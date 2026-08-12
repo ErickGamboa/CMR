@@ -1,0 +1,79 @@
+# CMR — Control Metabólico & Regenerativo
+
+App móvil (Android e iOS) para los pacientes de la Clínica CMR.
+
+Las cuentas las administra el doctor desde el sitio web: la app solo consume
+sesiones, no tiene registro ni recuperación de contraseña.
+
+## Requisitos
+
+- Flutter 3.44 o superior (Dart 3.12)
+- Android SDK para compilar en Android, Xcode para iOS
+
+## Configuración
+
+La clave de Supabase no está en el repositorio. Antes de compilar:
+
+```bash
+cp config/supabase.example.json config/supabase.json
+```
+
+Y poné en ese archivo la clave publicable del proyecto (Supabase → Project
+Settings → API Keys; empieza con `sb_publishable_`). Es pública por diseño —va
+dentro del cliente y lo que protege los datos es RLS—, pero se mantiene fuera
+del repo para poder rotarla sin tocar el código.
+
+`config/supabase.json` está en `.gitignore`. **Nunca uses la clave
+`service_role` en la app.**
+
+## Correr
+
+```bash
+flutter run --dart-define-from-file=config/supabase.json
+```
+
+Sin la clave la app no revienta: muestra una pantalla que explica qué falta.
+
+## Tests
+
+```bash
+flutter test
+```
+
+## Estructura
+
+```
+lib/
+  core/           auth, configuración, datos de demo, cálculo de etiquetas
+  features/       una carpeta por módulo (inicio, auth, plan, laboratorios…)
+  theme/          paleta de marca y tema Material 3
+  widgets/        widgets compartidos
+tool/             generador de assets de marca
+```
+
+Las pantallas dependen de la interfaz `ServicioAuth`, no de Supabase, así que
+los tests corren sin red ni credenciales.
+
+## Marca
+
+La paleta es fija y vive solo en `lib/theme/app_colors.dart`:
+
+| color | hex | rol |
+|---|---|---|
+| azul abisal | `#090972` | primario |
+| turquesa biocelular | `#62A1A6` | secundario |
+| azul vital | `#86DBFB` | acento |
+
+Los íconos y las imágenes del splash se generan del logo original:
+
+```bash
+dart run tool/build_brand_assets.dart <ruta-al-logo.png>
+dart run flutter_launcher_icons
+dart run flutter_native_splash:create
+```
+
+## Pendiente
+
+Los datos de `lib/core/datos_demo.dart` son inventados y se reemplazan cuando
+se conecten las tablas reales. Faltan también las fotos de producto de los
+suplementos y el material del módulo Libro.
