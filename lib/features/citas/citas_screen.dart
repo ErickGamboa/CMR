@@ -2,12 +2,44 @@ import 'package:flutter/material.dart';
 
 import '../../core/datos_demo.dart';
 
-/// Historial y agenda de citas.
+/// Historial y agenda de citas, separadas en médicas y de enfermería.
 ///
-/// Las pendientes van con el color de marca y las ya cumplidas en gris, para
-/// que se distinga de un vistazo qué queda por hacer.
+/// Van en dos pestañas y no en una sola lista porque son dos agendas
+/// distintas: la médica se agenda cada varias semanas y la de enfermería
+/// puede ser semanal, y mezclarlas hace perder de vista la que importa.
+///
+/// Dentro de cada pestaña, las pendientes van con el color de marca y las ya
+/// cumplidas en gris, para que se distinga de un vistazo qué queda por hacer.
 class CitasScreen extends StatelessWidget {
   const CitasScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: TipoCita.values.length,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Mis citas'),
+          bottom: TabBar(
+            tabs: [
+              for (final tipo in TipoCita.values) Tab(text: tipo.etiqueta),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            for (final tipo in TipoCita.values) _ListaDeCitas(tipo: tipo),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ListaDeCitas extends StatelessWidget {
+  const _ListaDeCitas({required this.tipo});
+
+  final TipoCita tipo;
 
   @override
   Widget build(BuildContext context) {
@@ -15,50 +47,41 @@ class CitasScreen extends StatelessWidget {
     final scheme = theme.colorScheme;
     final ahora = DateTime.now();
 
-    final citas = DatosDemo.citas;
+    final citas = DatosDemo.citasDe(tipo);
     final pendientes = citas.where((c) => c.fecha.isAfter(ahora)).toList();
     // Las cumplidas van de la más reciente a la más vieja.
     final cumplidas = citas.where((c) => !c.fecha.isAfter(ahora)).toList()
       ..sort((a, b) => b.fecha.compareTo(a.fecha));
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Mis citas')),
-      body: citas.isEmpty
-          ? Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Text(
-                  'Todavía no tenés citas registradas.',
-                  style: theme.textTheme.bodyMedium
-                      ?.copyWith(color: scheme.onSurfaceVariant),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            )
-          : ListView(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-              children: [
-                if (pendientes.isNotEmpty) ...[
-                  _Encabezado(
-                    texto: 'Pendientes',
-                    cantidad: pendientes.length,
-                  ),
-                  const SizedBox(height: 12),
-                  for (final c in pendientes)
-                    _TarjetaCita(cita: c, cumplida: false),
-                  const SizedBox(height: 20),
-                ],
-                if (cumplidas.isNotEmpty) ...[
-                  _Encabezado(
-                    texto: 'Anteriores',
-                    cantidad: cumplidas.length,
-                  ),
-                  const SizedBox(height: 12),
-                  for (final c in cumplidas)
-                    _TarjetaCita(cita: c, cumplida: true),
-                ],
-              ],
-            ),
+    if (citas.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Text(
+            tipo.vacio,
+            style: theme.textTheme.bodyMedium
+                ?.copyWith(color: scheme.onSurfaceVariant),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      children: [
+        if (pendientes.isNotEmpty) ...[
+          _Encabezado(texto: 'Pendientes', cantidad: pendientes.length),
+          const SizedBox(height: 12),
+          for (final c in pendientes) _TarjetaCita(cita: c, cumplida: false),
+          const SizedBox(height: 20),
+        ],
+        if (cumplidas.isNotEmpty) ...[
+          _Encabezado(texto: 'Anteriores', cantidad: cumplidas.length),
+          const SizedBox(height: 12),
+          for (final c in cumplidas) _TarjetaCita(cita: c, cumplida: true),
+        ],
+      ],
     );
   }
 }

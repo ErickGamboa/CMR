@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/auth/servicio_auth.dart';
+import '../citas/citas_screen.dart';
 import '../libro/libro_screen.dart';
 import '../peptidos/peptidos_screen.dart';
 import '../plan/mi_plan_screen.dart';
@@ -23,11 +24,21 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int _indice = 0;
 
+  void _ir(ModuloPrimario modulo) =>
+      setState(() => _indice = modulo.index);
+
   Widget _pantalla(ModuloPrimario modulo) => switch (modulo) {
-        ModuloPrimario.inicio => InicioScreen(auth: widget.auth),
+        // La tarjeta de próxima cita cambia de pestaña en vez de empujar otra
+        // pantalla: las citas ya son un módulo de la barra, y abrirlas encima
+        // dejaría dos copias de la misma lista en la pila.
+        ModuloPrimario.inicio => InicioScreen(
+            auth: widget.auth,
+            onIrACitas: () => _ir(ModuloPrimario.citas),
+          ),
         ModuloPrimario.libro => const LibroScreen(),
         ModuloPrimario.plan => const MiPlanScreen(),
         ModuloPrimario.peptidos => const PeptidosScreen(),
+        ModuloPrimario.citas => const CitasScreen(),
       };
 
   @override

@@ -178,13 +178,16 @@ void main() {
   });
 
   group('Mis citas', () {
-    testWidgets('separa pendientes de cumplidas', (tester) async {
+    testWidgets('abre en las médicas y separa pendientes de cumplidas',
+        (tester) async {
       await _abrir(tester, const CitasScreen());
 
       final ahora = DateTime.now();
-      final pendientes =
-          DatosDemo.citas.where((c) => c.fecha.isAfter(ahora)).length;
-      final cumplidas = DatosDemo.citas.length - pendientes;
+      final medicas = DatosDemo.citasDe(TipoCita.medica);
+      final pendientes = medicas.where((c) => c.fecha.isAfter(ahora)).length;
+
+      expect(find.widgetWithText(Tab, 'Cita médica'), findsOneWidget);
+      expect(find.widgetWithText(Tab, 'Cita enfermería'), findsOneWidget);
 
       expect(find.text('Pendientes'), findsOneWidget);
       expect(find.text('Anteriores'), findsOneWidget);
@@ -192,9 +195,35 @@ void main() {
       // El estado va escrito, no solo pintado.
       expect(find.text('Pendiente'), findsNWidgets(pendientes));
 
-      await tester.scrollUntilVisible(find.text('Anteriores'), 200);
       expect(find.text('Cumplida'), findsWidgets);
-      expect(cumplidas, greaterThan(0));
+      expect(medicas.length - pendientes, greaterThan(0));
+    });
+
+    testWidgets('la pestaña de enfermería muestra solo sus citas',
+        (tester) async {
+      await _abrir(tester, const CitasScreen());
+
+      await tester.tap(find.widgetWithText(Tab, 'Cita enfermería'));
+      await tester.pumpAndSettle();
+
+      final enfermeria = DatosDemo.citasDe(TipoCita.enfermeria);
+      expect(enfermeria, isNotEmpty);
+
+      for (final c in enfermeria) {
+        expect(
+          find.byKey(ValueKey('cita-${c.fecha.toIso8601String()}')),
+          findsOneWidget,
+          reason: c.especialidad,
+        );
+      }
+      // Y ninguna de las médicas se cuela.
+      for (final c in DatosDemo.citasDe(TipoCita.medica)) {
+        expect(
+          find.byKey(ValueKey('cita-${c.fecha.toIso8601String()}')),
+          findsNothing,
+          reason: c.especialidad,
+        );
+      }
     });
 
     testWidgets('las cumplidas se ven atenuadas y las pendientes destacadas',
@@ -202,8 +231,9 @@ void main() {
       await _abrir(tester, const CitasScreen());
 
       final ahora = DateTime.now();
-      final pendiente = DatosDemo.citas.firstWhere((c) => c.fecha.isAfter(ahora));
-      final cumplida = DatosDemo.citas.firstWhere((c) => !c.fecha.isAfter(ahora));
+      final medicas = DatosDemo.citasDe(TipoCita.medica);
+      final pendiente = medicas.firstWhere((c) => c.fecha.isAfter(ahora));
+      final cumplida = medicas.firstWhere((c) => !c.fecha.isAfter(ahora));
 
       final scheme = AppTheme.light.colorScheme;
       expect(_colorCita(tester, pendiente.fecha), scheme.tertiaryContainer);

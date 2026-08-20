@@ -98,6 +98,10 @@ Los datos de `lib/core/datos_demo.dart` son inventados y se reemplazan cuando
 se conecten las tablas reales. Faltan también las fotos de producto de los
 suplementos.
 
+El módulo **Videos** está creado pero vacío: hay que definir cuáles videos van,
+de dónde se sirven (YouTube, Vimeo o Supabase Storage) y si son los mismos para
+todos los pacientes o dependen del plan.
+
 Del libro y el plan queda por hacer:
 
 - **Favoritos del libro.** La tabla `libro_favoritos` está creada; la app

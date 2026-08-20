@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import '../../core/auth/servicio_auth.dart';
 import '../../core/datos_demo.dart';
 import '../../widgets/cmr_logo.dart';
-import '../citas/citas_screen.dart';
 import '../etiqueta/leer_etiqueta_screen.dart';
 import '../laboratorios/laboratorios_screen.dart';
 import '../recomendaciones/recomendaciones_screen.dart';
 import '../resultados/resultados_screen.dart';
+import '../videos/videos_screen.dart';
 import 'modulos.dart';
 import 'widgets/fila_modulos_secundarios.dart';
 import 'widgets/resumen_salud.dart';
@@ -15,9 +15,16 @@ import 'widgets/tarjeta_proxima_cita.dart';
 
 /// Pestaña de Inicio: próxima cita, accesos rápidos y resumen de salud.
 class InicioScreen extends StatelessWidget {
-  const InicioScreen({super.key, required this.auth});
+  const InicioScreen({
+    super.key,
+    required this.auth,
+    required this.onIrACitas,
+  });
 
   final ServicioAuth auth;
+
+  /// Lleva al módulo de citas, que vive en la barra inferior.
+  final VoidCallback onIrACitas;
 
   void _abrirSecundario(BuildContext context, ModuloSecundario modulo) {
     Navigator.of(context).push(
@@ -27,7 +34,7 @@ class InicioScreen extends StatelessWidget {
           ModuloSecundario.resultados => const ResultadosScreen(),
           ModuloSecundario.leerEtiqueta => const LeerEtiquetaScreen(),
           ModuloSecundario.recomendaciones => const RecomendacionesScreen(),
-          ModuloSecundario.misCitas => const CitasScreen(),
+          ModuloSecundario.videos => const VideosScreen(),
         },
       ),
     );
@@ -76,11 +83,7 @@ class InicioScreen extends StatelessWidget {
           if (DatosDemo.proximaCita case final cita?)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: TarjetaProximaCita(
-                cita: cita,
-                onTap: () =>
-                    _abrirSecundario(context, ModuloSecundario.misCitas),
-              ),
+              child: TarjetaProximaCita(cita: cita, onTap: onIrACitas),
             ),
           const SizedBox(height: 20),
           FilaModulosSecundarios(

@@ -256,12 +256,12 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('la barra inferior tiene los cuatro módulos primarios',
+    testWidgets('la barra inferior tiene todos los módulos primarios',
         (tester) async {
       await entrar(tester);
 
       final barra = tester.widget<NavigationBar>(find.byType(NavigationBar));
-      expect(barra.destinations, hasLength(4));
+      expect(barra.destinations, hasLength(ModuloPrimario.values.length));
 
       for (final m in ModuloPrimario.values) {
         expect(find.text(m.etiqueta), findsWidgets, reason: m.etiqueta);
@@ -502,13 +502,23 @@ void main() {
       );
     });
 
-    testWidgets('la tarjeta de próxima cita lleva a Mis citas', (tester) async {
+    testWidgets('la tarjeta de próxima cita lleva al módulo de citas',
+        (tester) async {
       await entrar(tester);
 
       await tester.tap(find.text('PRÓXIMA CITA'));
       await tester.pumpAndSettle();
 
-      expect(find.widgetWithText(AppBar, 'Mis citas'), findsOneWidget);
+      // Cambia de pestaña en vez de empujar otra pantalla: las citas ya son
+      // un módulo de la barra inferior.
+      expect(
+        tester.widget<IndexedStack>(find.byType(IndexedStack)).index,
+        ModuloPrimario.citas.index,
+      );
+      expect(
+        tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+        ModuloPrimario.citas.index,
+      );
     });
   });
 }

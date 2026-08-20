@@ -11,15 +11,37 @@ library;
 
 import 'package:flutter/material.dart';
 
+/// De qué es la cita.
+///
+/// Las dos van por aparte porque no se preparan igual: a la médica se llega
+/// con los laboratorios listos, y la de enfermería es la aplicación o la toma
+/// de muestras.
+enum TipoCita {
+  medica(etiqueta: 'Cita médica', vacio: 'Todavía no tenés citas médicas.'),
+  enfermeria(
+    etiqueta: 'Cita enfermería',
+    vacio: 'Todavía no tenés citas de enfermería.',
+  );
+
+  const TipoCita({required this.etiqueta, required this.vacio});
+
+  final String etiqueta;
+
+  /// Qué decir cuando el paciente no tiene ninguna de este tipo.
+  final String vacio;
+}
+
 class Cita {
   const Cita({
     required this.fecha,
+    required this.tipo,
     required this.profesional,
     required this.especialidad,
     required this.lugar,
   });
 
   final DateTime fecha;
+  final TipoCita tipo;
   final String profesional;
   final String especialidad;
   final String lugar;
@@ -115,42 +137,80 @@ abstract final class DatosDemo {
     return DateTime(d.year, d.month, d.day, hora, minuto);
   }
 
-  /// Citas ordenadas de la más vieja a la más reciente. Las anteriores a hoy
-  /// se consideran cumplidas.
+  /// Citas ordenadas de la más vieja a la más reciente, médicas y de
+  /// enfermería mezcladas. Las anteriores a hoy se consideran cumplidas.
   static final citas = [
     Cita(
       fecha: _enDias(-96, 9),
+      tipo: TipoCita.medica,
       profesional: 'Dr. Roy Jiménez',
       especialidad: 'Valoración inicial',
       lugar: 'Clínica CMR · Consultorio 3',
     ),
     Cita(
+      fecha: _enDias(-90, 8),
+      tipo: TipoCita.enfermeria,
+      profesional: 'Enfermería CMR',
+      especialidad: 'Toma de laboratorios',
+      lugar: 'Clínica CMR · Sala 2',
+    ),
+    Cita(
       fecha: _enDias(-61, 10, 30),
+      tipo: TipoCita.medica,
       profesional: 'Dr. Roy Jiménez',
       especialidad: 'Control metabólico',
       lugar: 'Clínica CMR · Consultorio 3',
     ),
     Cita(
+      fecha: _enDias(-30, 8, 30),
+      tipo: TipoCita.enfermeria,
+      profesional: 'Enfermería CMR',
+      especialidad: 'Aplicación de péptidos',
+      lugar: 'Clínica CMR · Sala 2',
+    ),
+    Cita(
       fecha: _enDias(-28, 14),
+      tipo: TipoCita.medica,
       profesional: 'Dr. Roy Jiménez',
       especialidad: 'Control metabólico',
       lugar: 'Clínica CMR · Consultorio 3',
     ),
     Cita(
       fecha: _enDias(4, 10, 30),
+      tipo: TipoCita.medica,
       profesional: 'Dr. Roy Jiménez',
       especialidad: 'Control metabólico',
       lugar: 'Clínica CMR · Consultorio 3',
     ),
     Cita(
+      fecha: _enDias(11, 9),
+      tipo: TipoCita.enfermeria,
+      profesional: 'Enfermería CMR',
+      especialidad: 'Aplicación de péptidos',
+      lugar: 'Clínica CMR · Sala 2',
+    ),
+    Cita(
+      fecha: _enDias(25, 8),
+      tipo: TipoCita.enfermeria,
+      profesional: 'Enfermería CMR',
+      especialidad: 'Control de presión y peso',
+      lugar: 'Clínica CMR · Sala 2',
+    ),
+    Cita(
       fecha: _enDias(39, 15),
+      tipo: TipoCita.medica,
       profesional: 'Dr. Roy Jiménez',
       especialidad: 'Revisión de composición corporal',
       lugar: 'Clínica CMR · Consultorio 1',
     ),
   ];
 
-  /// La próxima cita pendiente. Nula si no hay ninguna agendada.
+  /// Las citas de un tipo, en el mismo orden que [citas].
+  static List<Cita> citasDe(TipoCita tipo) =>
+      citas.where((c) => c.tipo == tipo).toList();
+
+  /// La próxima cita pendiente, sea médica o de enfermería. Nula si no hay
+  /// ninguna agendada.
   static Cita? get proximaCita {
     final ahora = DateTime.now();
     for (final c in citas) {

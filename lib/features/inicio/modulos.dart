@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Módulos primarios: las cuatro secciones de la barra inferior.
+/// Módulos primarios: las secciones de la barra inferior.
 enum ModuloPrimario {
   inicio(
     etiqueta: 'Inicio',
@@ -21,12 +21,19 @@ enum ModuloPrimario {
     iconoActivo: Icons.assignment,
   ),
   // La etiqueta de la barra va corta a propósito: "Péptidos y medicamentos"
-  // no entra en un cuarto de pantalla y se cortaría.
+  // no entra en un quinto de pantalla y se cortaría. Igual "Mis citas", que
+  // en la barra va como "Citas".
   peptidos(
     etiqueta: 'Péptidos',
     titulo: 'Péptidos y medicamentos',
     icono: Icons.medication_outlined,
     iconoActivo: Icons.medication,
+  ),
+  citas(
+    etiqueta: 'Citas',
+    titulo: 'Mis citas',
+    icono: Icons.event_outlined,
+    iconoActivo: Icons.event,
   );
 
   const ModuloPrimario({
@@ -52,7 +59,7 @@ enum ModuloSecundario {
   resultados('Resultados', Icons.insights_outlined),
   leerEtiqueta('Leer etiqueta', Icons.document_scanner_outlined),
   recomendaciones('Recomendaciones', Icons.lightbulb_outline),
-  misCitas('Mis citas', Icons.event_outlined);
+  videos('Videos', Icons.play_circle_outline);
 
   const ModuloSecundario(this.etiqueta, this.icono);
 
