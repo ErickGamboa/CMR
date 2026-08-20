@@ -288,11 +288,14 @@ void main() {
       }
     });
 
-    testWidgets('Libro avisa que falta el material', (tester) async {
+    // El contenido del libro se prueba en libro_test.dart, con una fuente de
+    // datos falsa: acá solo interesa que el módulo abra con sus secciones.
+    testWidgets('Libro abre con sus secciones', (tester) async {
       await entrar(tester);
       await _irA(tester, ModuloPrimario.libro);
 
-      expect(find.text('Se ocupa libro de Esteban'), findsOneWidget);
+      expect(find.widgetWithText(Tab, 'Restaurantes'), findsOneWidget);
+      expect(find.widgetWithText(Tab, 'Libres'), findsOneWidget);
     });
 
     testWidgets('Mi plan tiene las pestañas Alimentos y Suplementos',
@@ -302,10 +305,6 @@ void main() {
 
       expect(find.widgetWithText(Tab, 'Alimentos'), findsOneWidget);
       expect(find.widgetWithText(Tab, 'Suplementos'), findsOneWidget);
-      expect(
-        find.text('Se ocupa tabla de alimento de ejemplo de Esteban'),
-        findsOneWidget,
-      );
     });
 
     testWidgets('Suplementos lista los recetados y los ejemplos',

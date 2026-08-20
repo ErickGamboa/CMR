@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../../core/datos_demo.dart';
-import '../../widgets/aviso_pendiente.dart';
 import '../../widgets/foto_pendiente.dart';
 import '../../widgets/tarjeta_prescripcion.dart';
 import 'marcas_screen.dart';
+import 'plan_alimentacion_vista.dart';
+import 'repositorio_plan.dart';
 
 /// Módulo Mi plan: alimentos y suplementos.
 class MiPlanScreen extends StatelessWidget {
-  const MiPlanScreen({super.key});
+  const MiPlanScreen({super.key, this.fuentePlan});
+
+  /// De dónde se lee el plan de alimentación. En la app va sin definir y sale
+  /// de Supabase; los tests inyectan una fuente falsa.
+  final FuentePlan? fuentePlan;
 
   @override
   Widget build(BuildContext context) {
@@ -24,13 +29,10 @@ class MiPlanScreen extends StatelessWidget {
             ],
           ),
         ),
-        body: const TabBarView(
+        body: TabBarView(
           children: [
-            AvisoPendiente(
-              icono: Icons.restaurant_menu_outlined,
-              mensaje: 'Se ocupa tabla de alimento de ejemplo de Esteban',
-            ),
-            _Suplementos(),
+            PlanAlimentacionVista(fuente: fuentePlan),
+            const _Suplementos(),
           ],
         ),
       ),

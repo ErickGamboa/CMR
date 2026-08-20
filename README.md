@@ -44,12 +44,32 @@ flutter test
 
 ```
 lib/
-  core/           auth, configuración, datos de demo, cálculo de etiquetas
-  features/       una carpeta por módulo (inicio, auth, plan, laboratorios…)
+  core/           auth, configuración, datos de demo, intercambios, etiquetas
+  features/       una carpeta por módulo (inicio, auth, libro, plan…)
   theme/          paleta de marca y tema Material 3
   widgets/        widgets compartidos
+supabase/
+  migrations/     esquema y datos del libro de intercambios
+  plantillas/     scripts que el doctor corre a mano (asignar un plan)
 tool/             generador de assets de marca
 ```
+
+## Base de datos
+
+El libro de intercambios y el plan de alimentación viven en Supabase. Las
+migraciones se aplican **en orden de nombre**, desde el SQL Editor o con la
+CLI:
+
+```bash
+supabase db push          # o pegar los archivos de supabase/migrations/ en orden
+```
+
+El libro es un catálogo público —el mismo para todos los pacientes— que el
+doctor mantiene desde el panel de Supabase; la app solo lo lee. El plan es por
+paciente y se asigna con `supabase/plantillas/asignar_plan.sql`.
+
+Qué se corrigió al transcribir el libro del PDF, y con qué criterio, está en
+[LIBRO_REVISION.md](LIBRO_REVISION.md).
 
 Las pantallas dependen de la interfaz `ServicioAuth`, no de Supabase, así que
 los tests corren sin red ni credenciales.
@@ -76,4 +96,13 @@ dart run flutter_native_splash:create
 
 Los datos de `lib/core/datos_demo.dart` son inventados y se reemplazan cuando
 se conecten las tablas reales. Faltan también las fotos de producto de los
-suplementos y el material del módulo Libro.
+suplementos.
+
+Del libro y el plan queda por hacer:
+
+- **Favoritos del libro.** La tabla `libro_favoritos` está creada; la app
+  todavía no la usa.
+- **Contador del día.** Con el plan y el libro ya en la misma app, el paso que
+  falta es poder marcar lo que se comió y descontarlo de lo que le toca hoy.
+- Una fila del menú de McDonald's quedó en `por_revisar` y no se muestra
+  (ver LIBRO_REVISION.md, §4).
