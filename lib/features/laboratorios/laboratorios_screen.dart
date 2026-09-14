@@ -1,48 +1,62 @@
 import 'package:flutter/material.dart';
 
-import '../../core/datos_demo.dart';
+import '../../core/datos/modelos.dart';
+import '../../core/datos/repositorio.dart';
+import '../../core/fechas.dart';
+import '../../widgets/carga_de_datos.dart';
 
 /// Lista de laboratorios por fecha. Cada uno se despliega hacia abajo con sus
 /// resultados.
 class LaboratoriosScreen extends StatelessWidget {
-  const LaboratoriosScreen({super.key});
+  const LaboratoriosScreen({super.key, this.fuente});
+
+  /// De dónde salen. En la app va sin definir y sale de Supabase; los tests
+  /// inyectan una fuente falsa.
+  final FuentePaciente? fuente;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Laboratorios')),
+      body: CargaDeDatos<List<Laboratorio>>(
+        cargar: () => (fuente ?? RepositorioPaciente()).laboratorios(),
+        vacio: const SinDatos(
+          icono: Icons.science_outlined,
+          mensaje: 'Todavía no tienes laboratorios registrados.',
+        ),
+        constructor: (context, laboratorios) =>
+            _Lista(laboratorios: laboratorios),
+      ),
+    );
+  }
+}
+
+class _Lista extends StatelessWidget {
+  const _Lista({required this.laboratorios});
+
+  final List<Laboratorio> laboratorios;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final laboratorios = DatosDemo.laboratorios;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Laboratorios')),
-      body: laboratorios.isEmpty
-          ? Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Text(
-                  'Todavía no tienes laboratorios registrados.',
-                  style: theme.textTheme.bodyMedium
-                      ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            )
-          : ListView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-              children: [
-                Text(
-                  'Toca una fecha para ver los resultados',
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                ),
-                const SizedBox(height: 14),
-                for (var i = 0; i < laboratorios.length; i++)
-                  _TarjetaLaboratorio(
-                    laboratorio: laboratorios[i],
-                    // El más reciente arranca abierto: es el que se consulta.
-                    abiertoInicialmente: i == 0,
-                  ),
-              ],
-            ),
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      children: [
+        Text(
+          'Toca una fecha para ver los resultados',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 14),
+        for (var i = 0; i < laboratorios.length; i++)
+          _TarjetaLaboratorio(
+            laboratorio: laboratorios[i],
+            // El más reciente arranca abierto: es el que se consulta.
+            abiertoInicialmente: i == 0,
+          ),
+      ],
     );
   }
 }
@@ -80,19 +94,25 @@ class _TarjetaLaboratorio extends StatelessWidget {
               color: scheme.tertiaryContainer,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.science_outlined, size: 20, color: scheme.primary),
+            child: Icon(
+              Icons.science_outlined,
+              size: 20,
+              color: scheme.primary,
+            ),
           ),
           title: Text(
             formatearFechaCorta(laboratorio.fecha),
-            style: theme.textTheme.titleSmall
-                ?.copyWith(fontWeight: FontWeight.w600),
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
           subtitle: Padding(
             padding: const EdgeInsets.only(top: 3),
             child: Text(
               laboratorio.nombre,
-              style: theme.textTheme.bodySmall
-                  ?.copyWith(color: scheme.onSurfaceVariant),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
             ),
           ),
           children: [
@@ -108,8 +128,9 @@ class _TarjetaLaboratorio extends StatelessWidget {
                       alertas == 1
                           ? '1 valor fuera del rango de referencia'
                           : '$alertas valores fuera del rango de referencia',
-                      style: theme.textTheme.bodySmall
-                          ?.copyWith(color: scheme.error),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.error,
+                      ),
                     ),
                   ),
                 ],
@@ -146,8 +167,9 @@ class _FilaAnalisis extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   'Ref. ${analisis.referencia} ${analisis.unidad}',
-                  style: theme.textTheme.labelSmall
-                      ?.copyWith(color: scheme.onSurfaceVariant),
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -159,8 +181,11 @@ class _FilaAnalisis extends StatelessWidget {
               // El ícono acompaña al color: fuera de rango no puede depender
               // solo del rojo.
               if (fuera) ...[
-                Icon(Icons.warning_amber_rounded,
-                    size: 16, color: scheme.error),
+                Icon(
+                  Icons.warning_amber_rounded,
+                  size: 16,
+                  color: scheme.error,
+                ),
                 const SizedBox(width: 4),
               ],
               Text(

@@ -40,8 +40,9 @@ class HojaSimbologia extends StatelessWidget {
               Text(
                 'Cada alimento dice cuántos intercambios de cada grupo gasta '
                 'la porción indicada.',
-                style: theme.textTheme.bodyMedium
-                    ?.copyWith(color: scheme.onSurfaceVariant),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: 20),
 
@@ -67,13 +68,15 @@ class HojaSimbologia extends StatelessWidget {
               ),
               _Regla(
                 titulo: 'ó',
-                detalle: 'El alimento cuenta de una forma o de la otra, a tu '
+                detalle:
+                    'El alimento cuenta de una forma o de la otra, a tu '
                     'elección. El queso fresco cuenta 1 proteína ó 1 lácteo, '
                     'no las dos.',
               ),
               _Regla(
                 titulo: '+ grasa*',
-                detalle: 'La grasa depende de cómo se preparó el platillo, así '
+                detalle:
+                    'La grasa depende de cómo se preparó el platillo, así '
                     'que el libro no le pone número.',
               ),
               _Regla(
@@ -82,12 +85,14 @@ class HojaSimbologia extends StatelessWidget {
               ),
               _Regla(
                 titulo: 'Alcohol',
-                detalle: 'Se cuenta como grasa: por eso las bebidas '
+                detalle:
+                    'Se cuenta como grasa: por eso las bebidas '
                     'alcohólicas gastan intercambios de grasa.',
               ),
               _Regla(
                 titulo: 'Alimentos libres',
-                detalle: 'No gastan intercambios. Los que tienen condición la '
+                detalle:
+                    'No gastan intercambios. Los que tienen condición la '
                     'llevan anotada.',
               ),
             ],
@@ -115,14 +120,16 @@ class _Regla extends StatelessWidget {
         children: [
           Text(
             titulo,
-            style: theme.textTheme.titleSmall
-                ?.copyWith(fontWeight: FontWeight.w700),
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 2),
           Text(
             detalle,
-            style: theme.textTheme.bodyMedium
-                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),

@@ -72,9 +72,7 @@ Future<void> _abrirPlan(WidgetTester tester, {PlanAlimentacion? plan}) async {
   await tester.pumpWidget(
     MaterialApp(
       theme: AppTheme.light,
-      home: Scaffold(
-        body: PlanAlimentacionVista(fuente: _FuenteFalsa(plan)),
-      ),
+      home: Scaffold(body: PlanAlimentacionVista(fuente: _FuenteFalsa(plan))),
     ),
   );
   await tester.pumpAndSettle();
@@ -131,8 +129,9 @@ void main() {
       );
     });
 
-    testWidgets('hay una tarjeta por tiempo de comida con sus cantidades',
-        (tester) async {
+    testWidgets('hay una tarjeta por tiempo de comida con sus cantidades', (
+      tester,
+    ) async {
       await _abrirPlan(tester, plan: _planDeEjemplo());
 
       for (final tiempo in TiempoComida.values) {
@@ -144,15 +143,17 @@ void main() {
       expect(find.text('2+ V'), findsNWidgets(3));
     });
 
-    testWidgets('el tiempo de comida sin nada asignado lo dice',
-        (tester) async {
+    testWidgets('el tiempo de comida sin nada asignado lo dice', (
+      tester,
+    ) async {
       await _abrirPlan(tester, plan: _planDeEjemplo());
 
       expect(find.text('Sin intercambios asignados'), findsOneWidget);
     });
 
-    testWidgets('tocar un grupo abre el libro filtrado por ese grupo',
-        (tester) async {
+    testWidgets('tocar un grupo abre el libro filtrado por ese grupo', (
+      tester,
+    ) async {
       await _abrirPlan(tester, plan: _planDeEjemplo());
 
       await tester.tap(find.text('11 proteínas'));
@@ -163,8 +164,9 @@ void main() {
       expect(find.widgetWithText(Tab, 'Restaurantes'), findsOneWidget);
     });
 
-    testWidgets('sin plan cargado lo explica en vez de quedarse en blanco',
-        (tester) async {
+    testWidgets('sin plan cargado lo explica en vez de quedarse en blanco', (
+      tester,
+    ) async {
       await _abrirPlan(tester);
 
       expect(find.text('Todavía no tienes un plan cargado'), findsOneWidget);

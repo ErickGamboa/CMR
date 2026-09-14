@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../core/datos_demo.dart';
+import '../../core/fechas.dart';
 import '../../widgets/ocultar_teclado.dart';
 import 'modelo_mapeo.dart';
 import 'repositorio_mapeo.dart';

@@ -147,9 +147,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           labelText: 'Contraseña',
                           prefixIcon: const Icon(Icons.lock_outline),
                           suffixIcon: IconButton(
-                            onPressed: () => setState(
-                              () => _claveVisible = !_claveVisible,
-                            ),
+                            onPressed: () =>
+                                setState(() => _claveVisible = !_claveVisible),
                             icon: Icon(
                               _claveVisible
                                   ? Icons.visibility_off_outlined
@@ -225,10 +224,9 @@ class _AvisoError extends StatelessWidget {
           Expanded(
             child: Text(
               mensaje,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: scheme.error),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: scheme.error),
             ),
           ),
         ],

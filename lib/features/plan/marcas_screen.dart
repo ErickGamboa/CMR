@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/datos_demo.dart';
+import '../../core/datos/modelos.dart';
 import '../../widgets/foto_pendiente.dart';
 
 /// Marcas recomendadas por el doctor para un tipo de suplemento.
@@ -20,8 +20,9 @@ class MarcasScreen extends StatelessWidget {
         children: [
           Text(
             'Marcas recomendadas por tu doctor',
-            style: theme.textTheme.bodyMedium
-                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 16),
           for (final marca in categoria.marcas)
@@ -36,8 +37,9 @@ class MarcasScreen extends StatelessWidget {
                     const SizedBox(height: 14),
                     Text(
                       marca.nombre,
-                      style: theme.textTheme.titleSmall
-                          ?.copyWith(fontWeight: FontWeight.w600),
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../core/datos_demo.dart';
+import '../../core/datos/modelos.dart';
+import '../../core/datos/repositorio.dart';
+import '../../core/fechas.dart';
+import '../../widgets/carga_de_datos.dart';
 
 /// Historial y agenda de citas, separadas en médicas y de enfermería.
 ///
@@ -11,7 +14,11 @@ import '../../core/datos_demo.dart';
 /// Dentro de cada pestaña, las pendientes van con el color de marca y las ya
 /// cumplidas en gris, para que se distinga de un vistazo qué queda por hacer.
 class CitasScreen extends StatelessWidget {
-  const CitasScreen({super.key});
+  const CitasScreen({super.key, this.fuente});
+
+  /// De dónde salen. En la app va sin definir y sale de Supabase; los tests
+  /// inyectan una fuente falsa.
+  final FuentePaciente? fuente;
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +33,19 @@ class CitasScreen extends StatelessWidget {
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
-            for (final tipo in TipoCita.values) _ListaDeCitas(tipo: tipo),
-          ],
+        // Se piden todas de una y se reparten en las pestañas: son dos vistas
+        // de la misma agenda, no dos consultas.
+        body: CargaDeDatos<List<Cita>>(
+          cargar: () => (fuente ?? RepositorioPaciente()).citas(),
+          constructor: (context, citas) => TabBarView(
+            children: [
+              for (final tipo in TipoCita.values)
+                _ListaDeCitas(
+                  tipo: tipo,
+                  citas: citas.where((c) => c.tipo == tipo).toList(),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -37,9 +53,10 @@ class CitasScreen extends StatelessWidget {
 }
 
 class _ListaDeCitas extends StatelessWidget {
-  const _ListaDeCitas({required this.tipo});
+  const _ListaDeCitas({required this.tipo, required this.citas});
 
   final TipoCita tipo;
+  final List<Cita> citas;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +64,6 @@ class _ListaDeCitas extends StatelessWidget {
     final scheme = theme.colorScheme;
     final ahora = DateTime.now();
 
-    final citas = DatosDemo.citasDe(tipo);
     final pendientes = citas.where((c) => c.fecha.isAfter(ahora)).toList();
     // Las cumplidas van de la más reciente a la más vieja.
     final cumplidas = citas.where((c) => !c.fecha.isAfter(ahora)).toList()
@@ -59,8 +75,9 @@ class _ListaDeCitas extends StatelessWidget {
           padding: const EdgeInsets.all(32),
           child: Text(
             tipo.vacio,
-            style: theme.textTheme.bodyMedium
-                ?.copyWith(color: scheme.onSurfaceVariant),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
             textAlign: TextAlign.center,
           ),
         ),
@@ -102,8 +119,9 @@ class _Encabezado extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           '$cantidad',
-          style: theme.textTheme.bodyMedium
-              ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
       ],
     );
@@ -172,14 +190,16 @@ class _TarjetaCita extends StatelessWidget {
                   const SizedBox(height: 10),
                   Text(
                     '${cita.profesional} · ${cita.especialidad}',
-                    style: theme.textTheme.bodySmall
-                        ?.copyWith(color: secundario),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: secundario,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     cita.lugar,
-                    style: theme.textTheme.bodySmall
-                        ?.copyWith(color: secundario),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: secundario,
+                    ),
                   ),
                 ],
               ),
@@ -206,9 +226,7 @@ class _Estado extends StatelessWidget {
       decoration: BoxDecoration(
         color: cumplida ? Colors.transparent : scheme.primary,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: cumplida ? scheme.outline : scheme.primary,
-        ),
+        border: Border.all(color: cumplida ? scheme.outline : scheme.primary),
       ),
       child: Text(
         cumplida ? 'Cumplida' : 'Pendiente',

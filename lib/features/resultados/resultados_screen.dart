@@ -1,97 +1,103 @@
 import 'package:flutter/material.dart';
 
-import '../../core/datos_demo.dart';
+import '../../core/datos/modelos.dart';
+import '../../core/datos/repositorio.dart';
+import '../../core/fechas.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/carga_de_datos.dart';
 
 /// Resultados de composición corporal de una medición, con filtro por fecha.
-class ResultadosScreen extends StatefulWidget {
-  const ResultadosScreen({super.key});
+class ResultadosScreen extends StatelessWidget {
+  const ResultadosScreen({super.key, this.fuente});
 
-  @override
-  State<ResultadosScreen> createState() => _ResultadosScreenState();
-}
-
-class _ResultadosScreenState extends State<ResultadosScreen> {
-  /// La más reciente por defecto: es la que el paciente viene a ver.
-  late int _indice = DatosDemo.mediciones.length - 1;
+  /// De dónde salen. En la app va sin definir y sale de Supabase; los tests
+  /// inyectan una fuente falsa.
+  final FuentePaciente? fuente;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final mediciones = DatosDemo.mediciones;
-
-    if (mediciones.isEmpty) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Resultados')),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Text(
-              'Todavía no tienes mediciones registradas.',
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      );
-    }
-
-    final m = mediciones[_indice];
-
     return Scaffold(
       appBar: AppBar(title: const Text('Resultados')),
-      body: Column(
-        children: [
-          _FiltroFechas(
-            mediciones: mediciones,
-            indice: _indice,
-            onCambio: (i) => setState(() => _indice = i),
-          ),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-              children: [
-                _Dato(
-                  etiqueta: 'Peso',
-                  valor: m.peso.toStringAsFixed(1),
-                  unidad: 'kg',
-                  icono: Icons.monitor_weight_outlined,
-                ),
-                _Dato(
-                  etiqueta: 'Músculo ganado',
-                  valor: m.musculoGanado.toStringAsFixed(1),
-                  unidad: 'kg',
-                  icono: Icons.fitness_center,
-                  color: AppColors.turquesaBiocelular,
-                  detalle: 'Acumulado desde el inicio del plan',
-                ),
-                _Dato(
-                  etiqueta: 'Grasa perdida',
-                  valor: m.grasaPerdida.toStringAsFixed(1),
-                  unidad: 'kg',
-                  icono: Icons.trending_down,
-                  color: AppColors.azulAbisal,
-                  detalle: 'Acumulado desde el inicio del plan',
-                ),
-                _Dato(
-                  etiqueta: '% de grasa',
-                  valor: m.porcentajeGrasa.toStringAsFixed(1),
-                  unidad: '%',
-                  icono: Icons.pie_chart_outline,
-                ),
-                _Dato(
-                  etiqueta: 'Grasa visceral',
-                  valor: m.grasaVisceral.toStringAsFixed(0),
-                  unidad: '',
-                  icono: Icons.donut_large_outlined,
-                  detalle: 'Índice del equipo de bioimpedancia',
-                ),
-              ],
-            ),
-          ),
-        ],
+      body: CargaDeDatos<List<Medicion>>(
+        cargar: () => (fuente ?? RepositorioPaciente()).mediciones(),
+        vacio: const SinDatos(
+          icono: Icons.insights_outlined,
+          mensaje: 'Todavía no tienes mediciones registradas.',
+        ),
+        constructor: (context, mediciones) => _Vista(mediciones: mediciones),
       ),
+    );
+  }
+}
+
+class _Vista extends StatefulWidget {
+  const _Vista({required this.mediciones});
+
+  final List<Medicion> mediciones;
+
+  @override
+  State<_Vista> createState() => _VistaState();
+}
+
+class _VistaState extends State<_Vista> {
+  /// La más reciente por defecto: es la que el paciente viene a ver.
+  late int _indice = widget.mediciones.length - 1;
+
+  @override
+  Widget build(BuildContext context) {
+    final mediciones = widget.mediciones;
+    final m = mediciones[_indice];
+
+    return Column(
+      children: [
+        _FiltroFechas(
+          mediciones: mediciones,
+          indice: _indice,
+          onCambio: (i) => setState(() => _indice = i),
+        ),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            children: [
+              _Dato(
+                etiqueta: 'Peso',
+                valor: m.peso.toStringAsFixed(1),
+                unidad: 'kg',
+                icono: Icons.monitor_weight_outlined,
+              ),
+              _Dato(
+                etiqueta: 'Músculo ganado',
+                valor: m.musculoGanado.toStringAsFixed(1),
+                unidad: 'kg',
+                icono: Icons.fitness_center,
+                color: AppColors.turquesaBiocelular,
+                detalle: 'Acumulado desde el inicio del plan',
+              ),
+              _Dato(
+                etiqueta: 'Grasa perdida',
+                valor: m.grasaPerdida.toStringAsFixed(1),
+                unidad: 'kg',
+                icono: Icons.trending_down,
+                color: AppColors.azulAbisal,
+                detalle: 'Acumulado desde el inicio del plan',
+              ),
+              _Dato(
+                etiqueta: '% de grasa',
+                valor: m.porcentajeGrasa.toStringAsFixed(1),
+                unidad: '%',
+                icono: Icons.pie_chart_outline,
+              ),
+              _Dato(
+                etiqueta: 'Grasa visceral',
+                valor: m.grasaVisceral.toStringAsFixed(0),
+                unidad: '',
+                icono: Icons.donut_large_outlined,
+                detalle: 'Índice del equipo de bioimpedancia',
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -129,9 +135,7 @@ class _FiltroFechas extends StatelessWidget {
           children: [
             for (var i = mediciones.length - 1; i >= 0; i--) ...[
               _Fecha(
-                key: ValueKey(
-                  'fecha-${mediciones[i].fecha.toIso8601String()}',
-                ),
+                key: ValueKey('fecha-${mediciones[i].fecha.toIso8601String()}'),
                 texto: formatearFechaBreve(mediciones[i].fecha),
                 activa: i == indice,
                 onTap: () => onCambio(i),
@@ -236,8 +240,9 @@ class _Dato extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       detalle!,
-                      style: theme.textTheme.labelSmall
-                          ?.copyWith(color: scheme.onSurfaceVariant),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ],
@@ -247,14 +252,16 @@ class _Dato extends StatelessWidget {
             Text.rich(
               TextSpan(
                 text: valor,
-                style: theme.textTheme.headlineSmall
-                    ?.copyWith(fontWeight: FontWeight.w700),
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
                 children: [
                   if (unidad.isNotEmpty)
                     TextSpan(
                       text: ' $unidad',
-                      style: theme.textTheme.bodyMedium
-                          ?.copyWith(color: scheme.onSurfaceVariant),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
                     ),
                 ],
               ),

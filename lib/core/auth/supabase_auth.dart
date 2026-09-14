@@ -36,10 +36,7 @@ class SupabaseAuth implements ServicioAuth {
   String? get correoActual => _client.auth.currentUser?.email;
 
   @override
-  Future<void> ingresar({
-    required String correo,
-    required String clave,
-  }) async {
+  Future<void> ingresar({required String correo, required String clave}) async {
     try {
       await _client.auth.signInWithPassword(email: correo, password: clave);
     } on AuthException catch (e) {

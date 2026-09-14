@@ -44,13 +44,17 @@ flutter test
 
 ```
 lib/
-  core/           auth, configuración, datos de demo, intercambios, etiquetas
-  features/       una carpeta por módulo (inicio, auth, libro, plan…)
+  core/
+    auth/         sesión contra Supabase
+    datos/        modelos y repositorios de lo que el doctor carga
+    fechas.dart   formato de fechas en español, sin intl
+    iconos.dart   catálogo cerrado de íconos que el doctor puede elegir
+  features/       una carpeta por módulo (inicio, auth, libro, plan, mapeo…)
   theme/          paleta de marca y tema Material 3
   widgets/        widgets compartidos
 supabase/
-  migrations/     esquema y datos del libro de intercambios
-  plantillas/     scripts que el doctor corre a mano (asignar un plan)
+  migrations/     esquema completo y datos del libro de intercambios
+  plantillas/     scripts que el doctor corre a mano
 tool/             generador de assets de marca
 ```
 
@@ -64,9 +68,34 @@ CLI:
 supabase db push          # o pegar los archivos de supabase/migrations/ en orden
 ```
 
-El libro es un catálogo público —el mismo para todos los pacientes— que el
-doctor mantiene desde el panel de Supabase; la app solo lo lee. El plan es por
-paciente y se asigna con `supabase/plantillas/asignar_plan.sql`.
+**Nada de lo que ve el paciente está quemado en el código.** Todo sale de la
+base, y cada quien ve lo suyo: citas, mediciones, laboratorios, recomendaciones,
+suplementos, péptidos, medicamentos, plan de alimentación y mapeo van por
+`paciente_id` con RLS contra `auth.uid()`. El libro de intercambios, las marcas
+de suplementos y los videos son catálogo público: el mismo para todos.
+
+La app **solo lee**, con dos excepciones que el paciente sí escribe: el mapeo
+(su presión y su glisemia) y, cuando se conecte, sus favoritos del libro.
+
+Scripts que el doctor corre a mano hasta que exista el sitio admin:
+
+| script | qué hace |
+|---|---|
+| `plantillas/cargar_paciente.sql` | citas, mediciones, laboratorios, recomendaciones y recetas de un paciente |
+| `plantillas/asignar_plan.sql` | el plan de alimentación |
+| `plantillas/catalogo.sql` | marcas de suplementos y videos (global) |
+| `plantillas/habilitar_modulo.sql` | prende o apaga un módulo opcional (hoy solo Mapeo) |
+
+Un paciente sin nada cargado no ve datos de nadie: cada módulo dice "Todavía no
+tienes…" y la app funciona igual.
+
+### Íconos
+
+Las recomendaciones y las categorías de suplementos llevan un ícono que el
+doctor elige, pero no puede ser cualquiera: un ícono es un glifo de una fuente
+compilada dentro de la app. El catálogo de nombres válidos está en
+`lib/core/iconos.dart`, y un nombre que la app no conozca cae en el genérico
+en vez de romper la pantalla.
 
 Qué se corrigió al transcribir el libro del PDF, y con qué criterio, está en
 [LIBRO_REVISION.md](LIBRO_REVISION.md).
@@ -94,13 +123,12 @@ dart run flutter_native_splash:create
 
 ## Pendiente
 
-Los datos de `lib/core/datos_demo.dart` son inventados y se reemplazan cuando
-se conecten las tablas reales. Faltan también las fotos de producto de los
-suplementos.
+Faltan las fotos de producto de los suplementos, y los videos oficiales: los
+que estén cargados hoy son de prueba y se cambian en la tabla `videos`.
 
-El módulo **Videos** está creado pero vacío: hay que definir cuáles videos van,
-de dónde se sirven (YouTube, Vimeo o Supabase Storage) y si son los mismos para
-todos los pacientes o dependen del plan.
+No hay tabla de perfil: la app identifica al paciente solo por el correo de
+`auth.users`. Cuando el sitio admin necesite manejarlos por nombre y cédula,
+hay que crearla.
 
 Del libro y el plan queda por hacer:
 

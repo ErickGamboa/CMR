@@ -85,7 +85,8 @@ class _AppSinConfigurar extends StatelessWidget {
       home: const _Aviso(
         icono: Icons.key_off_outlined,
         titulo: 'Falta la clave de Supabase',
-        detalle: 'Copia config/supabase.example.json a config/supabase.json, '
+        detalle:
+            'Copia config/supabase.example.json a config/supabase.json, '
             'pon la clave publicable del proyecto y compila con:\n\n'
             'flutter run --dart-define-from-file=config/supabase.json',
       ),

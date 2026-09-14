@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/auth/servicio_auth.dart';
+import '../../core/datos/repositorio.dart';
 import '../citas/citas_screen.dart';
 import '../libro/libro_screen.dart';
 import '../peptidos/peptidos_screen.dart';
@@ -13,9 +14,19 @@ import 'modulos.dart';
 /// Usa [IndexedStack] para que cada pestaña conserve su estado y su posición
 /// de scroll al ir y volver.
 class HomeShell extends StatefulWidget {
-  const HomeShell({super.key, required this.auth});
+  const HomeShell({
+    super.key,
+    required this.auth,
+    this.paciente,
+    this.catalogo,
+  });
 
   final ServicioAuth auth;
+
+  /// De dónde salen los datos del paciente y el catálogo público. En la app
+  /// van sin definir y salen de Supabase; los tests inyectan fuentes falsas.
+  final FuentePaciente? paciente;
+  final FuenteCatalogo? catalogo;
 
   @override
   State<HomeShell> createState() => _HomeShellState();
@@ -33,11 +44,16 @@ class _HomeShellState extends State<HomeShell> {
     ModuloPrimario.inicio => InicioScreen(
       auth: widget.auth,
       onIrACitas: () => _ir(ModuloPrimario.citas),
+      paciente: widget.paciente,
+      catalogo: widget.catalogo,
     ),
     ModuloPrimario.libro => const LibroScreen(),
-    ModuloPrimario.plan => const MiPlanScreen(),
-    ModuloPrimario.peptidos => const PeptidosScreen(),
-    ModuloPrimario.citas => const CitasScreen(),
+    ModuloPrimario.plan => MiPlanScreen(
+      fuentePaciente: widget.paciente,
+      fuenteCatalogo: widget.catalogo,
+    ),
+    ModuloPrimario.peptidos => PeptidosScreen(fuente: widget.paciente),
+    ModuloPrimario.citas => CitasScreen(fuente: widget.paciente),
   };
 
   @override

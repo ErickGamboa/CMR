@@ -109,10 +109,10 @@ class RepositorioPlan implements FuentePlan {
   }
 
   static double _aDouble(Object? valor) => switch (valor) {
-        num v => v.toDouble(),
-        String v => double.tryParse(v) ?? 0,
-        _ => 0,
-      };
+    num v => v.toDouble(),
+    String v => double.tryParse(v) ?? 0,
+    _ => 0,
+  };
 }
 
 /// Error con mensaje listo para mostrarle al paciente.

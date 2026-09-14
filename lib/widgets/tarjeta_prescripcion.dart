@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../core/datos_demo.dart';
+import '../core/datos/modelos.dart';
 
 /// Muestra algo indicado por el doctor: suplemento, péptido o medicamento.
 ///
@@ -43,8 +43,9 @@ class TarjetaPrescripcion extends StatelessWidget {
                 children: [
                   Text(
                     prescripcion.nombre,
-                    style: theme.textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w600),
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Wrap(
@@ -59,8 +60,9 @@ class TarjetaPrescripcion extends StatelessWidget {
                     const SizedBox(height: 10),
                     Text(
                       prescripcion.indicacion!,
-                      style: theme.textTheme.bodySmall
-                          ?.copyWith(color: scheme.onSurfaceVariant),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ],

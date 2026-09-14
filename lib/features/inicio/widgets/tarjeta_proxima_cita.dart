@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/datos_demo.dart';
+import '../../../core/datos/modelos.dart';
+import '../../../core/fechas.dart';
 
 /// Banner superior del Home con la cita más próxima.
 class TarjetaProximaCita extends StatelessWidget {

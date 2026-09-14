@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../core/datos_demo.dart' show formatearFechaCorta;
+import '../../core/fechas.dart' show formatearFechaCorta;
 import '../libro/libro_screen.dart';
 import '../libro/widgets/pildora_intercambio.dart';
 import 'modelo_plan.dart';

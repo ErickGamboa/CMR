@@ -2,7 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../core/datos_demo.dart';
+import '../../../core/datos/modelos.dart';
+import '../../../core/fechas.dart';
 import '../../../theme/app_colors.dart';
 
 /// Composición corporal de la última medición.

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../core/auth/servicio_auth.dart';
-import '../../core/datos_demo.dart';
+import '../../core/datos/modelos.dart';
+import '../../core/datos/repositorio.dart';
 import '../../core/modulos_habilitados.dart';
+import '../../widgets/carga_de_datos.dart';
 import '../../widgets/cmr_logo.dart';
 import '../etiqueta/leer_etiqueta_screen.dart';
 import '../laboratorios/laboratorios_screen.dart';
@@ -15,6 +17,9 @@ import 'widgets/fila_modulos_secundarios.dart';
 import 'widgets/resumen_salud.dart';
 import 'widgets/tarjeta_proxima_cita.dart';
 
+/// Lo que el Home necesita de la base: la cita que sigue y las mediciones.
+typedef _Portada = ({Cita? proxima, List<Medicion> mediciones});
+
 /// Pestaña de Inicio: próxima cita, accesos rápidos y resumen de salud.
 class InicioScreen extends StatefulWidget {
   const InicioScreen({
@@ -22,6 +27,8 @@ class InicioScreen extends StatefulWidget {
     required this.auth,
     required this.onIrACitas,
     this.modulos,
+    this.paciente,
+    this.catalogo,
   });
 
   final ServicioAuth auth;
@@ -33,26 +40,61 @@ class InicioScreen extends StatefulWidget {
   /// Supabase; los tests inyectan una fuente falsa.
   final FuenteModulos? modulos;
 
+  /// Los datos del paciente. Se pasa también a los módulos secundarios que se
+  /// abren desde acá, para que los tests puedan recorrerlos sin red.
+  final FuentePaciente? paciente;
+
+  /// El catálogo público (marcas de suplementos, videos).
+  final FuenteCatalogo? catalogo;
+
   @override
   State<InicioScreen> createState() => _InicioScreenState();
 }
 
 class _InicioScreenState extends State<InicioScreen> {
-  // Se pide una sola vez por sesión de pantalla: la lista de módulos no
+  // Se piden una sola vez por sesión de pantalla: la lista de módulos no
   // cambia mientras el paciente usa la app, la cambia el doctor.
   late final Future<Set<String>> _habilitados =
       (widget.modulos ?? const RepositorioModulos()).habilitados();
+
+  FuentePaciente get _datos => widget.paciente ?? RepositorioPaciente();
+
+  /// Se pide una sola vez y la usan los dos bloques del Home, que están
+  /// separados por la fila de accesos.
+  late final Future<_Portada> _portada = _cargarPortada();
+
+  /// Las dos consultas salen juntas: son independientes y esperar una tras
+  /// otra dejaría el Home a medio dibujar el doble de tiempo.
+  Future<_Portada> _cargarPortada() async {
+    final (citas, mediciones) = await (
+      _datos.citas(),
+      _datos.mediciones(),
+    ).wait;
+
+    final ahora = DateTime.now();
+    // Las citas vienen de la más vieja a la más reciente, así que la primera
+    // que todavía no pasó es la que sigue.
+    final proxima = citas.where((c) => c.fecha.isAfter(ahora)).firstOrNull;
+
+    return (proxima: proxima, mediciones: mediciones);
+  }
 
   void _abrirSecundario(BuildContext context, ModuloSecundario modulo) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => switch (modulo) {
-          ModuloSecundario.laboratorios => const LaboratoriosScreen(),
-          ModuloSecundario.resultados => const ResultadosScreen(),
+          ModuloSecundario.laboratorios => LaboratoriosScreen(
+            fuente: widget.paciente,
+          ),
+          ModuloSecundario.resultados => ResultadosScreen(
+            fuente: widget.paciente,
+          ),
           ModuloSecundario.mapeo => const MapeoScreen(),
           ModuloSecundario.leerEtiqueta => const LeerEtiquetaScreen(),
-          ModuloSecundario.recomendaciones => const RecomendacionesScreen(),
-          ModuloSecundario.videos => const VideosScreen(),
+          ModuloSecundario.recomendaciones => RecomendacionesScreen(
+            fuente: widget.paciente,
+          ),
+          ModuloSecundario.videos => VideosScreen(fuente: widget.catalogo),
         },
       ),
     );
@@ -98,11 +140,18 @@ class _InicioScreenState extends State<InicioScreen> {
         // para que pueda desbordar hasta el borde al hacer scroll.
         padding: const EdgeInsets.only(top: 8, bottom: 16),
         children: [
-          if (DatosDemo.proximaCita case final cita?)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: TarjetaProximaCita(cita: cita, onTap: widget.onIrACitas),
-            ),
+          CargaDeDatos<_Portada>(
+            cargar: () => _portada,
+            alCargar: const SizedBox.shrink(),
+            alFallar: const SizedBox.shrink(),
+            constructor: (context, datos) => switch (datos.proxima) {
+              final cita? => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TarjetaProximaCita(cita: cita, onTap: widget.onIrACitas),
+              ),
+              null => const SizedBox.shrink(),
+            },
+          ),
           const SizedBox(height: 20),
           FutureBuilder<Set<String>>(
             future: _habilitados,
@@ -125,9 +174,16 @@ class _InicioScreenState extends State<InicioScreen> {
             },
           ),
           const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: ResumenSalud(mediciones: DatosDemo.mediciones),
+          CargaDeDatos<_Portada>(
+            cargar: () => _portada,
+            alCargar: const SizedBox.shrink(),
+            alFallar: const SizedBox.shrink(),
+            constructor: (context, datos) => datos.mediciones.isEmpty
+                ? const SizedBox.shrink()
+                : Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: ResumenSalud(mediciones: datos.mediciones),
+                  ),
           ),
         ],
       ),

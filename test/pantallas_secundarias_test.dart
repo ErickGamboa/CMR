@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:cmr_app/core/datos_demo.dart';
+import 'package:cmr_app/core/datos/modelos.dart';
+import 'package:cmr_app/core/fechas.dart';
 import 'package:cmr_app/features/citas/citas_screen.dart';
 import 'package:cmr_app/features/etiqueta/leer_etiqueta_screen.dart';
 import 'package:cmr_app/features/laboratorios/laboratorios_screen.dart';
 import 'package:cmr_app/features/recomendaciones/recomendaciones_screen.dart';
 import 'package:cmr_app/features/resultados/resultados_screen.dart';
 import 'package:cmr_app/theme/app_theme.dart';
+
+import 'fuentes_falsas.dart';
 
 /// Monta una pantalla suelta con el tema de la app.
 ///
@@ -19,17 +22,26 @@ Future<void> _abrir(WidgetTester tester, Widget pantalla) async {
   tester.view.devicePixelRatio = 2;
   addTearDown(tester.view.reset);
 
-  await tester.pumpWidget(
-    MaterialApp(theme: AppTheme.light, home: pantalla),
-  );
+  await tester.pumpWidget(MaterialApp(theme: AppTheme.light, home: pantalla));
+  // Las pantallas leen de la fuente inyectada, que responde en el microtask
+  // siguiente: sin esto se quedarían en el spinner.
+  await tester.pumpAndSettle();
 }
 
+late PacienteFalso paciente;
+late CatalogoFalso catalogo;
+
 void main() {
+  setUp(() {
+    paciente = PacienteFalso();
+    catalogo = CatalogoFalso();
+  });
+
   group('Laboratorios', () {
     testWidgets('lista todas las fechas', (tester) async {
-      await _abrir(tester, const LaboratoriosScreen());
+      await _abrir(tester, LaboratoriosScreen(fuente: paciente));
 
-      for (final lab in DatosDemo.laboratorios) {
+      for (final lab in laboratoriosDePrueba) {
         expect(
           find.text(formatearFechaCorta(lab.fecha)),
           findsOneWidget,
@@ -38,11 +50,12 @@ void main() {
       }
     });
 
-    testWidgets('el más reciente arranca desplegado con sus resultados',
-        (tester) async {
-      await _abrir(tester, const LaboratoriosScreen());
+    testWidgets('el más reciente arranca desplegado con sus resultados', (
+      tester,
+    ) async {
+      await _abrir(tester, LaboratoriosScreen(fuente: paciente));
 
-      final reciente = DatosDemo.laboratorios.first;
+      final reciente = laboratoriosDePrueba.first;
       for (final a in reciente.analisis) {
         expect(find.text(a.nombre), findsOneWidget, reason: a.nombre);
       }
@@ -52,9 +65,9 @@ void main() {
     });
 
     testWidgets('tocar una fecha despliega sus resultados', (tester) async {
-      await _abrir(tester, const LaboratoriosScreen());
+      await _abrir(tester, LaboratoriosScreen(fuente: paciente));
 
-      final viejo = DatosDemo.laboratorios.last;
+      final viejo = laboratoriosDePrueba.last;
       final analito = viejo.analisis.firstWhere((a) => a.nombre == 'TSH');
 
       await tester.tap(find.text(formatearFechaCorta(viejo.fecha)));
@@ -65,20 +78,24 @@ void main() {
     });
 
     testWidgets('avisa cuántos valores salieron del rango', (tester) async {
-      await _abrir(tester, const LaboratoriosScreen());
+      await _abrir(tester, LaboratoriosScreen(fuente: paciente));
 
-      final reciente = DatosDemo.laboratorios.first;
+      final reciente = laboratoriosDePrueba.first;
       expect(reciente.fueraDeRango, 1);
-      expect(find.text('1 valor fuera del rango de referencia'), findsOneWidget);
+      expect(
+        find.text('1 valor fuera del rango de referencia'),
+        findsOneWidget,
+      );
     });
   });
 
   group('Resultados', () {
-    testWidgets('muestra las cinco métricas de la última medición',
-        (tester) async {
-      await _abrir(tester, const ResultadosScreen());
+    testWidgets('muestra las cinco métricas de la última medición', (
+      tester,
+    ) async {
+      await _abrir(tester, ResultadosScreen(fuente: paciente));
 
-      final ultima = DatosDemo.mediciones.last;
+      final ultima = medicionesDePrueba.last;
 
       expect(find.text('Peso'), findsOneWidget);
       expect(find.text('Músculo ganado'), findsOneWidget);
@@ -96,9 +113,9 @@ void main() {
     });
 
     testWidgets('el filtro cambia la medición mostrada', (tester) async {
-      await _abrir(tester, const ResultadosScreen());
+      await _abrir(tester, ResultadosScreen(fuente: paciente));
 
-      final primera = DatosDemo.mediciones.first;
+      final primera = medicionesDePrueba.first;
       await tester.tap(
         find.byKey(ValueKey('fecha-${primera.fecha.toIso8601String()}')),
       );
@@ -117,8 +134,9 @@ void main() {
       expect(find.textContaining('no del paquete completo'), findsOneWidget);
     });
 
-    testWidgets('calcula las equivalencias con la fibra descontada',
-        (tester) async {
+    testWidgets('calcula las equivalencias con la fibra descontada', (
+      tester,
+    ) async {
       await _abrir(tester, const LeerEtiquetaScreen());
 
       // Grasa 12 → 2, carbos 40-6=34 → 2, proteína 24 → 3.
@@ -134,8 +152,9 @@ void main() {
       expect(find.textContaining('34 g netos'), findsOneWidget);
     });
 
-    testWidgets('respeta el redondeo del punto medio hacia abajo',
-        (tester) async {
+    testWidgets('respeta el redondeo del punto medio hacia abajo', (
+      tester,
+    ) async {
       await _abrir(tester, const LeerEtiquetaScreen());
 
       // 7.5 g de grasa sigue siendo 1; 2.5 g de nada.
@@ -168,9 +187,9 @@ void main() {
 
   group('Recomendaciones', () {
     testWidgets('lista las del doctor', (tester) async {
-      await _abrir(tester, const RecomendacionesScreen());
+      await _abrir(tester, RecomendacionesScreen(fuente: paciente));
 
-      for (final r in DatosDemo.recomendaciones) {
+      for (final r in recomendacionesDePrueba) {
         await tester.scrollUntilVisible(find.text(r.titulo), 200);
         expect(find.text(r.titulo), findsOneWidget, reason: r.titulo);
       }
@@ -178,12 +197,13 @@ void main() {
   });
 
   group('Mis citas', () {
-    testWidgets('abre en las médicas y separa pendientes de cumplidas',
-        (tester) async {
-      await _abrir(tester, const CitasScreen());
+    testWidgets('abre en las médicas y separa pendientes de cumplidas', (
+      tester,
+    ) async {
+      await _abrir(tester, CitasScreen(fuente: paciente));
 
       final ahora = DateTime.now();
-      final medicas = DatosDemo.citasDe(TipoCita.medica);
+      final medicas = paciente.citasDe(TipoCita.medica);
       final pendientes = medicas.where((c) => c.fecha.isAfter(ahora)).length;
 
       expect(find.widgetWithText(Tab, 'Cita médica'), findsOneWidget);
@@ -199,14 +219,15 @@ void main() {
       expect(medicas.length - pendientes, greaterThan(0));
     });
 
-    testWidgets('la pestaña de enfermería muestra solo sus citas',
-        (tester) async {
-      await _abrir(tester, const CitasScreen());
+    testWidgets('la pestaña de enfermería muestra solo sus citas', (
+      tester,
+    ) async {
+      await _abrir(tester, CitasScreen(fuente: paciente));
 
       await tester.tap(find.widgetWithText(Tab, 'Cita enfermería'));
       await tester.pumpAndSettle();
 
-      final enfermeria = DatosDemo.citasDe(TipoCita.enfermeria);
+      final enfermeria = paciente.citasDe(TipoCita.enfermeria);
       expect(enfermeria, isNotEmpty);
 
       for (final c in enfermeria) {
@@ -217,7 +238,7 @@ void main() {
         );
       }
       // Y ninguna de las médicas se cuela.
-      for (final c in DatosDemo.citasDe(TipoCita.medica)) {
+      for (final c in paciente.citasDe(TipoCita.medica)) {
         expect(
           find.byKey(ValueKey('cita-${c.fecha.toIso8601String()}')),
           findsNothing,
@@ -226,12 +247,13 @@ void main() {
       }
     });
 
-    testWidgets('las cumplidas se ven atenuadas y las pendientes destacadas',
-        (tester) async {
-      await _abrir(tester, const CitasScreen());
+    testWidgets('las cumplidas se ven atenuadas y las pendientes destacadas', (
+      tester,
+    ) async {
+      await _abrir(tester, CitasScreen(fuente: paciente));
 
       final ahora = DateTime.now();
-      final medicas = DatosDemo.citasDe(TipoCita.medica);
+      final medicas = paciente.citasDe(TipoCita.medica);
       final pendiente = medicas.firstWhere((c) => c.fecha.isAfter(ahora));
       final cumplida = medicas.firstWhere((c) => !c.fecha.isAfter(ahora));
 
@@ -257,11 +279,9 @@ List<String> _valores(WidgetTester tester) => tester
 
 /// Las tres cantidades del bloque de resultado de la calculadora.
 List<String> _equivalencias(WidgetTester tester) => [
-      for (final etiqueta in ['Grasas', 'Carbohidratos', 'Proteínas'])
-        tester
-            .widget<Text>(find.byKey(ValueKey('equivalencias-$etiqueta')))
-            .data!,
-    ];
+  for (final etiqueta in ['Grasas', 'Carbohidratos', 'Proteínas'])
+    tester.widget<Text>(find.byKey(ValueKey('equivalencias-$etiqueta'))).data!,
+];
 
 // Se usa `ensureVisible` y no `scrollUntilVisible`: cada campo de texto tiene
 // su propio scrollable interno, así que buscar "el" scrollable es ambiguo.

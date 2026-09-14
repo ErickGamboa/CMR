@@ -72,22 +72,26 @@ class _LeerEtiquetaScreenState extends State<LeerEtiquetaScreen> {
           const SizedBox(height: 12),
           const _Paso(
             numero: 1,
-            texto: 'Busca el tamaño de la porción y cuántas porciones trae el '
+            texto:
+                'Busca el tamaño de la porción y cuántas porciones trae el '
                 'paquete. Todo lo demás está calculado sobre una sola porción.',
           ),
           const _Paso(
             numero: 2,
-            texto: 'Anota la grasa total, los carbohidratos totales, la fibra '
+            texto:
+                'Anota la grasa total, los carbohidratos totales, la fibra '
                 'y la proteína. Son los cuatro números que ocupas.',
           ),
           const _Paso(
             numero: 3,
-            texto: 'La fibra no cuenta como carbohidrato: se resta de los '
+            texto:
+                'La fibra no cuenta como carbohidrato: se resta de los '
                 'carbohidratos totales antes de convertir.',
           ),
           const _Paso(
             numero: 4,
-            texto: 'Convierte los gramos a equivalencias con la calculadora de '
+            texto:
+                'Convierte los gramos a equivalencias con la calculadora de '
                 'abajo y compáralos contra tu plan.',
           ),
           const SizedBox(height: 18),
@@ -97,8 +101,9 @@ class _LeerEtiquetaScreenState extends State<LeerEtiquetaScreen> {
           const SizedBox(height: 4),
           Text(
             'Ingresa los gramos que dice la etiqueta por porción.',
-            style: theme.textTheme.bodySmall
-                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 16),
           Form(
@@ -170,9 +175,7 @@ class _Paso extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Expanded(
-            child: Text(texto, style: theme.textTheme.bodyMedium),
-          ),
+          Expanded(child: Text(texto, style: theme.textTheme.bodyMedium)),
         ],
       ),
     );
@@ -196,10 +199,7 @@ class _NotaPorcion extends StatelessWidget {
         color: AppColors.turquesaBiocelular.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(14),
         border: Border(
-          left: BorderSide(
-            color: AppColors.turquesaBiocelular,
-            width: 4,
-          ),
+          left: BorderSide(color: AppColors.turquesaBiocelular, width: 4),
         ),
       ),
       child: Row(
@@ -217,8 +217,9 @@ class _NotaPorcion extends StatelessWidget {
               children: [
                 Text(
                   'Todo es por porción',
-                  style: theme.textTheme.titleSmall
-                      ?.copyWith(fontWeight: FontWeight.w700),
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -256,9 +257,7 @@ class _CampoGramos extends StatelessWidget {
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       textInputAction: ultimo ? TextInputAction.done : TextInputAction.next,
       onFieldSubmitted: (_) => onEnviar?.call(),
-      inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-      ],
+      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
       validator: (v) {
         final texto = (v ?? '').trim();
         if (texto.isEmpty) return null; // vacío se toma como 0
@@ -311,10 +310,9 @@ class _Resultado extends StatelessWidget {
             _Linea(
               etiqueta: 'Carbohidratos',
               cantidad: porciones.carbohidratos,
-              regla: '15 g = 1 · '
-                  '${porciones.carbohidratosNetos.toStringAsFixed(
-                porciones.carbohidratosNetos % 1 == 0 ? 0 : 1,
-              )} g netos',
+              regla:
+                  '15 g = 1 · '
+                  '${porciones.carbohidratosNetos.toStringAsFixed(porciones.carbohidratosNetos % 1 == 0 ? 0 : 1)} g netos',
             ),
             const SizedBox(height: 14),
             _Linea(

@@ -96,8 +96,9 @@ class HojaAlimento extends StatelessWidget {
                     color: alimento.porcion == null
                         ? scheme.onSurfaceVariant
                         : null,
-                    fontStyle:
-                        alimento.porcion == null ? FontStyle.italic : null,
+                    fontStyle: alimento.porcion == null
+                        ? FontStyle.italic
+                        : null,
                   ),
                 ),
               ),
@@ -113,8 +114,9 @@ class HojaAlimento extends StatelessWidget {
                     if (alimento.libre && alimento.vale.vacio)
                       Text(
                         'Nada: es un alimento libre',
-                        style: theme.textTheme.titleMedium
-                            ?.copyWith(color: scheme.secondary),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: scheme.secondary,
+                        ),
                       )
                     else ...[
                       _Conteo(intercambios: alimento.vale),
@@ -122,8 +124,9 @@ class HojaAlimento extends StatelessWidget {
                         const SizedBox(height: 10),
                         Text(
                           'o bien',
-                          style: theme.textTheme.bodySmall
-                              ?.copyWith(color: scheme.onSurfaceVariant),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
                         ),
                         const SizedBox(height: 10),
                         _Conteo(intercambios: alimento.alternativa!),
@@ -134,8 +137,9 @@ class HojaAlimento extends StatelessWidget {
                       Text(
                         '+ la grasa con que se preparó, que el libro no fija '
                         'porque depende de la receta',
-                        style: theme.textTheme.bodyMedium
-                            ?.copyWith(color: scheme.onSurfaceVariant),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ],
@@ -172,8 +176,9 @@ class HojaAlimento extends StatelessWidget {
                 const SizedBox(height: 14),
                 Text(
                   seccion.nota!,
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: scheme.onSurfaceVariant),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ],
@@ -196,11 +201,7 @@ class _Conteo extends StatelessWidget {
       runSpacing: 8,
       children: [
         for (final (grupo, cantidad) in intercambios.presentes)
-          PildoraIntercambio(
-            grupo: grupo,
-            cantidad: cantidad,
-            compacta: false,
-          ),
+          PildoraIntercambio(grupo: grupo, cantidad: cantidad, compacta: false),
       ],
     );
   }

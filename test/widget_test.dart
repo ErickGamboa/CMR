@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:cmr_app/core/datos_demo.dart';
+import 'package:cmr_app/core/fechas.dart';
 
 import 'package:cmr_app/core/auth/servicio_auth.dart';
 import 'package:cmr_app/features/auth/auth_gate.dart';
@@ -17,18 +17,26 @@ import 'package:cmr_app/widgets/pantalla_carga.dart';
 import 'package:cmr_app/widgets/tarjeta_prescripcion.dart';
 
 import 'fake_auth.dart';
+import 'fuentes_falsas.dart';
 
 void main() {
   late FakeAuth auth;
+  late PacienteFalso paciente;
+  late CatalogoFalso catalogo;
 
-  setUp(() => auth = FakeAuth());
+  setUp(() {
+    auth = FakeAuth();
+    paciente = PacienteFalso();
+    catalogo = CatalogoFalso();
+  });
   tearDown(() => auth.dispose());
 
   Future<void> abrir(WidgetTester tester, {ServicioAuth? servicio}) =>
       tester.pumpWidget(CmrApp(auth: servicio ?? auth));
 
-  testWidgets('sin sesión la app abre en el login con el tema de marca',
-      (tester) async {
+  testWidgets('sin sesión la app abre en el login con el tema de marca', (
+    tester,
+  ) async {
     await abrir(tester);
 
     expect(find.byType(LoginScreen), findsOneWidget);
@@ -39,8 +47,9 @@ void main() {
   });
 
   group('pantalla de carga', () {
-    testWidgets('calca el splash nativo: logo completo, mismo ancho, centrado',
-        (tester) async {
+    testWidgets('calca el splash nativo: logo completo, mismo ancho, centrado', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(theme: AppTheme.light, home: const PantallaCarga()),
       );
@@ -57,15 +66,15 @@ void main() {
       expect(centro.dy, closeTo(pantalla.height / 2, 0.5));
     });
 
-    testWidgets('el indicador no aparece de una, para no parpadear',
-        (tester) async {
+    testWidgets('el indicador no aparece de una, para no parpadear', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(theme: AppTheme.light, home: const PantallaCarga()),
       );
 
-      double opacidad() => tester
-          .widget<AnimatedOpacity>(find.byType(AnimatedOpacity))
-          .opacity;
+      double opacidad() =>
+          tester.widget<AnimatedOpacity>(find.byType(AnimatedOpacity)).opacity;
 
       expect(opacidad(), 0);
 
@@ -109,8 +118,9 @@ void main() {
       expect(find.text('Debe tener al menos 8 caracteres'), findsOneWidget);
     });
 
-    testWidgets('no ofrece registro ni recuperación de contraseña',
-        (tester) async {
+    testWidgets('no ofrece registro ni recuperación de contraseña', (
+      tester,
+    ) async {
       await abrir(tester);
 
       // Las cuentas las administra el admin desde el sitio web.
@@ -123,16 +133,17 @@ void main() {
       );
     });
 
-    testWidgets('el ojito alterna la visibilidad de la contraseña',
-        (tester) async {
+    testWidgets('el ojito alterna la visibilidad de la contraseña', (
+      tester,
+    ) async {
       await abrir(tester);
 
       TextField clave() => tester.widget<TextField>(
-            find.descendant(
-              of: _campo('Contraseña'),
-              matching: find.byType(TextField),
-            ),
-          );
+        find.descendant(
+          of: _campo('Contraseña'),
+          matching: find.byType(TextField),
+        ),
+      );
 
       expect(clave().obscureText, isTrue);
 
@@ -144,8 +155,9 @@ void main() {
   });
 
   group('login contra el servicio de auth', () {
-    testWidgets('recorta espacios del correo y manda la clave tal cual',
-        (tester) async {
+    testWidgets('recorta espacios del correo y manda la clave tal cual', (
+      tester,
+    ) async {
       await abrir(tester);
       await _completarYEnviar(tester, correo: '  ana@cmr.cr ');
 
@@ -153,8 +165,9 @@ void main() {
       expect(auth.llamadas.single.clave, 'clave-segura');
     });
 
-    testWidgets('muestra el spinner y bloquea el botón mientras envía',
-        (tester) async {
+    testWidgets('muestra el spinner y bloquea el botón mientras envía', (
+      tester,
+    ) async {
       auth.suspenderProximoIngreso();
       await abrir(tester);
       await _completarYEnviar(tester);
@@ -178,8 +191,9 @@ void main() {
       expect(find.byType(LoginScreen), findsNothing);
     });
 
-    testWidgets('muestra el mensaje de la falla y deja reintentar',
-        (tester) async {
+    testWidgets('muestra el mensaje de la falla y deja reintentar', (
+      tester,
+    ) async {
       final malas = FakeAuth(
         falla: const FallaAuth('Correo o contraseña incorrectos.'),
       );
@@ -242,22 +256,32 @@ void main() {
     });
   });
 
-  testWidgets('AuthGate arranca en el login cuando no hay sesión',
-      (tester) async {
+  testWidgets('AuthGate arranca en el login cuando no hay sesión', (
+    tester,
+  ) async {
     await tester.pumpWidget(MaterialApp(home: AuthGate(auth: auth)));
     expect(find.byType(LoginScreen), findsOneWidget);
   });
 
   group('navegación del home', () {
-    /// Entra a la app ya autenticada.
+    /// Monta el home ya autenticado, con los datos del paciente falsos.
+    ///
+    /// No pasa por el login: eso tiene su propio grupo, y encadenarlo acá
+    /// obligaría a arrastrar las fuentes por CmrApp y AuthGate solo para los
+    /// tests.
     Future<void> entrar(WidgetTester tester) async {
-      await tester.pumpWidget(CmrApp(auth: auth));
-      await _completarYEnviar(tester);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: HomeShell(auth: auth, paciente: paciente, catalogo: catalogo),
+        ),
+      );
       await tester.pumpAndSettle();
     }
 
-    testWidgets('la barra inferior tiene todos los módulos primarios',
-        (tester) async {
+    testWidgets('la barra inferior tiene todos los módulos primarios', (
+      tester,
+    ) async {
       await entrar(tester);
 
       final barra = tester.widget<NavigationBar>(find.byType(NavigationBar));
@@ -282,7 +306,9 @@ void main() {
           reason: 'el módulo ${m.etiqueta} debe quedar activo',
         );
         expect(
-          tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+          tester
+              .widget<NavigationBar>(find.byType(NavigationBar))
+              .selectedIndex,
           m.index,
         );
       }
@@ -298,8 +324,9 @@ void main() {
       expect(find.widgetWithText(Tab, 'Libres'), findsOneWidget);
     });
 
-    testWidgets('Mi plan tiene las pestañas Alimentos y Suplementos',
-        (tester) async {
+    testWidgets('Mi plan tiene las pestañas Alimentos y Suplementos', (
+      tester,
+    ) async {
       await entrar(tester);
       await _irA(tester, ModuloPrimario.plan);
 
@@ -307,8 +334,9 @@ void main() {
       expect(find.widgetWithText(Tab, 'Suplementos'), findsOneWidget);
     });
 
-    testWidgets('Suplementos lista los recetados y los ejemplos',
-        (tester) async {
+    testWidgets('Suplementos lista los recetados y los ejemplos', (
+      tester,
+    ) async {
       await entrar(tester);
       await _irA(tester, ModuloPrimario.plan);
 
@@ -318,26 +346,27 @@ void main() {
       expect(find.text('Recetados por tu doctor'), findsOneWidget);
       // Se recorre de arriba abajo, en el mismo orden en que están en la
       // pantalla: la lista monta sus hijos por demanda.
-      for (final s in DatosDemo.suplementosRecetados) {
+      for (final s in suplementosDePrueba) {
         final tarjeta = find.widgetWithText(TarjetaPrescripcion, s.nombre);
         await _bajarEnPlan(tester, tarjeta);
         expect(tarjeta, findsOneWidget, reason: s.nombre);
       }
-      for (final c in DatosDemo.categoriasSuplementos) {
+      for (final c in categoriasDePrueba) {
         await _bajarEnPlan(tester, _categoria(c.nombre));
         expect(_categoria(c.nombre), findsOneWidget, reason: c.nombre);
       }
     });
 
-    testWidgets('tocar un suplemento abre sus marcas recomendadas',
-        (tester) async {
+    testWidgets('tocar un suplemento abre sus marcas recomendadas', (
+      tester,
+    ) async {
       await entrar(tester);
       await _irA(tester, ModuloPrimario.plan);
 
       await tester.tap(find.widgetWithText(Tab, 'Suplementos'));
       await tester.pumpAndSettle();
 
-      final proteina = DatosDemo.categoriasSuplementos.first;
+      final proteina = categoriasDePrueba.first;
       await _bajarEnPlan(tester, _categoria(proteina.nombre));
       await tester.tap(_categoria(proteina.nombre));
       await tester.pumpAndSettle();
@@ -348,36 +377,39 @@ void main() {
       }
     });
 
-    testWidgets('Péptidos y medicamentos separa las dos listas',
-        (tester) async {
+    testWidgets('Péptidos y medicamentos separa las dos listas', (
+      tester,
+    ) async {
       await entrar(tester);
       await _irA(tester, ModuloPrimario.peptidos);
 
-      for (final p in DatosDemo.peptidos) {
+      for (final p in peptidosDePrueba) {
         expect(find.text(p.nombre), findsOneWidget, reason: p.nombre);
       }
 
       await tester.tap(find.widgetWithText(Tab, 'Medicamentos'));
       await tester.pumpAndSettle();
 
-      for (final m in DatosDemo.medicamentos) {
+      for (final m in medicamentosDePrueba) {
         expect(find.text(m.nombre), findsOneWidget, reason: m.nombre);
       }
     });
 
-    testWidgets('el Home muestra próxima cita, accesos y el resumen',
-        (tester) async {
+    testWidgets('el Home muestra próxima cita, accesos y el resumen', (
+      tester,
+    ) async {
       await entrar(tester);
 
       expect(find.text('PRÓXIMA CITA'), findsOneWidget);
-      expect(find.textContaining('Dr. Roy Jiménez'), findsOneWidget);
+      expect(find.textContaining('Dra. Prueba'), findsOneWidget);
       expect(find.text('Resumen de salud'), findsOneWidget);
       expect(find.text('Grasa perdida'), findsOneWidget);
       expect(find.text('Músculo ganado'), findsOneWidget);
     });
 
-    testWidgets('ninguna etiqueta de módulo secundario se corta',
-        (tester) async {
+    testWidgets('ninguna etiqueta de módulo secundario se corta', (
+      tester,
+    ) async {
       await entrar(tester);
 
       for (final m in ModuloSecundario.abiertos) {
@@ -396,8 +428,9 @@ void main() {
       }
     });
 
-    testWidgets('cada módulo secundario navega y permite volver',
-        (tester) async {
+    testWidgets('cada módulo secundario navega y permite volver', (
+      tester,
+    ) async {
       await entrar(tester);
 
       for (final m in ModuloSecundario.abiertos) {
@@ -443,15 +476,18 @@ void main() {
       expect(_opacidadFlecha(tester, Icons.chevron_right), 1);
     });
 
-    testWidgets('al llegar al extremo izquierdo se apaga esa flecha',
-        (tester) async {
+    testWidgets('al llegar al extremo izquierdo se apaga esa flecha', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(360, 800);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
 
       await entrar(tester);
 
-      tester.state<ScrollableState>(find.byType(Scrollable).at(1)).position
+      tester
+          .state<ScrollableState>(find.byType(Scrollable).at(1))
+          .position
           .jumpTo(0);
       await tester.pumpAndSettle();
 
@@ -471,11 +507,12 @@ void main() {
       expect(_opacidadFlecha(tester, Icons.chevron_right), 0);
     });
 
-    testWidgets('el resumen muestra los kilos de la última medición',
-        (tester) async {
+    testWidgets('el resumen muestra los kilos de la última medición', (
+      tester,
+    ) async {
       await entrar(tester);
 
-      final ultima = DatosDemo.mediciones.last;
+      final ultima = medicionesDePrueba.last;
       expect(_kilos(tester), ['7.5', '2.2']);
       expect(
         find.textContaining(formatearFechaBreve(ultima.fecha)),
@@ -488,7 +525,7 @@ void main() {
       await entrar(tester);
       await tester.pumpAndSettle();
 
-      final ultima = DatosDemo.mediciones.last;
+      final ultima = medicionesDePrueba.last;
       final grasa = _barra(tester, 'Grasa perdida');
       final musculo = _barra(tester, 'Músculo ganado');
 
@@ -502,8 +539,9 @@ void main() {
       );
     });
 
-    testWidgets('la tarjeta de próxima cita lleva al módulo de citas',
-        (tester) async {
+    testWidgets('la tarjeta de próxima cita lleva al módulo de citas', (
+      tester,
+    ) async {
       await entrar(tester);
 
       await tester.tap(find.text('PRÓXIMA CITA'));
@@ -568,10 +606,9 @@ List<String> _kilos(WidgetTester tester) => tester
     .widgetList<Text>(find.byType(Text))
     .map((t) => t.textSpan)
     .whereType<TextSpan>()
-    .where((s) => s.children?.any(
-              (c) => c is TextSpan && c.text == ' kg',
-            ) ??
-        false)
+    .where(
+      (s) => s.children?.any((c) => c is TextSpan && c.text == ' kg') ?? false,
+    )
     .map((s) => s.text!)
     .toList();
 
