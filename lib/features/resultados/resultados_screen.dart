@@ -5,9 +5,10 @@ import '../../core/datos/repositorio.dart';
 import '../../core/fechas.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/carga_de_datos.dart';
+import '../../widgets/recarga.dart';
 
 /// Resultados de composición corporal de una medición, con filtro por fecha.
-class ResultadosScreen extends StatelessWidget {
+class ResultadosScreen extends StatefulWidget {
   const ResultadosScreen({super.key, this.fuente});
 
   /// De dónde salen. En la app va sin definir y sale de Supabase; los tests
@@ -15,11 +16,28 @@ class ResultadosScreen extends StatelessWidget {
   final FuentePaciente? fuente;
 
   @override
+  State<ResultadosScreen> createState() => _ResultadosScreenState();
+}
+
+class _ResultadosScreenState extends State<ResultadosScreen> {
+  final _recarga = ControlRecarga();
+
+  @override
+  void dispose() {
+    _recarga.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Resultados')),
+      appBar: AppBar(
+        title: const Text('Resultados'),
+        actions: [BotonRecargar(control: _recarga)],
+      ),
       body: CargaDeDatos<List<Medicion>>(
-        cargar: () => (fuente ?? RepositorioPaciente()).mediciones(),
+        control: _recarga,
+        cargar: () => (widget.fuente ?? RepositorioPaciente()).mediciones(),
         vacio: const SinDatos(
           icono: Icons.insights_outlined,
           mensaje: 'Todavía no tienes mediciones registradas.',

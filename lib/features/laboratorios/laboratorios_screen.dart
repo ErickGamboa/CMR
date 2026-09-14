@@ -4,10 +4,11 @@ import '../../core/datos/modelos.dart';
 import '../../core/datos/repositorio.dart';
 import '../../core/fechas.dart';
 import '../../widgets/carga_de_datos.dart';
+import '../../widgets/recarga.dart';
 
 /// Lista de laboratorios por fecha. Cada uno se despliega hacia abajo con sus
 /// resultados.
-class LaboratoriosScreen extends StatelessWidget {
+class LaboratoriosScreen extends StatefulWidget {
   const LaboratoriosScreen({super.key, this.fuente});
 
   /// De dónde salen. En la app va sin definir y sale de Supabase; los tests
@@ -15,11 +16,28 @@ class LaboratoriosScreen extends StatelessWidget {
   final FuentePaciente? fuente;
 
   @override
+  State<LaboratoriosScreen> createState() => _LaboratoriosScreenState();
+}
+
+class _LaboratoriosScreenState extends State<LaboratoriosScreen> {
+  final _recarga = ControlRecarga();
+
+  @override
+  void dispose() {
+    _recarga.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Laboratorios')),
+      appBar: AppBar(
+        title: const Text('Laboratorios'),
+        actions: [BotonRecargar(control: _recarga)],
+      ),
       body: CargaDeDatos<List<Laboratorio>>(
-        cargar: () => (fuente ?? RepositorioPaciente()).laboratorios(),
+        control: _recarga,
+        cargar: () => (widget.fuente ?? RepositorioPaciente()).laboratorios(),
         vacio: const SinDatos(
           icono: Icons.science_outlined,
           mensaje: 'Todavía no tienes laboratorios registrados.',

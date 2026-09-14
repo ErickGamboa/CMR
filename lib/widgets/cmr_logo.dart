@@ -28,9 +28,9 @@ class CmrLogo extends StatelessWidget {
     this.ancho,
     this.alto,
   }) : assert(
-          ancho != null || alto != null,
-          'Indicá ancho o alto para dimensionar el logo.',
-        );
+         ancho != null || alto != null,
+         'Indicá ancho o alto para dimensionar el logo.',
+       );
 
   final CmrLogoVariante variante;
   final double? ancho;

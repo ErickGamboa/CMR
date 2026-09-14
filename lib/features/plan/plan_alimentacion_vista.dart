@@ -5,6 +5,7 @@ import '../../core/fechas.dart' show formatearFechaCorta;
 import '../libro/libro_screen.dart';
 import '../libro/widgets/pildora_intercambio.dart';
 import 'modelo_plan.dart';
+import '../../widgets/recarga.dart';
 import 'repositorio_plan.dart';
 
 /// El plan de alimentación del paciente.
@@ -17,11 +18,14 @@ import 'repositorio_plan.dart';
 /// Cada grupo es tocable y abre el libro filtrado por ese grupo, que es el
 /// paso que faltaba entre "me tocan 2 carbohidratos" y "entonces qué como".
 class PlanAlimentacionVista extends StatefulWidget {
-  const PlanAlimentacionVista({super.key, this.fuente});
+  const PlanAlimentacionVista({super.key, this.fuente, this.control});
 
   /// De dónde se lee el plan. En la app va sin definir y sale de Supabase;
   /// los tests inyectan una fuente falsa.
   final FuentePlan? fuente;
+
+  /// Si viene, el botón de la barra puede pedirle que vuelva a bajar el plan.
+  final ControlRecarga? control;
 
   @override
   State<PlanAlimentacionVista> createState() => _PlanAlimentacionVistaState();
@@ -30,13 +34,48 @@ class PlanAlimentacionVista extends StatefulWidget {
 class _PlanAlimentacionVistaState extends State<PlanAlimentacionVista> {
   FuentePlan? _fuente;
   late Future<PlanAlimentacion?> _carga = _cargar();
+  int _generacionVista = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _generacionVista = widget.control?.generacion ?? 0;
+    widget.control?.addListener(_alPedirRecarga);
+  }
+
+  @override
+  void dispose() {
+    widget.control?.removeListener(_alPedirRecarga);
+    super.dispose();
+  }
+
+  /// El control avisa de dos cosas —recargar y el progreso—, así que solo una
+  /// generación nueva significa "volvé a pedir".
+  void _alPedirRecarga() {
+    final generacion = widget.control?.generacion ?? 0;
+    if (generacion == _generacionVista || !mounted) return;
+
+    _generacionVista = generacion;
+    setState(() {
+      _carga = _cargar(deNuevo: true);
+    });
+  }
 
   /// La fuente se resuelve dentro de este `async` para que, si Supabase no
   /// está inicializado, el error caiga en el [FutureBuilder].
   Future<PlanAlimentacion?> _cargar({bool deNuevo = false}) async {
     final fuente = _fuente ??=
         widget.fuente ?? RepositorioPlan(Supabase.instance.client);
-    return deNuevo ? fuente.recargar() : fuente.cargar();
+
+    final control = widget.control;
+    if (control == null) {
+      return deNuevo ? fuente.recargar() : fuente.cargar();
+    }
+
+    control.iniciar();
+    return (deNuevo ? fuente.recargar() : fuente.cargar()).whenComplete(
+      control.terminar,
+    );
   }
 
   void _abrirLibro(GrupoIntercambio grupo) {

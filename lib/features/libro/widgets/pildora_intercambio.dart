@@ -35,7 +35,7 @@ class PildoraIntercambio extends StatelessWidget {
     final texto = compacta
         ? '$cantidadTexto ${grupo.letra}'
         : '$cantidadTexto '
-            '${cantidad == 1 && sufijo.isEmpty ? grupo.singular : grupo.plural}';
+              '${cantidad == 1 && sufijo.isEmpty ? grupo.singular : grupo.plural}';
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: compacta ? 8 : 12, vertical: 4),

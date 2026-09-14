@@ -21,11 +21,7 @@ import { doctorActual, type Doctor } from "@/lib/doctor";
  * nueva queda protegida por existir dentro de `(panel)`, sin que nadie se
  * tenga que acordar de agregarle el chequeo.
  */
-export default async function LayoutPanel({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function LayoutPanel({ children }: LayoutProps<"/">) {
   const doctor = await doctorActual();
 
   if (!doctor) return <SinPermiso />;

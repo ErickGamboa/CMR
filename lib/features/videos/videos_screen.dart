@@ -4,13 +4,14 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/datos/modelos.dart';
 import '../../core/datos/repositorio.dart';
 import '../../widgets/carga_de_datos.dart';
+import '../../widgets/recarga.dart';
 
 /// Módulo Videos: el material que el doctor publica para todos los pacientes.
 ///
 /// Los videos no se reproducen dentro de la app: se abren en YouTube, en el
 /// navegador o en la app que corresponda según el enlace. Así el doctor puede
 /// cambiar de plataforma sin que la app se entere.
-class VideosScreen extends StatelessWidget {
+class VideosScreen extends StatefulWidget {
   const VideosScreen({super.key, this.fuente});
 
   /// De dónde salen. En la app va sin definir y sale de Supabase; los tests
@@ -18,11 +19,28 @@ class VideosScreen extends StatelessWidget {
   final FuenteCatalogo? fuente;
 
   @override
+  State<VideosScreen> createState() => _VideosScreenState();
+}
+
+class _VideosScreenState extends State<VideosScreen> {
+  final _recarga = ControlRecarga();
+
+  @override
+  void dispose() {
+    _recarga.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Videos')),
+      appBar: AppBar(
+        title: const Text('Videos'),
+        actions: [BotonRecargar(control: _recarga)],
+      ),
       body: CargaDeDatos<List<Video>>(
-        cargar: () => (fuente ?? RepositorioCatalogo()).videos(),
+        control: _recarga,
+        cargar: () => (widget.fuente ?? RepositorioCatalogo()).videos(),
         vacio: const SinDatos(
           icono: Icons.play_circle_outline,
           mensaje: 'Todavía no hay videos publicados.',

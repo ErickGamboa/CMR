@@ -70,9 +70,26 @@ async function exigirDoctor() {
  * inicio de sesión con límite de intentos es suficiente.
  */
 const PALABRAS = [
-  "roble", "cedro", "guaria", "colibri", "quetzal", "yiguirro", "manglar",
-  "poas", "arenal", "coco", "mango", "papaya", "jocote", "guanabana",
-  "tortuga", "perezoso", "danta", "lapa", "garza", "tucan",
+  "roble",
+  "cedro",
+  "guaria",
+  "colibri",
+  "quetzal",
+  "yiguirro",
+  "manglar",
+  "poas",
+  "arenal",
+  "coco",
+  "mango",
+  "papaya",
+  "jocote",
+  "guanabana",
+  "tortuga",
+  "perezoso",
+  "danta",
+  "lapa",
+  "garza",
+  "tucan",
 ];
 
 export function claveTemporal() {
@@ -82,8 +99,7 @@ export function claveTemporal() {
 }
 
 export type ResultadoAlta =
-  | { ok: true; id: string; clave: string }
-  | { ok: false; error: string };
+  { ok: true; id: string; clave: string } | { ok: false; error: string };
 
 /**
  * Crea la cuenta de un paciente y devuelve la contraseña temporal.

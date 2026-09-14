@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/datos/repositorio.dart';
+import 'recarga.dart';
 
 /// Pide un dato a la base y dibuja lo que corresponda: espera, falla con
 /// "Intentar de nuevo", o el contenido.
@@ -18,6 +19,7 @@ class CargaDeDatos<T> extends StatefulWidget {
     this.estaVacio,
     this.alCargar,
     this.alFallar,
+    this.control,
   });
 
   /// Se llama una sola vez al montar, y de nuevo en cada reintento.
@@ -42,16 +44,64 @@ class CargaDeDatos<T> extends StatefulWidget {
   /// pantalla por algo que el paciente no vino a ver.
   final Widget? alFallar;
 
+  /// Si viene, el botón de recargar de la barra puede pedirle que vuelva a
+  /// bajar los datos.
+  final ControlRecarga? control;
+
   @override
   State<CargaDeDatos<T>> createState() => _CargaDeDatosState<T>();
 }
 
 class _CargaDeDatosState<T> extends State<CargaDeDatos<T>> {
-  late Future<T> _futuro = widget.cargar();
+  late Future<T> _futuro = _pedir();
+  int _generacionVista = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _generacionVista = widget.control?.generacion ?? 0;
+    widget.control?.addListener(_alPedirRecarga);
+  }
+
+  @override
+  void didUpdateWidget(CargaDeDatos<T> anterior) {
+    super.didUpdateWidget(anterior);
+    if (anterior.control != widget.control) {
+      anterior.control?.removeListener(_alPedirRecarga);
+      widget.control?.addListener(_alPedirRecarga);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.control?.removeListener(_alPedirRecarga);
+    super.dispose();
+  }
+
+  /// El control avisa de dos cosas —recargar y el progreso—, así que hay que
+  /// distinguirlas: solo la generación nueva significa "volvé a pedir".
+  void _alPedirRecarga() {
+    final generacion = widget.control?.generacion ?? 0;
+    if (generacion == _generacionVista) return;
+
+    _generacionVista = generacion;
+    _reintentar();
+  }
+
+  /// Pide los datos avisándole al control mientras dura, para que el botón
+  /// pueda girar.
+  Future<T> _pedir() {
+    final control = widget.control;
+    if (control == null) return widget.cargar();
+
+    control.iniciar();
+    return widget.cargar().whenComplete(control.terminar);
+  }
 
   void _reintentar() {
+    if (!mounted) return;
     setState(() {
-      _futuro = widget.cargar();
+      _futuro = _pedir();
     });
   }
 

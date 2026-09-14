@@ -72,9 +72,7 @@ export function BotonesEstado({
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    ¿Rechazar esta solicitud?
-                  </AlertDialogTitle>
+                  <AlertDialogTitle>¿Rechazar esta solicitud?</AlertDialogTitle>
                   <AlertDialogDescription className="leading-relaxed">
                     Rechazar <strong>borra la cuenta</strong> y todo lo que
                     tenga, sin vuelta atrás. No se guarda ni el nombre ni la
@@ -107,9 +105,8 @@ export function BotonesEstado({
               <AlertDialogHeader>
                 <AlertDialogTitle>¿Dar de baja al paciente?</AlertDialogTitle>
                 <AlertDialogDescription className="leading-relaxed">
-                  Deja de ver la app, pero{" "}
-                  <strong>no se borra nada</strong>: su expediente se conserva
-                  y lo podés reactivar cuando quieras.
+                  Deja de ver la app, pero <strong>no se borra nada</strong>: su
+                  expediente se conserva y lo podés reactivar cuando quieras.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -137,8 +134,7 @@ export function BotonesEstado({
         {estado === "pendiente" &&
           "Hasta que lo apruebes, la app no le muestra nada."}
         {estado === "activo" && "Ve su plan, sus citas y el libro."}
-        {estado === "inactivo" &&
-          "No ve la app. Su expediente sigue guardado."}
+        {estado === "inactivo" && "No ve la app. Su expediente sigue guardado."}
       </p>
 
       {error && (

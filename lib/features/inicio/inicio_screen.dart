@@ -6,6 +6,7 @@ import '../../core/datos/repositorio.dart';
 import '../../core/modulos_habilitados.dart';
 import '../../widgets/carga_de_datos.dart';
 import '../../widgets/cmr_logo.dart';
+import '../../widgets/recarga.dart';
 import '../cuenta/mi_cuenta_screen.dart';
 import '../etiqueta/leer_etiqueta_screen.dart';
 import '../laboratorios/laboratorios_screen.dart';
@@ -55,14 +56,45 @@ class InicioScreen extends StatefulWidget {
 class _InicioScreenState extends State<InicioScreen> {
   // Se piden una sola vez por sesión de pantalla: la lista de módulos no
   // cambia mientras el paciente usa la app, la cambia el doctor.
-  late final Future<Set<String>> _habilitados =
+  late Future<Set<String>> _habilitados = _cargarModulos();
+  final _recarga = ControlRecarga();
+  int _generacionVista = 0;
+
+  Future<Set<String>> _cargarModulos() =>
       (widget.modulos ?? const RepositorioModulos()).habilitados();
+
+  @override
+  void initState() {
+    super.initState();
+    _recarga.addListener(_alPedirRecarga);
+  }
+
+  @override
+  void dispose() {
+    _recarga
+      ..removeListener(_alPedirRecarga)
+      ..dispose();
+    super.dispose();
+  }
+
+  /// Recargar el Home vuelve a pedir las dos cosas: la portada y qué módulos
+  /// tiene habilitados. Si el doctor le prendió Mapeo mientras la app estaba
+  /// abierta, la ficha aparece sin reinstalar nada.
+  void _alPedirRecarga() {
+    if (_recarga.generacion == _generacionVista || !mounted) return;
+
+    _generacionVista = _recarga.generacion;
+    setState(() {
+      _portada = _cargarPortada();
+      _habilitados = _cargarModulos();
+    });
+  }
 
   FuentePaciente get _datos => widget.paciente ?? RepositorioPaciente();
 
-  /// Se pide una sola vez y la usan los dos bloques del Home, que están
-  /// separados por la fila de accesos.
-  late final Future<_Portada> _portada = _cargarPortada();
+  /// La usan los dos bloques del Home, que están separados por la fila de
+  /// accesos.
+  late Future<_Portada> _portada = _cargarPortada();
 
   /// Las dos consultas salen juntas: son independientes y esperar una tras
   /// otra dejaría el Home a medio dibujar el doble de tiempo.
@@ -120,6 +152,7 @@ class _InicioScreenState extends State<InicioScreen> {
       appBar: AppBar(
         title: const CmrLogo(variante: CmrLogoVariante.marca, alto: 24),
         actions: [
+          BotonRecargar(control: _recarga),
           IconButton(
             onPressed: () => _abrirMiCuenta(context),
             icon: const Icon(Icons.person_outline),
@@ -133,6 +166,7 @@ class _InicioScreenState extends State<InicioScreen> {
         padding: const EdgeInsets.only(top: 8, bottom: 16),
         children: [
           CargaDeDatos<_Portada>(
+            key: ValueKey('cita-$_generacionVista'),
             cargar: () => _portada,
             alCargar: const SizedBox.shrink(),
             alFallar: const SizedBox.shrink(),
@@ -167,6 +201,7 @@ class _InicioScreenState extends State<InicioScreen> {
           ),
           const SizedBox(height: 20),
           CargaDeDatos<_Portada>(
+            key: ValueKey('resumen-$_generacionVista'),
             cargar: () => _portada,
             alCargar: const SizedBox.shrink(),
             alFallar: const SizedBox.shrink(),

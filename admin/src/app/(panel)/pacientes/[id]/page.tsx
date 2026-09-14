@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { EstadoPacienteBadge } from "@/components/estado-paciente";
+import { Volver } from "@/components/volver";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,12 +49,7 @@ export default async function PaginaPaciente({
   return (
     <div className="animate-in fade-in duration-300 space-y-8">
       <header className="space-y-4">
-        <Link
-          href="/pacientes"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <span aria-hidden>←</span> Pacientes
-        </Link>
+        <Volver href="/pacientes">Pacientes</Volver>
 
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-2">

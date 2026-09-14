@@ -4,9 +4,10 @@ import '../../core/datos/modelos.dart';
 import '../../core/datos/repositorio.dart';
 import '../../core/fechas.dart';
 import '../../widgets/carga_de_datos.dart';
+import '../../widgets/recarga.dart';
 
 /// Recomendaciones que el doctor le dejó al paciente.
-class RecomendacionesScreen extends StatelessWidget {
+class RecomendacionesScreen extends StatefulWidget {
   const RecomendacionesScreen({super.key, this.fuente});
 
   /// De dónde salen. En la app va sin definir y sale de Supabase; los tests
@@ -14,11 +15,29 @@ class RecomendacionesScreen extends StatelessWidget {
   final FuentePaciente? fuente;
 
   @override
+  State<RecomendacionesScreen> createState() => _RecomendacionesScreenState();
+}
+
+class _RecomendacionesScreenState extends State<RecomendacionesScreen> {
+  final _recarga = ControlRecarga();
+
+  @override
+  void dispose() {
+    _recarga.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Recomendaciones')),
+      appBar: AppBar(
+        title: const Text('Recomendaciones'),
+        actions: [BotonRecargar(control: _recarga)],
+      ),
       body: CargaDeDatos<List<Recomendacion>>(
-        cargar: () => (fuente ?? RepositorioPaciente()).recomendaciones(),
+        control: _recarga,
+        cargar: () =>
+            (widget.fuente ?? RepositorioPaciente()).recomendaciones(),
         vacio: const SinDatos(
           icono: Icons.lightbulb_outline,
           mensaje: 'Tu doctor todavía no te dejó recomendaciones.',

@@ -5,11 +5,7 @@ import 'package:flutter/material.dart';
 /// A diferencia de un "próximamente" genérico, dice qué falta exactamente,
 /// para que al verlo se sepa a quién hay que pedírselo.
 class AvisoPendiente extends StatelessWidget {
-  const AvisoPendiente({
-    super.key,
-    required this.icono,
-    required this.mensaje,
-  });
+  const AvisoPendiente({super.key, required this.icono, required this.mensaje});
 
   final IconData icono;
   final String mensaje;
@@ -42,8 +38,9 @@ class AvisoPendiente extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               'Pendiente',
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: scheme.onSurfaceVariant),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),

@@ -27,9 +27,12 @@ import type { EstadoPaciente, Paciente } from "@/lib/pacientes";
  * escribe cuando tiene prisa.
  */
 function normalizar(texto: string) {
+  // `\p{Diacritic}` y no un rango de códigos: un rango se escribe con
+  // caracteres combinantes que en el editor son invisibles, y nadie puede
+  // revisar una línea que no se ve.
   return texto
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/\p{Diacritic}/gu, "")
     .toLowerCase();
 }
 

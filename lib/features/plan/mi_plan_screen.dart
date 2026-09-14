@@ -4,13 +4,14 @@ import '../../core/datos/modelos.dart';
 import '../../core/datos/repositorio.dart';
 import '../../widgets/carga_de_datos.dart';
 import '../../widgets/foto_pendiente.dart';
+import '../../widgets/recarga.dart';
 import '../../widgets/tarjeta_prescripcion.dart';
 import 'marcas_screen.dart';
 import 'plan_alimentacion_vista.dart';
 import 'repositorio_plan.dart';
 
 /// Módulo Mi plan: alimentos y suplementos.
-class MiPlanScreen extends StatelessWidget {
+class MiPlanScreen extends StatefulWidget {
   const MiPlanScreen({
     super.key,
     this.fuentePlan,
@@ -29,12 +30,27 @@ class MiPlanScreen extends StatelessWidget {
   final FuenteCatalogo? fuenteCatalogo;
 
   @override
+  State<MiPlanScreen> createState() => _MiPlanScreenState();
+}
+
+class _MiPlanScreenState extends State<MiPlanScreen> {
+  // Un control para las dos pestañas: el botón está en la barra, que es común.
+  final _recarga = ControlRecarga();
+
+  @override
+  void dispose() {
+    _recarga.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Mi plan'),
+          actions: [BotonRecargar(control: _recarga)],
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Alimentos'),
@@ -44,8 +60,12 @@ class MiPlanScreen extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
-            PlanAlimentacionVista(fuente: fuentePlan),
-            _Suplementos(paciente: fuentePaciente, catalogo: fuenteCatalogo),
+            PlanAlimentacionVista(fuente: widget.fuentePlan, control: _recarga),
+            _Suplementos(
+              paciente: widget.fuentePaciente,
+              catalogo: widget.fuenteCatalogo,
+              control: _recarga,
+            ),
           ],
         ),
       ),
@@ -59,10 +79,15 @@ class MiPlanScreen extends StatelessWidget {
 /// paciente, lo de abajo es el mismo catálogo para todos. Si el doctor
 /// todavía no le recetó nada, el catálogo igual se muestra.
 class _Suplementos extends StatelessWidget {
-  const _Suplementos({required this.paciente, required this.catalogo});
+  const _Suplementos({
+    required this.paciente,
+    required this.catalogo,
+    required this.control,
+  });
 
   final FuentePaciente? paciente;
   final FuenteCatalogo? catalogo;
+  final ControlRecarga control;
 
   void _abrirMarcas(BuildContext context, CategoriaSuplemento categoria) {
     Navigator.of(context).push(
@@ -82,6 +107,7 @@ class _Suplementos extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
       children: [
         CargaDeDatos<List<Prescripcion>>(
+          control: control,
           cargar: () => datos.prescripciones(TipoPrescripcion.suplemento),
           vacio: const _SinRecetados(),
           constructor: (context, recetados) => Column(
@@ -104,6 +130,7 @@ class _Suplementos extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         CargaDeDatos<List<CategoriaSuplemento>>(
+          control: control,
           cargar: publico.categoriasDeSuplemento,
           vacio: const SizedBox.shrink(),
           constructor: (context, categorias) => Column(

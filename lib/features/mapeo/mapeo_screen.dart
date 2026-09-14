@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/fechas.dart';
 import '../../widgets/ocultar_teclado.dart';
+import '../../widgets/recarga.dart';
 import 'modelo_mapeo.dart';
 import 'repositorio_mapeo.dart';
 
@@ -30,10 +31,14 @@ class _MapeoScreenState extends State<MapeoScreen>
     vsync: this,
   )..addListener(OcultarTeclado.soltarFoco);
 
+  // Un control para las dos pestañas: el botón está en la barra, que es común.
+  final _recarga = ControlRecarga();
+
   @override
   void dispose() {
     _pestanas.removeListener(OcultarTeclado.soltarFoco);
     _pestanas.dispose();
+    _recarga.dispose();
     super.dispose();
   }
 
@@ -42,6 +47,7 @@ class _MapeoScreenState extends State<MapeoScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mapeo'),
+        actions: [BotonRecargar(control: _recarga)],
         bottom: TabBar(
           controller: _pestanas,
           tabs: [for (final t in TipoMapeo.values) Tab(text: t.etiqueta)],
@@ -51,7 +57,7 @@ class _MapeoScreenState extends State<MapeoScreen>
         controller: _pestanas,
         children: [
           for (final t in TipoMapeo.values)
-            _Pestana(tipo: t, fuente: widget.fuente),
+            _Pestana(tipo: t, fuente: widget.fuente, control: _recarga),
         ],
       ),
     );
@@ -60,10 +66,15 @@ class _MapeoScreenState extends State<MapeoScreen>
 
 /// Una de las dos mediciones, con su propio historial y su día seleccionado.
 class _Pestana extends StatefulWidget {
-  const _Pestana({required this.tipo, required this.fuente});
+  const _Pestana({
+    required this.tipo,
+    required this.fuente,
+    required this.control,
+  });
 
   final TipoMapeo tipo;
   final FuenteMapeo? fuente;
+  final ControlRecarga control;
 
   @override
   State<_Pestana> createState() => _PestanaState();
@@ -86,8 +97,28 @@ class _PestanaState extends State<_Pestana> with AutomaticKeepAliveClientMixin {
   bool _sucio = false;
   bool _guardando = false;
 
+  int _generacionVista = 0;
+
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    _generacionVista = widget.control.generacion;
+    widget.control.addListener(_alPedirRecarga);
+  }
+
+  /// Recargar vuelve a bajar el historial. Lo que esté a medio escribir en los
+  /// campos se conserva: solo se refresca lo que vino del servidor.
+  void _alPedirRecarga() {
+    if (widget.control.generacion == _generacionVista || !mounted) return;
+
+    _generacionVista = widget.control.generacion;
+    setState(() {
+      _carga = _cargar();
+    });
+  }
 
   /// La fuente se resuelve dentro del `async` a propósito: si Supabase no
   /// está inicializado, el error cae en el [FutureBuilder] y la pantalla
@@ -95,7 +126,10 @@ class _PestanaState extends State<_Pestana> with AutomaticKeepAliveClientMixin {
   Future<List<RegistroMapeo>> _cargar() async {
     final fuente = _fuente ??=
         widget.fuente ?? RepositorioMapeo(Supabase.instance.client);
-    final historial = await fuente.historial(widget.tipo);
+    widget.control.iniciar();
+    final historial = await fuente
+        .historial(widget.tipo)
+        .whenComplete(widget.control.terminar);
 
     _porDia
       ..clear()
@@ -107,6 +141,7 @@ class _PestanaState extends State<_Pestana> with AutomaticKeepAliveClientMixin {
 
   @override
   void dispose() {
+    widget.control.removeListener(_alPedirRecarga);
     for (final c in _campos.values) {
       c.dispose();
     }

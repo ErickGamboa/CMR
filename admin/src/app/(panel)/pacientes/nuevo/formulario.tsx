@@ -57,7 +57,6 @@ export function FormularioAlta() {
       )}
 
       <Crear />
-
     </form>
   );
 }

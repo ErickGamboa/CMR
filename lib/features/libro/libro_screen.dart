@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../widgets/ocultar_teclado.dart';
+import '../../widgets/recarga.dart';
 import 'modelo_libro.dart';
 import 'repositorio_libro.dart';
 import 'widgets/fila_alimento.dart';
@@ -51,10 +52,16 @@ class _LibroScreenState extends State<LibroScreen>
   Future<Libro> _cargar({bool deNuevo = false}) async {
     final fuente = _fuente ??=
         widget.fuente ?? RepositorioLibro(Supabase.instance.client);
-    return deNuevo ? fuente.recargar() : fuente.cargar();
+
+    _recarga.iniciar();
+    return (deNuevo ? fuente.recargar() : fuente.cargar()).whenComplete(
+      _recarga.terminar,
+    );
   }
 
   final TextEditingController _texto = TextEditingController();
+  final _recarga = ControlRecarga();
+  int _generacionVista = 0;
 
   /// Ya normalizada, para no repetir el trabajo en cada fila.
   String _consulta = '';
@@ -64,6 +71,21 @@ class _LibroScreenState extends State<LibroScreen>
   int _pestanaActual = 0;
 
   static const _indiceLibres = 2;
+
+  @override
+  void initState() {
+    super.initState();
+    _recarga.addListener(_alPedirRecarga);
+  }
+
+  void _alPedirRecarga() {
+    if (_recarga.generacion == _generacionVista || !mounted) return;
+
+    _generacionVista = _recarga.generacion;
+    setState(() {
+      _carga = _cargar(deNuevo: true);
+    });
+  }
 
   void _alCambiarPestana() {
     if (_pestanas.index == _pestanaActual) return;
@@ -77,6 +99,9 @@ class _LibroScreenState extends State<LibroScreen>
     _pestanas.removeListener(_alCambiarPestana);
     _pestanas.dispose();
     _texto.dispose();
+    _recarga
+      ..removeListener(_alPedirRecarga)
+      ..dispose();
     super.dispose();
   }
 
@@ -92,6 +117,7 @@ class _LibroScreenState extends State<LibroScreen>
       appBar: AppBar(
         title: const Text('Libro'),
         actions: [
+          BotonRecargar(control: _recarga),
           IconButton(
             onPressed: () => HojaSimbologia.mostrar(context),
             icon: const Icon(Icons.help_outline),

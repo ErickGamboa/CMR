@@ -65,8 +65,9 @@ class FilaAlimento extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       detalle,
-                      style: theme.textTheme.bodySmall
-                          ?.copyWith(color: scheme.onSurfaceVariant),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                   if (alimento.nota != null) ...[
@@ -84,8 +85,9 @@ class FilaAlimento extends StatelessWidget {
                             alimento.nota!,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodySmall
-                                ?.copyWith(color: scheme.onSurfaceVariant),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
                           ),
                         ),
                       ],

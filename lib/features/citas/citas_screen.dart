@@ -4,6 +4,7 @@ import '../../core/datos/modelos.dart';
 import '../../core/datos/repositorio.dart';
 import '../../core/fechas.dart';
 import '../../widgets/carga_de_datos.dart';
+import '../../widgets/recarga.dart';
 
 /// Historial y agenda de citas, separadas en médicas y de enfermería.
 ///
@@ -13,12 +14,25 @@ import '../../widgets/carga_de_datos.dart';
 ///
 /// Dentro de cada pestaña, las pendientes van con el color de marca y las ya
 /// cumplidas en gris, para que se distinga de un vistazo qué queda por hacer.
-class CitasScreen extends StatelessWidget {
+class CitasScreen extends StatefulWidget {
   const CitasScreen({super.key, this.fuente});
 
   /// De dónde salen. En la app va sin definir y sale de Supabase; los tests
   /// inyectan una fuente falsa.
   final FuentePaciente? fuente;
+
+  @override
+  State<CitasScreen> createState() => _CitasScreenState();
+}
+
+class _CitasScreenState extends State<CitasScreen> {
+  final _recarga = ControlRecarga();
+
+  @override
+  void dispose() {
+    _recarga.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +41,7 @@ class CitasScreen extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Mis citas'),
+          actions: [BotonRecargar(control: _recarga)],
           bottom: TabBar(
             tabs: [
               for (final tipo in TipoCita.values) Tab(text: tipo.etiqueta),
@@ -36,7 +51,8 @@ class CitasScreen extends StatelessWidget {
         // Se piden todas de una y se reparten en las pestañas: son dos vistas
         // de la misma agenda, no dos consultas.
         body: CargaDeDatos<List<Cita>>(
-          cargar: () => (fuente ?? RepositorioPaciente()).citas(),
+          control: _recarga,
+          cargar: () => (widget.fuente ?? RepositorioPaciente()).citas(),
           constructor: (context, citas) => TabBarView(
             children: [
               for (final tipo in TipoCita.values)

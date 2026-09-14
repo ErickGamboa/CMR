@@ -85,7 +85,9 @@ class AlimentoLibro {
     required this.grasaVariable,
     required this.libre,
     required this.nota,
-  }) : _busqueda = normalizar('$nombre ${marcas.join(' ')} ${subseccion ?? ''}');
+  }) : _busqueda = normalizar(
+         '$nombre ${marcas.join(' ')} ${subseccion ?? ''}',
+       );
 
   factory AlimentoLibro.desdeFila(Map<String, dynamic> fila) {
     return AlimentoLibro(
@@ -155,7 +157,9 @@ class Libro {
   /// Las secciones por grupo, más las dos de bebidas. Son las que el paciente
   /// consulta para armar una comida.
   List<SeccionLibro> get alimentos => secciones
-      .where((s) => s.tipo == TipoSeccion.grupo || s.tipo == TipoSeccion.bebidas)
+      .where(
+        (s) => s.tipo == TipoSeccion.grupo || s.tipo == TipoSeccion.bebidas,
+      )
       .toList();
 
   List<SeccionLibro> get restaurantes =>
@@ -164,8 +168,7 @@ class Libro {
   List<SeccionLibro> get libres =>
       secciones.where((s) => s.tipo == TipoSeccion.libres).toList();
 
-  int get total =>
-      secciones.fold(0, (suma, s) => suma + s.alimentos.length);
+  int get total => secciones.fold(0, (suma, s) => suma + s.alimentos.length);
 }
 
 /// Pasa el texto a minúsculas y le quita las tildes, para que "melon",

@@ -39,7 +39,6 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-
   /// Abre el registro y, si la solicitud salió, lo avisa acá.
   ///
   /// El aviso va en el login y no en la pantalla de registro porque registrarse
