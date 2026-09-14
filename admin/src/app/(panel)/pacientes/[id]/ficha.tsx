@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -13,8 +13,71 @@ import { guardarPaciente, type EstadoFicha } from "./acciones";
 
 const inicial: EstadoFicha = { error: null, guardado: false };
 
+/** Solo los campos que este formulario edita. */
+type Campos = {
+  nombre: string;
+  apellidos: string;
+  cedula: string;
+  telefono: string;
+  fecha_nacimiento: string;
+};
+
+function aCampos(p: Paciente): Campos {
+  return {
+    nombre: p.nombre,
+    apellidos: p.apellidos ?? "",
+    cedula: p.cedula ?? "",
+    telefono: p.telefono ?? "",
+    fecha_nacimiento: p.fecha_nacimiento ?? "",
+  };
+}
+
+/**
+ * Los valores en una sola cadena, para saber si de verdad cambiaron.
+ *
+ * `JSON.stringify` y no un `join` con separador: cualquier caracter que se
+ * elija como separador puede aparecer dentro de un dato, y ahi dos fichas
+ * distintas darian la misma firma.
+ */
+function firmaDe(c: Campos) {
+  return JSON.stringify([
+    c.nombre,
+    c.apellidos,
+    c.cedula,
+    c.telefono,
+    c.fecha_nacimiento,
+  ]);
+}
+
+/**
+ * Los campos van controlados, no con `defaultValue`.
+ *
+ * Al guardar, la acción llama a `revalidatePath` y el servidor vuelve a
+ * mandar la ficha. Con campos no controlados eso cambia el `defaultValue`
+ * después de que el input ya se montó, y Base UI avisa —con razón— de que
+ * nadie sabe cuál de los dos valores manda.
+ *
+ * El estado se vuelve a sincronizar solo cuando los datos que llegan del
+ * servidor son distintos a los que se mostraron la última vez. Comparando el
+ * contenido y no la identidad del objeto: el servidor manda un objeto nuevo en
+ * cada render, y comparar identidades borraría lo que el doctor esté
+ * escribiendo en ese momento.
+ */
 export function FormularioFicha({ paciente }: { paciente: Paciente }) {
   const [estado, enviar] = useActionState(guardarPaciente, inicial);
+
+  const delServidor = aCampos(paciente);
+  const [campos, setCampos] = useState(delServidor);
+  const [ultimaFirma, setUltimaFirma] = useState(() => firmaDe(delServidor));
+
+  const firmaNueva = firmaDe(delServidor);
+  if (firmaNueva !== ultimaFirma) {
+    setUltimaFirma(firmaNueva);
+    setCampos(delServidor);
+  }
+
+  const cambiar = (id: keyof Campos) => (valor: string) =>
+    setCampos((previos) => ({ ...previos, [id]: valor }));
 
   return (
     <form action={enviar} className="space-y-6">
@@ -24,13 +87,15 @@ export function FormularioFicha({ paciente }: { paciente: Paciente }) {
         <Campo
           id="nombre"
           etiqueta="Nombre"
-          valor={paciente.nombre}
+          valor={campos.nombre}
+          onCambio={cambiar("nombre")}
           requerido
         />
         <Campo
           id="apellidos"
           etiqueta="Apellidos"
-          valor={paciente.apellidos ?? ""}
+          valor={campos.apellidos}
+          onCambio={cambiar("apellidos")}
         />
       </div>
 
@@ -38,13 +103,15 @@ export function FormularioFicha({ paciente }: { paciente: Paciente }) {
         <Campo
           id="cedula"
           etiqueta="Cédula"
-          valor={paciente.cedula ?? ""}
+          valor={campos.cedula}
+          onCambio={cambiar("cedula")}
           ayuda="No se puede repetir entre pacientes."
         />
         <Campo
           id="telefono"
           etiqueta="Teléfono"
-          valor={paciente.telefono ?? ""}
+          valor={campos.telefono}
+          onCambio={cambiar("telefono")}
           tipo="tel"
         />
       </div>
@@ -52,7 +119,8 @@ export function FormularioFicha({ paciente }: { paciente: Paciente }) {
       <Campo
         id="fecha_nacimiento"
         etiqueta="Fecha de nacimiento"
-        valor={paciente.fecha_nacimiento ?? ""}
+        valor={campos.fecha_nacimiento}
+        onCambio={cambiar("fecha_nacimiento")}
         tipo="date"
       />
 
@@ -79,6 +147,7 @@ function Campo({
   id,
   etiqueta,
   valor,
+  onCambio,
   tipo = "text",
   ayuda,
   requerido = false,
@@ -86,6 +155,7 @@ function Campo({
   id: string;
   etiqueta: string;
   valor: string;
+  onCambio: (valor: string) => void;
   tipo?: string;
   ayuda?: string;
   requerido?: boolean;
@@ -97,7 +167,8 @@ function Campo({
         id={id}
         name={id}
         type={tipo}
-        defaultValue={valor}
+        value={valor}
+        onChange={(e) => onCambio(e.target.value)}
         required={requerido}
         aria-describedby={ayuda ? `${id}-ayuda` : undefined}
       />

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { EstadoPacienteBadge } from "@/components/estado-paciente";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { COLUMNAS_PACIENTE, type Paciente } from "@/lib/pacientes";
 import { clienteServidor } from "@/lib/supabase/servidor";
@@ -54,16 +55,28 @@ export default async function PaginaPaciente({
           <span aria-hidden>←</span> Pacientes
         </Link>
 
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight">
-            {paciente.nombre_completo}
-          </h1>
-          <EstadoPacienteBadge estado={paciente.estado} />
-        </div>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <h1 className="text-3xl font-semibold tracking-tight">
+                {paciente.nombre_completo}
+              </h1>
+              <EstadoPacienteBadge estado={paciente.estado} />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {paciente.correo ?? "Sin correo registrado"}
+            </p>
+          </div>
 
-        <p className="text-sm text-muted-foreground">
-          {paciente.correo ?? "Sin correo registrado"}
-        </p>
+          {/* Lo que el doctor viene a hacer casi siempre. Esta pantalla es
+              para corregir datos; atender es el trabajo. */}
+          <Link
+            href={`/pacientes/${paciente.user_id}/atender`}
+            className={buttonVariants({ className: "w-full sm:w-auto" })}
+          >
+            Atender
+          </Link>
+        </div>
       </header>
 
       {paciente.estado === "pendiente" && (
