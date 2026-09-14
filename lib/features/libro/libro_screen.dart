@@ -22,11 +22,7 @@ import 'widgets/pildora_intercambio.dart';
 ///  - **Explicar.** En el papel, "1 C + ½ G" no se entiende sin volver a la
 ///    primera página. Acá cada alimento se abre y lo dice con palabras.
 class LibroScreen extends StatefulWidget {
-  const LibroScreen({
-    super.key,
-    this.fuente,
-    this.filtroInicial = const {},
-  });
+  const LibroScreen({super.key, this.fuente, this.filtroInicial = const {}});
 
   /// De dónde se lee el libro. En la app va sin definir y sale de Supabase;
   /// los tests inyectan una fuente falsa para no depender de la red.
@@ -43,8 +39,8 @@ class LibroScreen extends StatefulWidget {
 
 class _LibroScreenState extends State<LibroScreen>
     with SingleTickerProviderStateMixin {
-  late final TabController _pestanas =
-      TabController(length: 3, vsync: this)..addListener(_alCambiarPestana);
+  late final TabController _pestanas = TabController(length: 3, vsync: this)
+    ..addListener(_alCambiarPestana);
 
   FuenteLibro? _fuente;
   late Future<Libro> _carga = _cargar();
@@ -119,8 +115,9 @@ class _LibroScreenState extends State<LibroScreen>
               mensaje: snapshot.error is FallaLibro
                   ? (snapshot.error! as FallaLibro).mensaje
                   : 'No pudimos cargar el libro.',
-              onReintentar: () =>
-                  setState(() => _carga = _cargar(deNuevo: true)),
+              onReintentar: () => setState(() {
+                _carga = _cargar(deNuevo: true);
+              }),
             );
           }
           if (!snapshot.hasData) {
@@ -250,8 +247,9 @@ class _FiltrosDeGrupo extends StatelessWidget {
                 avatar: seleccionados.contains(grupo)
                     ? null
                     : CircleAvatar(
-                        backgroundColor:
-                            PildoraIntercambio.coloresDe(grupo).fondo,
+                        backgroundColor: PildoraIntercambio.coloresDe(
+                          grupo,
+                        ).fondo,
                         child: Text(
                           grupo.letra,
                           style: TextStyle(
@@ -384,8 +382,9 @@ class _TituloSeccion extends _Entrada {
             const SizedBox(height: 4),
             Text(
               seccion.nota!,
-              style: theme.textTheme.bodySmall
-                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ],
@@ -430,8 +429,9 @@ class _Conteo extends _Entrada {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
       child: Text(
         cantidad == 1 ? '1 alimento' : '$cantidad alimentos',
-        style: theme.textTheme.labelMedium
-            ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+        style: theme.textTheme.labelMedium?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }
@@ -458,11 +458,8 @@ class _FilaDeAlimento extends _Entrada {
               if (alimento.subseccion != null) alimento.subseccion!,
             ].join(' · ')
           : null,
-      onTap: () => HojaAlimento.mostrar(
-        context,
-        alimento: alimento,
-        seccion: seccion,
-      ),
+      onTap: () =>
+          HojaAlimento.mostrar(context, alimento: alimento, seccion: seccion),
     );
   }
 }
@@ -492,7 +489,7 @@ class _SinResultados extends StatelessWidget {
             Text(
               consulta.isEmpty
                   ? 'Ningún alimento de esta sección cuenta en los grupos que '
-                      'elegiste.'
+                        'elegiste.'
                   : 'No encontramos nada en esta sección.',
               textAlign: TextAlign.center,
               style: theme.textTheme.titleSmall,
@@ -501,8 +498,9 @@ class _SinResultados extends StatelessWidget {
             Text(
               'Prueba en otra pestaña o cambia la búsqueda.',
               textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall
-                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
             if (consulta.isNotEmpty) ...[
               const SizedBox(height: 16),

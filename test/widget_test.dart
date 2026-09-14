@@ -380,7 +380,7 @@ void main() {
         (tester) async {
       await entrar(tester);
 
-      for (final m in ModuloSecundario.values) {
+      for (final m in ModuloSecundario.abiertos) {
         final texto = tester.widget<Text>(find.text(m.etiqueta));
         expect(texto.maxLines, 1, reason: m.etiqueta);
 
@@ -400,7 +400,7 @@ void main() {
         (tester) async {
       await entrar(tester);
 
-      for (final m in ModuloSecundario.values) {
+      for (final m in ModuloSecundario.abiertos) {
         // La fila arranca centrada, así que hay ítems fuera de vista a ambos
         // lados; ensureVisible los acerca sin importar la dirección.
         await tester.ensureVisible(find.text(m.etiqueta));

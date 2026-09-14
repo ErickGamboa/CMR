@@ -581,16 +581,22 @@ String mesCorto(DateTime f) {
   return m[0].toUpperCase() + m.substring(1, 3);
 }
 
+const _dias = [
+  'lunes', 'martes', 'miércoles', 'jueves',
+  'viernes', 'sábado', 'domingo',
+];
+
+/// Ej.: "viernes 12 de setiembre, 2026". El día de la semana ayuda a ubicarse
+/// cuando se navega el mapeo hacia atrás, día por día.
+String formatearDiaConSemana(DateTime f) =>
+    '${_dias[f.weekday - 1]} ${f.day} de ${_meses[f.month - 1]}, ${f.year}';
+
 /// Formato de fecha en español sin depender de `intl`, que exigiría
 /// inicializar locales solo para esto.
 String formatearFechaLarga(DateTime f) {
   const meses = _meses;
-  const dias = [
-    'lunes', 'martes', 'miércoles', 'jueves',
-    'viernes', 'sábado', 'domingo',
-  ];
 
-  final dia = dias[f.weekday - 1];
+  final dia = _dias[f.weekday - 1];
   final hora = f.hour % 12 == 0 ? 12 : f.hour % 12;
   final minuto = f.minute.toString().padLeft(2, '0');
   final periodo = f.hour < 12 ? 'a.m.' : 'p.m.';

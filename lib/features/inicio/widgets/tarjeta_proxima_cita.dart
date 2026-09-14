@@ -65,10 +65,7 @@ class TarjetaProximaCita extends StatelessWidget {
                 texto: '${cita.profesional} · ${cita.especialidad}',
               ),
               const SizedBox(height: 4),
-              _Detalle(
-                icono: Icons.place_outlined,
-                texto: cita.lugar,
-              ),
+              _Detalle(icono: Icons.place_outlined, texto: cita.lugar),
             ],
           ),
         ),

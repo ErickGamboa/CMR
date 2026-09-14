@@ -10,9 +10,21 @@ import '../modulos.dart';
 /// entrada que hay más módulos en las dos direcciones. Dos flechas muy tenues
 /// refuerzan la pista y se desvanecen al llegar a cada extremo.
 class FilaModulosSecundarios extends StatefulWidget {
-  const FilaModulosSecundarios({super.key, required this.onSeleccion});
+  const FilaModulosSecundarios({
+    super.key,
+    required this.modulos,
+    required this.onSeleccion,
+  });
+
+  /// Los módulos que este paciente ve. No siempre son todos: los opcionales
+  /// dependen de lo que el doctor le haya habilitado.
+  final List<ModuloSecundario> modulos;
 
   final void Function(ModuloSecundario) onSeleccion;
+
+  /// Alto fijo de la fila. Inicio le reserva el lugar mientras resuelve qué
+  /// módulos van, para que la pantalla no salte al aparecer.
+  static const double alto = 108;
 
   @override
   State<FilaModulosSecundarios> createState() => _FilaModulosSecundariosState();
@@ -23,7 +35,6 @@ class _FilaModulosSecundariosState extends State<FilaModulosSecundarios> {
   static const _paddingH = 16.0;
   static const _paddingFicha = 8.0;
   static const _anchoMinimo = 92.0;
-  static const _alto = 108.0;
 
   ScrollController? _ctrl;
   late double _anchoFicha;
@@ -54,7 +65,7 @@ class _FilaModulosSecundariosState extends State<FilaModulosSecundarios> {
   }
 
   double get _anchoContenido {
-    final n = ModuloSecundario.values.length;
+    final n = widget.modulos.length;
     return n * _anchoFicha + (n - 1) * _separacion + _paddingH * 2;
   }
 
@@ -101,7 +112,7 @@ class _FilaModulosSecundariosState extends State<FilaModulosSecundarios> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: _alto,
+      height: FilaModulosSecundarios.alto,
       child: Stack(
         children: [
           Positioned.fill(
@@ -109,10 +120,10 @@ class _FilaModulosSecundariosState extends State<FilaModulosSecundarios> {
               controller: _ctrl,
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: _paddingH),
-              itemCount: ModuloSecundario.values.length,
+              itemCount: widget.modulos.length,
               separatorBuilder: (_, _) => const SizedBox(width: _separacion),
               itemBuilder: (context, i) {
-                final modulo = ModuloSecundario.values[i];
+                final modulo = widget.modulos[i];
                 return _Acceso(
                   modulo: modulo,
                   ancho: _anchoFicha,
@@ -162,10 +173,7 @@ class _Flecha extends StatelessWidget {
               gradient: LinearGradient(
                 begin: borde,
                 end: centro,
-                colors: [
-                  scheme.surface,
-                  scheme.surface.withValues(alpha: 0),
-                ],
+                colors: [scheme.surface, scheme.surface.withValues(alpha: 0)],
               ),
             ),
             child: Icon(

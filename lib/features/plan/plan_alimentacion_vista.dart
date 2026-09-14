@@ -34,8 +34,8 @@ class _PlanAlimentacionVistaState extends State<PlanAlimentacionVista> {
   /// La fuente se resuelve dentro de este `async` para que, si Supabase no
   /// está inicializado, el error caiga en el [FutureBuilder].
   Future<PlanAlimentacion?> _cargar({bool deNuevo = false}) async {
-    final fuente =
-        _fuente ??= widget.fuente ?? RepositorioPlan(Supabase.instance.client);
+    final fuente = _fuente ??=
+        widget.fuente ?? RepositorioPlan(Supabase.instance.client);
     return deNuevo ? fuente.recargar() : fuente.cargar();
   }
 
@@ -57,7 +57,9 @@ class _PlanAlimentacionVistaState extends State<PlanAlimentacionVista> {
             mensaje: snapshot.error is FallaPlan
                 ? (snapshot.error! as FallaPlan).mensaje
                 : 'No pudimos cargar tu plan.',
-            onReintentar: () => setState(() => _carga = _cargar(deNuevo: true)),
+            onReintentar: () => setState(() {
+              _carga = _cargar(deNuevo: true);
+            }),
           );
         }
         if (snapshot.connectionState != ConnectionState.done) {
@@ -113,8 +115,9 @@ class _TarjetaDelDia extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               'Vigente desde el ${formatearFechaCorta(plan.vigenteDesde)}',
-              style: theme.textTheme.bodySmall
-                  ?.copyWith(color: scheme.onSurfaceVariant),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 16),
             Wrap(
@@ -143,8 +146,9 @@ class _TarjetaDelDia extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Toca un grupo para ver en el libro qué puedes comer.',
-                    style: theme.textTheme.bodySmall
-                        ?.copyWith(color: scheme.onSurfaceVariant),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               ],
@@ -153,8 +157,9 @@ class _TarjetaDelDia extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 'El "+" quiere decir al menos esa cantidad: puedes comer más.',
-                style: theme.textTheme.bodySmall
-                    ?.copyWith(color: scheme.onSurfaceVariant),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
               ),
             ],
           ],
@@ -181,8 +186,9 @@ class _TarjetaTiempo extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final grupos =
-        GrupoIntercambio.values.where(asignaciones.containsKey).toList();
+    final grupos = GrupoIntercambio.values
+        .where(asignaciones.containsKey)
+        .toList();
 
     return Card(
       margin: const EdgeInsets.only(top: 12),
@@ -193,8 +199,9 @@ class _TarjetaTiempo extends StatelessWidget {
           children: [
             Text(
               tiempo.etiqueta,
-              style: theme.textTheme.titleSmall
-                  ?.copyWith(fontWeight: FontWeight.w700),
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 6),
             if (grupos.isEmpty)
@@ -202,8 +209,9 @@ class _TarjetaTiempo extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 2, bottom: 2),
                 child: Text(
                   'Sin intercambios asignados',
-                  style: theme.textTheme.bodyMedium
-                      ?.copyWith(color: scheme.onSurfaceVariant),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
                 ),
               )
             else
@@ -265,8 +273,9 @@ class _Notas extends StatelessWidget {
           Expanded(
             child: Text(
               texto,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: scheme.onTertiaryContainer),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: scheme.onTertiaryContainer,
+              ),
             ),
           ),
         ],
@@ -311,8 +320,9 @@ class _SinPlan extends StatelessWidget {
             Text(
               'Tu doctor lo asigna después de la consulta. Mientras tanto '
               'puedes consultar el libro de intercambios.',
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: scheme.onSurfaceVariant),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
               textAlign: TextAlign.center,
             ),
           ],

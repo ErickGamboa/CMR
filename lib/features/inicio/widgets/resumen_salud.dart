@@ -42,8 +42,9 @@ class ResumenSalud extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 'Todavía no hay mediciones registradas.',
-                style: theme.textTheme.bodyMedium
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -53,8 +54,7 @@ class ResumenSalud extends StatelessWidget {
 
     final ultima = mediciones.last;
     // Un 12% de aire para que la barra más larga no toque el borde.
-    final escala =
-        math.max(ultima.grasaPerdida, ultima.musculoGanado) * 1.12;
+    final escala = math.max(ultima.grasaPerdida, ultima.musculoGanado) * 1.12;
 
     return Card(
       child: Padding(
@@ -66,8 +66,9 @@ class ResumenSalud extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               'Última medición · ${formatearFechaBreve(ultima.fecha)}',
-              style: theme.textTheme.bodySmall
-                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 26),
             _Metrica(
@@ -133,8 +134,9 @@ class _Metrica extends StatelessWidget {
         Flexible(
           child: Text(
             nombre,
-            style: theme.textTheme.labelMedium
-                ?.copyWith(color: scheme.onSurfaceVariant),
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -143,13 +145,15 @@ class _Metrica extends StatelessWidget {
         Text.rich(
           TextSpan(
             text: valor.toStringAsFixed(1),
-            style: theme.textTheme.titleLarge
-                ?.copyWith(fontWeight: FontWeight.w700),
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
             children: [
               TextSpan(
                 text: ' kg',
-                style: theme.textTheme.bodySmall
-                    ?.copyWith(color: scheme.onSurfaceVariant),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -164,8 +168,9 @@ class _Metrica extends StatelessWidget {
       curve: Curves.easeOutCubic,
       builder: (context, factor, _) => FractionallySizedBox(
         widthFactor: factor,
-        alignment:
-            haciaLaIzquierda ? Alignment.centerRight : Alignment.centerLeft,
+        alignment: haciaLaIzquierda
+            ? Alignment.centerRight
+            : Alignment.centerLeft,
         child: Container(
           // La llave va acá y no en el FractionallySizedBox: ese ocupa todo el
           // ancho disponible, el que mide el valor es este.
@@ -215,8 +220,9 @@ class _Eje extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final estilo = theme.textTheme.labelSmall
-        ?.copyWith(color: theme.colorScheme.onSurfaceVariant);
+    final estilo = theme.textTheme.labelSmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
 
     return Row(
       children: [

@@ -24,31 +24,28 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int _indice = 0;
 
-  void _ir(ModuloPrimario modulo) =>
-      setState(() => _indice = modulo.index);
+  void _ir(ModuloPrimario modulo) => setState(() => _indice = modulo.index);
 
   Widget _pantalla(ModuloPrimario modulo) => switch (modulo) {
-        // La tarjeta de próxima cita cambia de pestaña en vez de empujar otra
-        // pantalla: las citas ya son un módulo de la barra, y abrirlas encima
-        // dejaría dos copias de la misma lista en la pila.
-        ModuloPrimario.inicio => InicioScreen(
-            auth: widget.auth,
-            onIrACitas: () => _ir(ModuloPrimario.citas),
-          ),
-        ModuloPrimario.libro => const LibroScreen(),
-        ModuloPrimario.plan => const MiPlanScreen(),
-        ModuloPrimario.peptidos => const PeptidosScreen(),
-        ModuloPrimario.citas => const CitasScreen(),
-      };
+    // La tarjeta de próxima cita cambia de pestaña en vez de empujar otra
+    // pantalla: las citas ya son un módulo de la barra, y abrirlas encima
+    // dejaría dos copias de la misma lista en la pila.
+    ModuloPrimario.inicio => InicioScreen(
+      auth: widget.auth,
+      onIrACitas: () => _ir(ModuloPrimario.citas),
+    ),
+    ModuloPrimario.libro => const LibroScreen(),
+    ModuloPrimario.plan => const MiPlanScreen(),
+    ModuloPrimario.peptidos => const PeptidosScreen(),
+    ModuloPrimario.citas => const CitasScreen(),
+  };
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
         index: _indice,
-        children: [
-          for (final m in ModuloPrimario.values) _pantalla(m),
-        ],
+        children: [for (final m in ModuloPrimario.values) _pantalla(m)],
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _indice,

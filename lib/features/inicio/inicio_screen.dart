@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../core/auth/servicio_auth.dart';
 import '../../core/datos_demo.dart';
+import '../../core/modulos_habilitados.dart';
 import '../../widgets/cmr_logo.dart';
 import '../etiqueta/leer_etiqueta_screen.dart';
 import '../laboratorios/laboratorios_screen.dart';
+import '../mapeo/mapeo_screen.dart';
 import '../recomendaciones/recomendaciones_screen.dart';
 import '../resultados/resultados_screen.dart';
 import '../videos/videos_screen.dart';
@@ -14,11 +16,12 @@ import 'widgets/resumen_salud.dart';
 import 'widgets/tarjeta_proxima_cita.dart';
 
 /// Pestaña de Inicio: próxima cita, accesos rápidos y resumen de salud.
-class InicioScreen extends StatelessWidget {
+class InicioScreen extends StatefulWidget {
   const InicioScreen({
     super.key,
     required this.auth,
     required this.onIrACitas,
+    this.modulos,
   });
 
   final ServicioAuth auth;
@@ -26,12 +29,27 @@ class InicioScreen extends StatelessWidget {
   /// Lleva al módulo de citas, que vive en la barra inferior.
   final VoidCallback onIrACitas;
 
+  /// Qué módulos opcionales tiene prendidos el paciente. En la app sale de
+  /// Supabase; los tests inyectan una fuente falsa.
+  final FuenteModulos? modulos;
+
+  @override
+  State<InicioScreen> createState() => _InicioScreenState();
+}
+
+class _InicioScreenState extends State<InicioScreen> {
+  // Se pide una sola vez por sesión de pantalla: la lista de módulos no
+  // cambia mientras el paciente usa la app, la cambia el doctor.
+  late final Future<Set<String>> _habilitados =
+      (widget.modulos ?? const RepositorioModulos()).habilitados();
+
   void _abrirSecundario(BuildContext context, ModuloSecundario modulo) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => switch (modulo) {
           ModuloSecundario.laboratorios => const LaboratoriosScreen(),
           ModuloSecundario.resultados => const ResultadosScreen(),
+          ModuloSecundario.mapeo => const MapeoScreen(),
           ModuloSecundario.leerEtiqueta => const LeerEtiquetaScreen(),
           ModuloSecundario.recomendaciones => const RecomendacionesScreen(),
           ModuloSecundario.videos => const VideosScreen(),
@@ -59,7 +77,7 @@ class InicioScreen extends StatelessWidget {
       ),
     );
 
-    if (confirmado ?? false) await auth.salir();
+    if (confirmado ?? false) await widget.auth.salir();
   }
 
   @override
@@ -83,11 +101,28 @@ class InicioScreen extends StatelessWidget {
           if (DatosDemo.proximaCita case final cita?)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: TarjetaProximaCita(cita: cita, onTap: onIrACitas),
+              child: TarjetaProximaCita(cita: cita, onTap: widget.onIrACitas),
             ),
           const SizedBox(height: 20),
-          FilaModulosSecundarios(
-            onSeleccion: (m) => _abrirSecundario(context, m),
+          FutureBuilder<Set<String>>(
+            future: _habilitados,
+            builder: (context, snapshot) {
+              // Mientras no se sepa, se reserva el alto y no se dibuja nada:
+              // mostrar la fila corta y que después le brote una ficha se ve
+              // peor que esperar los milisegundos que tarda la consulta.
+              if (!snapshot.hasData && !snapshot.hasError) {
+                return const SizedBox(height: FilaModulosSecundarios.alto);
+              }
+
+              final modulos = snapshot.hasData
+                  ? ModuloSecundario.visibles(snapshot.data!)
+                  : ModuloSecundario.abiertos;
+
+              return FilaModulosSecundarios(
+                modulos: modulos,
+                onSeleccion: (m) => _abrirSecundario(context, m),
+              );
+            },
           ),
           const SizedBox(height: 20),
           Padding(
