@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'core/auth/servicio_auth.dart';
+import 'core/cuenta/estado_cuenta.dart';
 import 'core/auth/supabase_auth.dart';
 import 'core/entorno.dart';
 import 'features/auth/auth_gate.dart';
@@ -51,9 +52,13 @@ class _ArranqueState extends State<Arranque> {
 }
 
 class CmrApp extends StatelessWidget {
-  const CmrApp({super.key, required this.auth});
+  const CmrApp({super.key, required this.auth, this.cuenta});
 
   final ServicioAuth auth;
+
+  /// De donde se lee si la cuenta esta aprobada. En la app sale de Supabase;
+  /// los tests inyectan una fuente falsa.
+  final FuenteCuenta? cuenta;
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +70,7 @@ class CmrApp extends StatelessWidget {
       // se mantiene en claro hasta que exista ese arte.
       themeMode: ThemeMode.light,
       builder: (context, child) => OcultarTeclado(child: child!),
-      home: AuthGate(auth: auth),
+      home: AuthGate(auth: auth, cuenta: cuenta),
     );
   }
 }

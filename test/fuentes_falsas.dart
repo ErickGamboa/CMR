@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 
 import 'package:cmr_app/core/datos/modelos.dart';
 import 'package:cmr_app/core/datos/repositorio.dart';
+import 'package:cmr_app/core/cuenta/estado_cuenta.dart';
 import 'package:cmr_app/core/modulos_habilitados.dart';
 
 DateTime _enDias(int dias, [int hora = 9, int minuto = 0]) {
@@ -328,4 +329,23 @@ class ModulosFalsos implements FuenteModulos {
 
   @override
   Future<Set<String>> habilitados() async => claves;
+}
+
+/// Fuente falsa del estado de la cuenta del paciente.
+class CuentaFalsa implements FuenteCuenta {
+  CuentaFalsa([this.estadoActual = EstadoCuenta.activa, this.falla]);
+
+  EstadoCuenta estadoActual;
+
+  /// Si viene, [estado] lanza esto en vez de responder.
+  FallaCuenta? falla;
+
+  int consultas = 0;
+
+  @override
+  Future<EstadoCuenta> estado() async {
+    consultas++;
+    if (falla case final f?) throw f;
+    return estadoActual;
+  }
 }

@@ -26,5 +26,29 @@ abstract interface class ServicioAuth {
   /// Lanza [FallaAuth] si las credenciales fallan o no hay conexión.
   Future<void> ingresar({required String correo, required String clave});
 
+  /// Crea una cuenta nueva y **no** deja sesión abierta.
+  ///
+  /// Registrarse es mandar una solicitud, no entrar: la cuenta queda esperando
+  /// que el doctor la apruebe. Dejar la sesión abierta haría que la persona
+  /// quedara "adentro" viendo una pantalla que no la deja hacer nada, que se
+  /// lee como que la app se rompió.
+  ///
+  /// El nombre, los apellidos y la cédula viajan como metadatos del registro;
+  /// del otro lado, un disparador les arma la ficha para que el doctor sepa a
+  /// quién está aprobando.
+  Future<void> registrar({
+    required String correo,
+    required String clave,
+    required String nombre,
+    String? apellidos,
+    String? cedula,
+  });
+
+  /// Borra la cuenta y **todo** lo que cuelga de ella, sin vuelta atrás.
+  ///
+  /// App Store y Google Play lo exigen: si la app deja crear una cuenta, tiene
+  /// que dejar borrarla desde adentro.
+  Future<void> eliminarCuenta();
+
   Future<void> salir();
 }

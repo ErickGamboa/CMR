@@ -5,7 +5,7 @@ enum CmrLogoVariante {
   /// Monograma + tagline "Control Metabólico & Regenerativo".
   completo('assets/images/logo_cmr.png', 1385 / 991),
 
-  /// Solo el monograma CMR con la hélice. Es el que va en el ícono de app.
+  /// Solo el monograma CMR con la hélice. Es el que va en el icono de app.
   marca('assets/images/logo_cmr_marca.png', 1385 / 828);
 
   const CmrLogoVariante(this.asset, this.proporcion);

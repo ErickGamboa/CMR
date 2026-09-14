@@ -1,0 +1,161 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* --------------------------------------------------------------------------
+   Paleta CMR
+   --------------------------------------------------------------------------
+   Los mismos tres colores de marca que la app Flutter (lib/theme/app_colors.dart).
+   Si alguno cambia, cambia en los dos lados: son la misma clínica.
+
+     azul abisal        #090972   primario
+     turquesa biocelular #62A1A6  secundario
+     azul vital         #86DBFB   acento / realces
+   -------------------------------------------------------------------------- */
+
+:root {
+  --background: #ffffff;
+  --foreground: #10102e;
+
+  --card: #ffffff;
+  --card-foreground: #10102e;
+  --popover: #ffffff;
+  --popover-foreground: #10102e;
+
+  /* Azul abisal. Blanco encima da 15.7:1. */
+  --primary: #090972;
+  --primary-foreground: #ffffff;
+
+  /* Superficie alterna: fondos de tabla, bloques secundarios. */
+  --secondary: #f4f7fa;
+  --secondary-foreground: #090972;
+
+  --muted: #f4f7fa;
+  --muted-foreground: #5b5f73;
+
+  /* Turquesa al 12% para realces suaves; el texto encima va en azul abisal. */
+  --accent: #e7f1f2;
+  --accent-foreground: #10393c;
+
+  --destructive: #b3261e;
+
+  --border: #e1e6ee;
+  --input: #bfc6d4;
+
+  /* El foco va en turquesa y no en azul vital: sobre blanco, el azul vital
+     queda en 1.5:1 y un anillo de foco que no se ve no sirve de nada. */
+  --ring: #62a1a6;
+
+  --chart-1: #090972;
+  --chart-2: #62a1a6;
+  --chart-3: #86dbfb;
+  --chart-4: #5b5f73;
+  --chart-5: #bfc6d4;
+
+  --radius: 0.625rem;
+
+  --sidebar: #f4f7fa;
+  --sidebar-foreground: #10102e;
+  --sidebar-primary: #090972;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e7f1f2;
+  --sidebar-accent-foreground: #10393c;
+  --sidebar-border: #e1e6ee;
+  --sidebar-ring: #62a1a6;
+}
+
+/* El modo oscuro está definido pero NO se activa: nada le pone la clase
+   `.dark` al documento. Es a propósito, igual que en la app: el logo es azul
+   abisal sobre transparente y sobre fondo oscuro cae a 1.15:1 de contraste,
+   o sea desaparece. Hasta que exista arte invertido, el panel va en claro. */
+.dark {
+  --background: #0b0b2b;
+  --foreground: #e6e8f2;
+  --card: #13133f;
+  --card-foreground: #e6e8f2;
+  --popover: #13133f;
+  --popover-foreground: #e6e8f2;
+  --primary: #86dbfb;
+  --primary-foreground: #090972;
+  --secondary: #13133f;
+  --secondary-foreground: #e6e8f2;
+  --muted: #13133f;
+  --muted-foreground: #b4b8cc;
+  --accent: #1b4e68;
+  --accent-foreground: #dff3fe;
+  --destructive: #f2b8b5;
+  --border: #2a2e4a;
+  --input: #474b66;
+  --ring: #62a1a6;
+  --chart-1: #86dbfb;
+  --chart-2: #62a1a6;
+  --chart-3: #dff3fe;
+  --chart-4: #b4b8cc;
+  --chart-5: #474b66;
+  --sidebar: #13133f;
+  --sidebar-foreground: #e6e8f2;
+  --sidebar-primary: #86dbfb;
+  --sidebar-primary-foreground: #090972;
+  --sidebar-accent: #1b4e68;
+  --sidebar-accent-foreground: #dff3fe;
+  --sidebar-border: #2a2e4a;
+  --sidebar-ring: #62a1a6;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}

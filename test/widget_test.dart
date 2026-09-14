@@ -7,6 +7,7 @@ import 'package:cmr_app/core/fechas.dart';
 import 'package:cmr_app/core/auth/servicio_auth.dart';
 import 'package:cmr_app/features/auth/auth_gate.dart';
 import 'package:cmr_app/features/auth/login_screen.dart';
+import 'package:cmr_app/features/cuenta/mi_cuenta_screen.dart';
 import 'package:cmr_app/features/inicio/home_shell.dart';
 import 'package:cmr_app/features/inicio/modulos.dart';
 import 'package:cmr_app/features/plan/mi_plan_screen.dart';
@@ -32,7 +33,9 @@ void main() {
   tearDown(() => auth.dispose());
 
   Future<void> abrir(WidgetTester tester, {ServicioAuth? servicio}) =>
-      tester.pumpWidget(CmrApp(auth: servicio ?? auth));
+      tester.pumpWidget(
+        CmrApp(auth: servicio ?? auth, cuenta: CuentaFalsa()),
+      );
 
   testWidgets('sin sesión la app abre en el login con el tema de marca', (
     tester,
@@ -118,19 +121,18 @@ void main() {
       expect(find.text('Debe tener al menos 8 caracteres'), findsOneWidget);
     });
 
-    testWidgets('no ofrece registro ni recuperación de contraseña', (
+    testWidgets('ofrece crear cuenta, pero no recuperar la contraseña', (
       tester,
     ) async {
       await abrir(tester);
 
-      // Las cuentas las administra el admin desde el sitio web.
+      expect(find.text('Crear una cuenta'), findsOneWidget);
+
+      // Recuperar la contraseña no está en la app: el correo de recuperación
+      // todavía no tiene por dónde salir, y el doctor puede asignar una nueva
+      // desde el sitio.
       expect(find.textContaining('Olvidaste'), findsNothing);
-      expect(find.textContaining('Registrate'), findsNothing);
-      expect(find.textContaining('No tienes cuenta'), findsNothing);
-      expect(
-        find.textContaining('Las credenciales las entrega tu administrador'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('Olvidé'), findsNothing);
     });
 
     testWidgets('el ojito alterna la visibilidad de la contraseña', (
@@ -225,12 +227,20 @@ void main() {
   });
 
   group('cierre de sesión', () {
+    // Salir vive dentro de Mi cuenta, junto a eliminar la cuenta: el borrado
+    // tiene que poder encontrarse sin dar vueltas para pasar las tiendas.
+    Future<void> abrirMiCuenta(WidgetTester tester) async {
+      await tester.tap(find.byTooltip('Mi cuenta'));
+      await tester.pumpAndSettle();
+    }
+
     testWidgets('pide confirmación y vuelve al login', (tester) async {
       await abrir(tester);
       await _completarYEnviar(tester);
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.logout));
+      await abrirMiCuenta(tester);
+      await tester.tap(find.widgetWithText(ListTile, 'Cerrar sesión'));
       await tester.pumpAndSettle();
       expect(find.text('Cerrar sesión'), findsWidgets);
 
@@ -246,13 +256,20 @@ void main() {
       await _completarYEnviar(tester);
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.logout));
+      await abrirMiCuenta(tester);
+      await tester.tap(find.widgetWithText(ListTile, 'Cerrar sesión'));
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(TextButton, 'Cancelar'));
       await tester.pumpAndSettle();
 
-      expect(find.byType(HomeShell), findsOneWidget);
+      // Sigue en Mi cuenta: el Home está debajo, fuera de pantalla.
+      expect(find.byType(MiCuentaScreen), findsOneWidget);
+      expect(find.byType(LoginScreen), findsNothing);
       expect(auth.autenticado, isTrue);
+
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.byType(HomeShell), findsOneWidget);
     });
   });
 

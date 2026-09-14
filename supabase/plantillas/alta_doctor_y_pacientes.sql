@@ -15,10 +15,12 @@
 -- Esta tabla se mantiene corta y a mano a propósito: no hay pantalla para
 -- agregar doctores, justamente para que nadie se agregue solo.
 
+-- Hoy está la cuenta de prueba. Cuando el doctor real tenga la suya, se agrega
+-- otra fila igual y se borra esta.
 insert into doctores (user_id, nombre)
-select id, 'Dr. Nombre Apellido'
+select id, 'Erick (prueba)'
   from auth.users
- where email = 'doctor@ejemplo.com'
+ where email = 'erick.yosue@gmail.com'
     on conflict (user_id) do update set nombre = excluded.nombre;
 
 -- Comprobar que quedó:
@@ -34,20 +36,22 @@ select id, 'Dr. Nombre Apellido'
 --
 -- Excluye a los doctores para que no se listen como pacientes de sí mismos.
 
-insert into pacientes (user_id, nombre_completo)
-select u.id, u.email
+-- Van como 'activo': son cuentas que creó la clínica, no registros abiertos
+-- esperando aprobación.
+insert into pacientes (user_id, nombre, correo, estado, aprobado_en)
+select u.id, u.email, u.email, 'activo', now()
   from auth.users u
  where not exists (select 1 from doctores d where d.user_id = u.id)
     on conflict (user_id) do nothing;
 
 -- Ver cómo quedó la lista:
--- select p.nombre_completo, p.cedula, u.email, p.activo
+-- select p.nombre_completo, p.cedula, u.email, p.estado
 --   from pacientes p join auth.users u on u.id = p.user_id
 --  order by p.nombre_completo;
 
 -- Corregir uno a mano mientras el sitio no exista:
 -- update pacientes
---    set nombre_completo = 'Nombre Real', cedula = '1-2345-6789'
+--    set nombre = 'Nombre', apellidos = 'Apellido Apellido', cedula = '1-2345-6789'
 --  where user_id = (select id from auth.users where email = 'paciente@ejemplo.com');
 
 -- ---------------------------------------------------------------------------

@@ -3,12 +3,15 @@ import 'package:flutter/services.dart';
 
 import '../../core/auth/servicio_auth.dart';
 import '../../widgets/cmr_logo.dart';
+import 'crear_cuenta_screen.dart';
 
 /// Pantalla de ingreso.
 ///
-/// Las cuentas las administra el admin desde el sitio web, así que acá no hay
-/// registro ni recuperación de contraseña. Al abrir sesión, [AuthGate] cambia
-/// de pantalla solo: esta no navega.
+/// Desde acá se puede pedir una cuenta, pero no recuperar la contraseña: eso
+/// necesita correo saliente, que el proyecto todavía no tiene. Mientras tanto
+/// lo resuelve el doctor asignando una desde el sitio.
+///
+/// Al abrir sesión, [AuthGate] cambia de pantalla solo: esta no navega.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.auth});
 
@@ -34,6 +37,34 @@ class _LoginScreenState extends State<LoginScreen> {
     _claveCtrl.dispose();
     _claveFocus.dispose();
     super.dispose();
+  }
+
+
+  /// Abre el registro y, si la solicitud salió, lo avisa acá.
+  ///
+  /// El aviso va en el login y no en la pantalla de registro porque registrarse
+  /// no deja a nadie adentro: la persona vuelve justo a donde va a tener que
+  /// entrar cuando la aprueben.
+  Future<void> _abrirRegistro() async {
+    final enviada = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (_) => CrearCuentaScreen(auth: widget.auth),
+      ),
+    );
+
+    if (!(enviada ?? false) || !mounted) return;
+
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        const SnackBar(
+          duration: Duration(seconds: 6),
+          content: Text(
+            'Tu solicitud se envió. La clínica la va a revisar y te va a '
+            'habilitar la cuenta.',
+          ),
+        ),
+      );
   }
 
   String? _validarCorreo(String? valor) {
@@ -177,13 +208,18 @@ class _LoginScreenState extends State<LoginScreen> {
                               )
                             : const Text('Ingresar'),
                       ),
-                      const SizedBox(height: 24),
-                      // Las cuentas las crea y administra el admin desde el
-                      // sitio web: acá no hay registro ni recuperación de
-                      // contraseña, así que el usuario necesita saber a dónde ir.
+                      const SizedBox(height: 16),
+                      // Registrarse no entra a la app: manda una solicitud que
+                      // la clínica revisa. Al volver de esa pantalla, el
+                      // aviso sale acá mismo.
+                      OutlinedButton(
+                        onPressed: _enviando ? null : _abrirRegistro,
+                        child: const Text('Crear una cuenta'),
+                      ),
+                      const SizedBox(height: 20),
                       Text(
-                        'Las credenciales las entrega tu administrador. '
-                        'Si no puedes ingresar, contáctalo.',
+                        'Si ya eres paciente y no puedes entrar, consulta en '
+                        'recepción.',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),

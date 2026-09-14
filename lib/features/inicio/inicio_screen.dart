@@ -6,6 +6,7 @@ import '../../core/datos/repositorio.dart';
 import '../../core/modulos_habilitados.dart';
 import '../../widgets/carga_de_datos.dart';
 import '../../widgets/cmr_logo.dart';
+import '../cuenta/mi_cuenta_screen.dart';
 import '../etiqueta/leer_etiqueta_screen.dart';
 import '../laboratorios/laboratorios_screen.dart';
 import '../mapeo/mapeo_screen.dart';
@@ -100,26 +101,17 @@ class _InicioScreenState extends State<InicioScreen> {
     );
   }
 
-  Future<void> _salir(BuildContext context) async {
-    final confirmado = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Cerrar sesión'),
-        content: const Text('Vas a tener que volver a ingresar tus datos.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Cerrar sesión'),
-          ),
-        ],
+  /// Cerrar sesión y eliminar la cuenta viven juntos en Mi cuenta.
+  ///
+  /// El borrado no puede quedar escondido: App Store y Google Play piden que
+  /// se encuentre sin dar vueltas, y un ícono de salir en la barra no es un
+  /// lugar donde nadie lo busque.
+  void _abrirMiCuenta(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => MiCuentaScreen(auth: widget.auth),
       ),
     );
-
-    if (confirmado ?? false) await widget.auth.salir();
   }
 
   @override
@@ -129,9 +121,9 @@ class _InicioScreenState extends State<InicioScreen> {
         title: const CmrLogo(variante: CmrLogoVariante.marca, alto: 24),
         actions: [
           IconButton(
-            onPressed: () => _salir(context),
-            icon: const Icon(Icons.logout),
-            tooltip: 'Cerrar sesión',
+            onPressed: () => _abrirMiCuenta(context),
+            icon: const Icon(Icons.person_outline),
+            tooltip: 'Mi cuenta',
           ),
         ],
       ),
