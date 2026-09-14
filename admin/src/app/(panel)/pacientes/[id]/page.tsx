@@ -1,12 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import {
-  COLOR_ESTADO,
-  COLUMNAS_PACIENTE,
-  ETIQUETA_ESTADO,
-  type Paciente,
-} from "@/lib/pacientes";
+import { EstadoPacienteBadge } from "@/components/estado-paciente";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { COLUMNAS_PACIENTE, type Paciente } from "@/lib/pacientes";
 import { clienteServidor } from "@/lib/supabase/servidor";
 
 import { Acceso } from "./acceso";
@@ -47,60 +45,67 @@ export default async function PaginaPaciente({
   if (!paciente) notFound();
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-3">
+    <div className="animate-in fade-in duration-300 space-y-8">
+      <header className="space-y-4">
         <Link
           href="/pacientes"
-          className="text-sm text-muted-foreground hover:text-foreground"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
-          ← Pacientes
+          <span aria-hidden>←</span> Pacientes
         </Link>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <h1 className="text-3xl font-semibold tracking-tight">
             {paciente.nombre_completo}
           </h1>
-          <span
-            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${COLOR_ESTADO[paciente.estado]}`}
-          >
-            {ETIQUETA_ESTADO[paciente.estado]}
-          </span>
+          <EstadoPacienteBadge estado={paciente.estado} />
         </div>
 
         <p className="text-sm text-muted-foreground">
           {paciente.correo ?? "Sin correo registrado"}
         </p>
-      </div>
+      </header>
 
       {paciente.estado === "pendiente" && (
-        <div className="rounded-lg border border-accent-foreground/20 bg-accent/40 p-4">
-          <h2 className="font-medium">Se registró desde la app</h2>
-          <p className="mt-1 max-w-prose text-sm text-muted-foreground">
-            Todavía no ve nada: ni su plan, ni sus citas, ni el libro.
-            Comprobá que los datos coincidan con los de la clínica antes de
-            aprobarlo.
-          </p>
-        </div>
+        <Alert className="border-accent-foreground/15 bg-accent/50">
+          <AlertTitle>Se registró desde la app</AlertTitle>
+          <AlertDescription className="leading-relaxed">
+            Todavía no ve nada: ni su plan, ni sus citas, ni el libro. Comprobá
+            que los datos coincidan con los de la clínica antes de aprobarlo.
+          </AlertDescription>
+        </Alert>
       )}
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-medium text-muted-foreground">
-          Estado de la cuenta
-        </h2>
-        <BotonesEstado id={paciente.user_id} estado={paciente.estado} />
-      </section>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
+        <Card className="order-2 lg:order-1">
+          <CardHeader>
+            <CardTitle>Datos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FormularioFicha paciente={paciente} />
+          </CardContent>
+        </Card>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-medium text-muted-foreground">
-          Acceso a la app
-        </h2>
-        <Acceso id={paciente.user_id} correo={paciente.correo} />
-      </section>
+        <div className="order-1 space-y-6 lg:order-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Estado de la cuenta</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <BotonesEstado id={paciente.user_id} estado={paciente.estado} />
+            </CardContent>
+          </Card>
 
-      <section className="space-y-4">
-        <h2 className="text-sm font-medium text-muted-foreground">Datos</h2>
-        <FormularioFicha paciente={paciente} />
-      </section>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Acceso a la app</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Acceso id={paciente.user_id} correo={paciente.correo} />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

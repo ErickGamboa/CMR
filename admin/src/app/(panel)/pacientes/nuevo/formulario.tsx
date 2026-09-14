@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { ClaveTemporal } from "@/components/clave-temporal";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,7 +31,7 @@ export function FormularioAlta() {
   }
 
   return (
-    <form action={enviar} className="max-w-xl space-y-5">
+    <form action={enviar} className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2">
         <Campo id="nombre" etiqueta="Nombre" requerido autoFoco />
         <Campo id="apellidos" etiqueta="Apellidos" />
@@ -50,12 +51,13 @@ export function FormularioAlta() {
       />
 
       {estado.error && (
-        <p role="alert" className="text-sm text-destructive">
-          {estado.error}
-        </p>
+        <Alert variant="destructive" className="animate-in fade-in">
+          <AlertDescription>{estado.error}</AlertDescription>
+        </Alert>
       )}
 
       <Crear />
+
     </form>
   );
 }

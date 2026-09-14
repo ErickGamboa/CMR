@@ -3,7 +3,15 @@ import Link from "next/link";
 import { salir } from "@/app/ingresar/acciones";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
-import { doctorActual } from "@/lib/doctor";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { doctorActual, type Doctor } from "@/lib/doctor";
 
 /**
  * Todo lo que cuelga de acá ya pasó por dos puertas: el proxy exige sesión, y
@@ -23,43 +31,15 @@ export default async function LayoutPanel({
   if (!doctor) return <SinPermiso />;
 
   return (
-    <div className="flex min-h-dvh flex-col">
-      {/* Fondo claro, no azul abisal: el logo es azul sobre transparente y
-          sobre oscuro desaparece. */}
-      <header className="sticky top-0 z-10 border-b bg-background/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-6 px-6 py-3">
-          <Link href="/pacientes" aria-label="Inicio">
-            <Logo variante="marca" alto={26} prioridad />
-          </Link>
+    <div className="flex min-h-dvh flex-col bg-muted/30">
+      <Cabecera doctor={doctor} />
 
-          <nav className="flex items-center gap-1 text-sm">
-            <Enlace href="/pacientes">Pacientes</Enlace>
-          </nav>
-
-          <div className="ml-auto flex items-center gap-3">
-            <div className="hidden text-right sm:block">
-              <p className="text-sm font-medium leading-tight">
-                {doctor.nombre}
-              </p>
-              <p className="text-xs text-muted-foreground leading-tight">
-                {doctor.correo}
-              </p>
-            </div>
-            <form action={salir}>
-              <Button type="submit" variant="outline" size="sm">
-                Salir
-              </Button>
-            </form>
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
         {children}
       </main>
 
-      <footer className="border-t">
-        <div className="mx-auto max-w-6xl px-6 py-4 text-xs text-muted-foreground">
+      <footer className="border-t bg-background">
+        <div className="mx-auto max-w-5xl px-4 py-5 text-xs text-muted-foreground sm:px-6">
           Clínica COSME - CMR
         </div>
       </footer>
@@ -67,15 +47,86 @@ export default async function LayoutPanel({
   );
 }
 
-function Enlace({ href, children }: { href: string; children: string }) {
+/**
+ * Fondo claro y no azul abisal: el logo es azul sobre transparente y sobre
+ * oscuro cae a 1.15:1, o sea desaparece.
+ */
+function Cabecera({ doctor }: { doctor: Doctor }) {
   return (
-    <Link
-      href={href}
-      className="rounded-md px-3 py-1.5 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-primary"
-    >
-      {children}
-    </Link>
+    <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-5xl items-center gap-4 px-4 sm:gap-6 sm:px-6">
+        <Link
+          href="/pacientes"
+          aria-label="Inicio"
+          className="shrink-0 rounded-md outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <Logo variante="marca" alto={24} prioridad />
+        </Link>
+
+        <nav className="flex items-center gap-1">
+          <Link
+            href="/pacientes"
+            className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-primary"
+          >
+            Pacientes
+          </Link>
+        </nav>
+
+        <div className="ml-auto">
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={<Button variant="ghost" size="sm" className="gap-2" />}
+            >
+              <span
+                aria-hidden
+                className="flex size-7 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground"
+              >
+                {iniciales(doctor.nombre)}
+              </span>
+              <span className="hidden max-w-[16ch] truncate sm:inline">
+                {doctor.nombre}
+              </span>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="end" className="w-60">
+              <DropdownMenuLabel className="font-normal">
+                <p className="text-sm font-medium">{doctor.nombre}</p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {doctor.correo}
+                </p>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {/* Un formulario y no un enlace: cerrar sesión cambia estado en
+                  el servidor, y eso no va por GET. */}
+              <form action={salir}>
+                <DropdownMenuItem
+                  render={
+                    <button type="submit" className="w-full cursor-pointer" />
+                  }
+                >
+                  Cerrar sesión
+                </DropdownMenuItem>
+              </form>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+    </header>
   );
+}
+
+/** "Dr. Erick Gamboa" → "EG". Se salta los títulos y las partículas. */
+function iniciales(nombre: string) {
+  const saltar = new Set(["dr", "dra", "de", "del", "la", "los", "y"]);
+
+  const letras = nombre
+    .split(/\s+/)
+    .map((p) => p.replace(/\./g, ""))
+    .filter((p) => p.length > 0 && !saltar.has(p.toLowerCase()))
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase() ?? "");
+
+  return letras.join("") || "·";
 }
 
 /**
@@ -88,20 +139,26 @@ function Enlace({ href, children }: { href: string; children: string }) {
 function SinPermiso() {
   return (
     <main className="flex min-h-dvh items-center justify-center p-6">
-      <div className="max-w-md space-y-5 text-center">
+      <div className="w-full max-w-md space-y-6 text-center">
         <div className="flex justify-center">
-          <Logo variante="completo" alto={72} />
+          <Logo variante="completo" alto={64} />
         </div>
-        <h1 className="text-xl font-semibold">
-          Esta cuenta no administra la clínica
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Entraste bien, pero tu cuenta no está registrada como doctor. Se da de
-          alta agregando una fila en la tabla <code>doctores</code>.
-        </p>
+        <div className="space-y-2">
+          <h1 className="text-xl font-semibold tracking-tight">
+            Esta cuenta no administra la clínica
+          </h1>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            Entraste bien, pero tu cuenta no está registrada como doctor. Se da
+            de alta agregando una fila en la tabla{" "}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
+              doctores
+            </code>
+            .
+          </p>
+        </div>
         <form action={salir}>
           <Button type="submit" variant="outline">
-            Salir
+            Cerrar sesión
           </Button>
         </form>
       </div>

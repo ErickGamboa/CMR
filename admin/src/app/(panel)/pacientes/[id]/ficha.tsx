@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +17,7 @@ export function FormularioFicha({ paciente }: { paciente: Paciente }) {
   const [estado, enviar] = useActionState(guardarPaciente, inicial);
 
   return (
-    <form action={enviar} className="max-w-xl space-y-5">
+    <form action={enviar} className="space-y-6">
       <input type="hidden" name="id" value={paciente.user_id} />
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -56,12 +57,15 @@ export function FormularioFicha({ paciente }: { paciente: Paciente }) {
       />
 
       {estado.error && (
-        <p role="alert" className="text-sm text-destructive">
-          {estado.error}
-        </p>
+        <Alert variant="destructive" className="animate-in fade-in">
+          <AlertDescription>{estado.error}</AlertDescription>
+        </Alert>
       )}
       {estado.guardado && !estado.error && (
-        <p role="status" className="text-sm text-muted-foreground">
+        <p
+          role="status"
+          className="animate-in fade-in text-sm text-muted-foreground"
+        >
           Guardado.
         </p>
       )}

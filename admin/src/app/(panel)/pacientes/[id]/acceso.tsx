@@ -3,6 +3,17 @@
 import { useState, useTransition } from "react";
 
 import { ClaveTemporal } from "@/components/clave-temporal";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
 import { nuevaClave } from "./acciones";
@@ -19,11 +30,9 @@ export function Acceso({ id, correo }: { id: string; correo: string | null }) {
   const [enCurso, empezar] = useTransition();
   const [clave, setClave] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [confirmando, setConfirmando] = useState(false);
 
   function asignar() {
     setError(null);
-    setConfirmando(false);
     empezar(async () => {
       const r = await nuevaClave(id);
       if (r.ok) setClave(r.clave);
@@ -42,43 +51,45 @@ export function Acceso({ id, correo }: { id: string; correo: string | null }) {
   }
 
   return (
-    <div className="space-y-3 rounded-lg border p-4">
-      <div className="text-sm">
-        <span className="text-muted-foreground">Entra con </span>
-        <span className="font-medium">{correo ?? "— sin correo —"}</span>
+    <div className="space-y-4">
+      <div className="space-y-1">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Entra con
+        </p>
+        <p className="truncate text-sm font-medium">
+          {correo ?? "— sin correo —"}
+        </p>
       </div>
 
-      {confirmando ? (
-        <div className="space-y-3">
-          <p className="max-w-prose text-sm">
-            La contraseña que tenga ahora va a dejar de funcionar. Si está
-            usando la app en su teléfono, va a tener que volver a entrar con la
-            nueva.
-          </p>
-          <div className="flex gap-2">
-            <Button onClick={asignar} disabled={enCurso}>
-              {enCurso ? "Asignando…" : "Sí, asignar una nueva"}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setConfirmando(false)}
-              disabled={enCurso}
-            >
-              Cancelar
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          <Button variant="outline" onClick={() => setConfirmando(true)}>
-            Asignar contraseña nueva
-          </Button>
-          <p className="max-w-prose text-xs text-muted-foreground">
-            Para cuando el paciente no puede entrar y no maneja su correo. La
-            contraseña actual no se puede consultar: se guarda cifrada.
-          </p>
-        </div>
-      )}
+      <AlertDialog>
+        <AlertDialogTrigger
+          render={
+            <Button variant="outline" className="w-full" disabled={enCurso} />
+          }
+        >
+          {enCurso ? "Asignando…" : "Asignar contraseña nueva"}
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Asignar una contraseña nueva?</AlertDialogTitle>
+            <AlertDialogDescription className="leading-relaxed">
+              La que tenga ahora deja de funcionar. Si está usando la app en su
+              teléfono, va a tener que volver a entrar con la nueva.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={asignar}>
+              Asignar una nueva
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <p className="text-xs leading-relaxed text-muted-foreground">
+        Para cuando el paciente no puede entrar y no maneja su correo. La
+        contraseña actual no se puede consultar: se guarda cifrada.
+      </p>
 
       {error && (
         <p role="alert" className="text-sm text-destructive">

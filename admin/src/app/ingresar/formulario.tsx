@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,7 +16,7 @@ export function FormularioIngreso({ volver }: { volver: string }) {
   const [estado, enviar] = useActionState(ingresar, inicial);
 
   return (
-    <form action={enviar} className="space-y-4">
+    <form action={enviar} className="space-y-5">
       <input type="hidden" name="volver" value={volver} />
 
       <div className="space-y-2">
@@ -25,6 +26,7 @@ export function FormularioIngreso({ volver }: { volver: string }) {
           name="correo"
           type="email"
           autoComplete="username"
+          placeholder="nombre@clinica.cr"
           autoFocus
           required
         />
@@ -42,9 +44,9 @@ export function FormularioIngreso({ volver }: { volver: string }) {
       </div>
 
       {estado.error && (
-        <p role="alert" className="text-sm text-destructive">
-          {estado.error}
-        </p>
+        <Alert variant="destructive" className="animate-in fade-in">
+          <AlertDescription>{estado.error}</AlertDescription>
+        </Alert>
       )}
 
       <Boton />

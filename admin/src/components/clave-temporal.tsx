@@ -1,15 +1,16 @@
 "use client";
 
+import { Check, Copy } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 /**
  * Muestra una contraseña recién asignada.
  *
- * Va en un bloque grande y en monoespaciada porque su destino es leerse en voz
- * alta o dictarse por teléfono a alguien que la va a escribir a mano.
+ * Va en grande y en monoespaciada porque su destino es leerse en voz alta o
+ * dictarse por teléfono a alguien que la va a escribir a mano.
  *
  * Y avisa que no se puede volver a ver: no es una restricción del sitio, es
  * que Supabase guarda un hash y no la contraseña. Si el doctor cierra esto sin
@@ -42,14 +43,17 @@ export function ClaveTemporal({
   }
 
   return (
-    <div className="space-y-4 rounded-lg border border-accent-foreground/20 bg-accent/40 p-5">
-      <div>
+    <div className="animate-in fade-in zoom-in-95 duration-300 space-y-5 rounded-xl border border-accent-foreground/15 bg-accent/40 p-5 sm:p-6">
+      <div className="space-y-1">
         <h2 className="font-medium">{titulo}</h2>
         {nombre && (
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {nombre}
             {correo && ` · ${correo}`}
           </p>
+        )}
+        {!nombre && correo && (
+          <p className="text-sm text-muted-foreground">{correo}</p>
         )}
       </div>
 
@@ -57,17 +61,31 @@ export function ClaveTemporal({
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Contraseña
         </p>
-        <div className="flex flex-wrap items-center gap-3">
-          <code className="rounded-md border bg-background px-4 py-2.5 font-mono text-lg tracking-wide">
+        <div className="flex flex-wrap items-center gap-2">
+          <code className="flex-1 rounded-lg border bg-background px-4 py-3 text-center font-mono text-lg tracking-wider sm:text-xl">
             {clave}
           </code>
-          <Button type="button" variant="outline" size="sm" onClick={copiar}>
-            {copiado ? "Copiada" : "Copiar"}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={copiar}
+            className="gap-1.5 transition-colors"
+          >
+            {copiado ? (
+              <>
+                <Check className="size-4" /> Copiada
+              </>
+            ) : (
+              <>
+                <Copy className="size-4" /> Copiar
+              </>
+            )}
           </Button>
         </div>
       </div>
 
-      <p className="max-w-prose text-sm text-muted-foreground">
+      <p className="text-sm leading-relaxed text-muted-foreground">
         Anotala o dictásela ahora: <strong>no se puede volver a ver</strong>.
         Supabase guarda la contraseña cifrada, no la contraseña. Si se pierde,
         se le asigna otra.
@@ -76,9 +94,9 @@ export function ClaveTemporal({
       {verFicha && (
         <Link
           href={verFicha}
-          className="inline-block text-sm font-medium underline underline-offset-4"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
         >
-          Ver la ficha del paciente →
+          Ver la ficha del paciente
         </Link>
       )}
     </div>

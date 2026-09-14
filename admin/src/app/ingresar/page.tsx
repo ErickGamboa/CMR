@@ -15,26 +15,27 @@ export default async function PaginaIngreso({
   const { volver } = await searchParams;
 
   return (
-    <main className="relative flex min-h-dvh items-center justify-center overflow-hidden p-6">
+    <main className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-muted/30 p-4 sm:p-6">
       <Fondo />
 
-      <div className="relative w-full max-w-sm space-y-8">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <Logo variante="completo" alto={84} prioridad />
-          <p className="text-sm text-muted-foreground">
+      <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 relative w-full max-w-sm space-y-8">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <Logo variante="completo" alto={80} prioridad />
+          <p className="text-sm font-medium tracking-wide text-muted-foreground">
             Panel de la clínica
           </p>
         </div>
 
-        <Card>
-          <CardContent className="pt-6">
+        <Card className="shadow-sm">
+          <CardContent className="pt-2">
             <FormularioIngreso volver={volver ?? ""} />
           </CardContent>
         </Card>
 
-        <p className="text-center text-xs text-muted-foreground">
-          Las cuentas las crea la clínica. Si no podés entrar, avisá en
-          recepción.
+        <p className="text-center text-xs leading-relaxed text-muted-foreground">
+          Las cuentas las crea la clínica.
+          <br />
+          Si no podés entrar, avisá en recepción.
         </p>
       </div>
     </main>
