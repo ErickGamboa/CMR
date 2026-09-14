@@ -77,10 +77,11 @@ de suplementos y los videos son catálogo público: el mismo para todos.
 La app **solo lee**, con dos excepciones que el paciente sí escribe: el mapeo
 (su presión y su glisemia) y, cuando se conecte, sus favoritos del libro.
 
-Scripts que el doctor corre a mano hasta que exista el sitio admin:
+Scripts que el doctor corre a mano hasta que el sitio admin los reemplace:
 
 | script | qué hace |
 |---|---|
+| `plantillas/alta_doctor_y_pacientes.sql` | da de alta al doctor y crea la ficha de los pacientes que ya tienen cuenta |
 | `plantillas/cargar_paciente.sql` | citas, mediciones, laboratorios, recomendaciones y recetas de un paciente |
 | `plantillas/asignar_plan.sql` | el plan de alimentación |
 | `plantillas/catalogo.sql` | marcas de suplementos y videos (global) |
@@ -88,6 +89,18 @@ Scripts que el doctor corre a mano hasta que exista el sitio admin:
 
 Un paciente sin nada cargado no ve datos de nadie: cada módulo dice "Todavía no
 tienes…" y la app funciona igual.
+
+### Quién escribe
+
+La app **solo lee** (menos el mapeo). Quien escribe expedientes es el doctor, y
+eso lo decide la base: la tabla `doctores` dice quién lo es, la función
+`es_doctor()` lo resuelve, y cada tabla tiene una política `..._doctor` que la
+usa. Varias políticas permisivas sobre la misma tabla se suman con OR, así que
+el paciente sigue viendo lo suyo por su política y el doctor pasa por la suya.
+
+La llave `service_role` **no se usa y no debería desplegarse**: se salta RLS por
+completo. La única cosa que la va a necesitar algún día es crear cuentas en
+Supabase Auth, porque eso es la Admin API; hoy eso se hace desde el panel.
 
 ### Íconos
 
@@ -121,14 +134,26 @@ dart run flutter_launcher_icons
 dart run flutter_native_splash:create
 ```
 
+## Sitio del doctor
+
+En construcción, en `admin/`: **Next.js (App Router) + TypeScript + Supabase +
+shadcn/ui**, desplegado en Vercel con *Root Directory* = `admin`.
+
+Vive en este repo, no en uno aparte, porque el sitio y la app están atados por
+el esquema: los dos escriben y leen los mismos nombres de columna y los mismos
+valores (`'peptido'`, `'medica'`, los nombres de ícono). Con las migraciones en
+un solo lugar no hay forma de que se desincronicen sin que se note.
+
+Entra con la sesión del doctor —no con `service_role`— y por eso depende de las
+políticas descritas arriba.
+
 ## Pendiente
 
 Faltan las fotos de producto de los suplementos, y los videos oficiales: los
 que estén cargados hoy son de prueba y se cambian en la tabla `videos`.
 
-No hay tabla de perfil: la app identifica al paciente solo por el correo de
-`auth.users`. Cuando el sitio admin necesite manejarlos por nombre y cédula,
-hay que crearla.
+La app todavía no lee `pacientes`: el paciente no ve su nombre en ningún lado.
+La tabla ya existe y se puede conectar sin tocar el esquema.
 
 Del libro y el plan queda por hacer:
 
