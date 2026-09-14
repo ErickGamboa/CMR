@@ -77,14 +77,14 @@ class RepositorioPlan implements FuentePlan {
       throw FallaPlan(
         e.code == '42P01'
             ? 'El plan todavía no está habilitado en el servidor.'
-            : 'No pudimos cargar tu plan. Intentá de nuevo en unos minutos.',
+            : 'No pudimos cargar tu plan. Intenta de nuevo en unos minutos.',
       );
     } on SocketException {
       throw const FallaPlan(
-        'No pudimos conectar. Revisá tu conexión a internet.',
+        'No pudimos conectar. Revisa tu conexión a internet.',
       );
     } on TimeoutException {
-      throw const FallaPlan('El servidor tardó demasiado. Intentá de nuevo.');
+      throw const FallaPlan('El servidor tardó demasiado. Intenta de nuevo.');
     }
   }
 

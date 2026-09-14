@@ -17,10 +17,10 @@ import 'package:flutter/material.dart';
 /// con los laboratorios listos, y la de enfermería es la aplicación o la toma
 /// de muestras.
 enum TipoCita {
-  medica(etiqueta: 'Cita médica', vacio: 'Todavía no tenés citas médicas.'),
+  medica(etiqueta: 'Cita médica', vacio: 'Todavía no tienes citas médicas.'),
   enfermeria(
     etiqueta: 'Cita enfermería',
-    vacio: 'Todavía no tenés citas de enfermería.',
+    vacio: 'Todavía no tienes citas de enfermería.',
   );
 
   const TipoCita({required this.etiqueta, required this.vacio});
@@ -145,63 +145,63 @@ abstract final class DatosDemo {
       tipo: TipoCita.medica,
       profesional: 'Dr. Roy Jiménez',
       especialidad: 'Valoración inicial',
-      lugar: 'Clínica CMR · Consultorio 3',
+      lugar: 'Clínica COSME - CMR',
     ),
     Cita(
       fecha: _enDias(-90, 8),
       tipo: TipoCita.enfermeria,
       profesional: 'Enfermería CMR',
       especialidad: 'Toma de laboratorios',
-      lugar: 'Clínica CMR · Sala 2',
+      lugar: 'Clínica COSME - CMR',
     ),
     Cita(
       fecha: _enDias(-61, 10, 30),
       tipo: TipoCita.medica,
       profesional: 'Dr. Roy Jiménez',
       especialidad: 'Control metabólico',
-      lugar: 'Clínica CMR · Consultorio 3',
+      lugar: 'Clínica COSME - CMR',
     ),
     Cita(
       fecha: _enDias(-30, 8, 30),
       tipo: TipoCita.enfermeria,
       profesional: 'Enfermería CMR',
       especialidad: 'Aplicación de péptidos',
-      lugar: 'Clínica CMR · Sala 2',
+      lugar: 'Clínica COSME - CMR',
     ),
     Cita(
       fecha: _enDias(-28, 14),
       tipo: TipoCita.medica,
       profesional: 'Dr. Roy Jiménez',
       especialidad: 'Control metabólico',
-      lugar: 'Clínica CMR · Consultorio 3',
+      lugar: 'Clínica COSME - CMR',
     ),
     Cita(
       fecha: _enDias(4, 10, 30),
       tipo: TipoCita.medica,
       profesional: 'Dr. Roy Jiménez',
       especialidad: 'Control metabólico',
-      lugar: 'Clínica CMR · Consultorio 3',
+      lugar: 'Clínica COSME - CMR',
     ),
     Cita(
       fecha: _enDias(11, 9),
       tipo: TipoCita.enfermeria,
       profesional: 'Enfermería CMR',
       especialidad: 'Aplicación de péptidos',
-      lugar: 'Clínica CMR · Sala 2',
+      lugar: 'Clínica COSME - CMR',
     ),
     Cita(
       fecha: _enDias(25, 8),
       tipo: TipoCita.enfermeria,
       profesional: 'Enfermería CMR',
       especialidad: 'Control de presión y peso',
-      lugar: 'Clínica CMR · Sala 2',
+      lugar: 'Clínica COSME - CMR',
     ),
     Cita(
       fecha: _enDias(39, 15),
       tipo: TipoCita.medica,
       profesional: 'Dr. Roy Jiménez',
       especialidad: 'Revisión de composición corporal',
-      lugar: 'Clínica CMR · Consultorio 1',
+      lugar: 'Clínica COSME - CMR',
     ),
   ];
 
@@ -284,7 +284,7 @@ abstract final class DatosDemo {
           referencia: '70 – 99',
         ),
         AnalisisLab(
-          nombre: 'Hemoglobina glicosilada',
+          nombre: 'Emoglobina glicada',
           valor: '5.4',
           unidad: '%',
           referencia: '< 5.7',
@@ -328,7 +328,7 @@ abstract final class DatosDemo {
           fueraDeRango: true,
         ),
         AnalisisLab(
-          nombre: 'Hemoglobina glicosilada',
+          nombre: 'Emoglobina glicada',
           valor: '5.8',
           unidad: '%',
           referencia: '< 5.7',
@@ -382,29 +382,29 @@ abstract final class DatosDemo {
   static final recomendaciones = [
     Recomendacion(
       fecha: DateTime(2026, 8, 8),
-      titulo: 'Subí la proteína en el desayuno',
-      texto: 'Apuntá a 30 g de proteína antes de las 10 a.m. Ayuda a sostener '
+      titulo: 'Sube la proteína en el desayuno',
+      texto: 'Apunta a 30 g de proteína antes de las 10 a.m. Ayuda a sostener '
           'la masa muscular que venís ganando y baja el antojo de la tarde.',
       icono: Icons.egg_alt_outlined,
     ),
     Recomendacion(
       fecha: DateTime(2026, 8, 8),
-      titulo: 'Caminá 20 minutos después de almorzar',
+      titulo: 'Camina 20 minutos después de almorzar',
       texto: 'No hace falta que sea intenso. El objetivo es amortiguar el pico '
           'de glucosa posterior a la comida más grande del día.',
       icono: Icons.directions_walk_outlined,
     ),
     Recomendacion(
       fecha: DateTime(2026, 7, 18),
-      titulo: 'Ordená el horario de sueño',
+      titulo: 'Ordena el horario de sueño',
       texto: 'Acostate y levantate a la misma hora, incluso el fin de semana. '
           'El descanso irregular frena la pérdida de grasa visceral.',
       icono: Icons.bedtime_outlined,
     ),
     Recomendacion(
       fecha: DateTime(2026, 6, 13),
-      titulo: 'Tomá 2.5 litros de agua al día',
-      texto: 'Repartilos a lo largo del día. Si entrenás, sumá medio litro '
+      titulo: 'Toma 2.5 litros de agua al día',
+      texto: 'Repártelos a lo largo del día. Si entrenas, suma medio litro '
           'extra por cada hora de ejercicio.',
       icono: Icons.water_drop_outlined,
     ),

@@ -46,10 +46,10 @@ class SupabaseAuth implements ServicioAuth {
       throw FallaAuth(_traducir(e));
     } on SocketException {
       throw const FallaAuth(
-        'No pudimos conectar. Revisá tu conexión a internet.',
+        'No pudimos conectar. Revisa tu conexión a internet.',
       );
     } on TimeoutException {
-      throw const FallaAuth('El servidor tardó demasiado. Intentá de nuevo.');
+      throw const FallaAuth('El servidor tardó demasiado. Intenta de nuevo.');
     }
   }
 
@@ -66,16 +66,16 @@ class SupabaseAuth implements ServicioAuth {
         return 'Correo o contraseña incorrectos.';
       case 'email_not_confirmed':
         return 'Tu cuenta todavía no está confirmada. '
-            'Contactá a tu administrador.';
+            'Contacta a tu administrador.';
       case 'user_banned':
-        return 'Tu cuenta está deshabilitada. Contactá a tu administrador.';
+        return 'Tu cuenta está deshabilitada. Contacta a tu administrador.';
       case 'over_request_rate_limit':
-        return 'Demasiados intentos. Esperá unos minutos e intentá de nuevo.';
+        return 'Demasiados intentos. Espera unos minutos e intenta de nuevo.';
     }
 
     if (e.statusCode == '429') {
-      return 'Demasiados intentos. Esperá unos minutos e intentá de nuevo.';
+      return 'Demasiados intentos. Espera unos minutos e intenta de nuevo.';
     }
-    return 'No pudimos iniciar sesión. Intentá de nuevo en unos minutos.';
+    return 'No pudimos iniciar sesión. Intenta de nuevo en unos minutos.';
   }
 }

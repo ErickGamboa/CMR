@@ -142,7 +142,7 @@ class _TarjetaDelDia extends StatelessWidget {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    'Tocá un grupo para ver en el libro qué podés comer.',
+                    'Toca un grupo para ver en el libro qué puedes comer.',
                     style: theme.textTheme.bodySmall
                         ?.copyWith(color: scheme.onSurfaceVariant),
                   ),
@@ -152,7 +152,7 @@ class _TarjetaDelDia extends StatelessWidget {
             if (hayMinimos) ...[
               const SizedBox(height: 6),
               Text(
-                'El "+" quiere decir al menos esa cantidad: podés comer más.',
+                'El "+" quiere decir al menos esa cantidad: puedes comer más.',
                 style: theme.textTheme.bodySmall
                     ?.copyWith(color: scheme.onSurfaceVariant),
               ),
@@ -303,14 +303,14 @@ class _SinPlan extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Todavía no tenés un plan cargado',
+              'Todavía no tienes un plan cargado',
               style: theme.textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 10),
             Text(
               'Tu doctor lo asigna después de la consulta. Mientras tanto '
-              'podés consultar el libro de intercambios.',
+              'puedes consultar el libro de intercambios.',
               style: theme.textTheme.bodyMedium
                   ?.copyWith(color: scheme.onSurfaceVariant),
               textAlign: TextAlign.center,

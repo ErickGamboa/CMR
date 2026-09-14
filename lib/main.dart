@@ -5,6 +5,7 @@ import 'core/auth/supabase_auth.dart';
 import 'core/entorno.dart';
 import 'features/auth/auth_gate.dart';
 import 'theme/app_theme.dart';
+import 'widgets/ocultar_teclado.dart';
 import 'widgets/pantalla_carga.dart';
 
 void main() {
@@ -39,6 +40,7 @@ class _ArranqueState extends State<Arranque> {
           title: 'CMR',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light,
+          builder: (context, child) => OcultarTeclado(child: child!),
           home: snapshot.hasError
               ? const _FalloDeArranque()
               : const PantallaCarga(),
@@ -62,6 +64,7 @@ class CmrApp extends StatelessWidget {
       // El logo todavía no tiene versión para fondo oscuro, así que la app
       // se mantiene en claro hasta que exista ese arte.
       themeMode: ThemeMode.light,
+      builder: (context, child) => OcultarTeclado(child: child!),
       home: AuthGate(auth: auth),
     );
   }
@@ -78,11 +81,12 @@ class _AppSinConfigurar extends StatelessWidget {
       title: 'CMR',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      builder: (context, child) => OcultarTeclado(child: child!),
       home: const _Aviso(
         icono: Icons.key_off_outlined,
         titulo: 'Falta la clave de Supabase',
-        detalle: 'Copiá config/supabase.example.json a config/supabase.json, '
-            'poné la clave publicable del proyecto y compilá con:\n\n'
+        detalle: 'Copia config/supabase.example.json a config/supabase.json, '
+            'pon la clave publicable del proyecto y compila con:\n\n'
             'flutter run --dart-define-from-file=config/supabase.json',
       ),
     );
@@ -98,7 +102,7 @@ class _FalloDeArranque extends StatelessWidget {
     return const _Aviso(
       icono: Icons.cloud_off_outlined,
       titulo: 'No pudimos iniciar la app',
-      detalle: 'Revisá tu conexión a internet y volvé a abrirla.',
+      detalle: 'Revisa tu conexión a internet y vuelve a abrirla.',
     );
   }
 }

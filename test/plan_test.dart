@@ -167,7 +167,7 @@ void main() {
         (tester) async {
       await _abrirPlan(tester);
 
-      expect(find.text('Todavía no tenés un plan cargado'), findsOneWidget);
+      expect(find.text('Todavía no tienes un plan cargado'), findsOneWidget);
       expect(find.textContaining('Tu doctor lo asigna'), findsOneWidget);
     });
   });

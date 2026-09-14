@@ -26,12 +26,12 @@ class PeptidosScreen extends StatelessWidget {
             _Lista(
               prescripciones: DatosDemo.peptidos,
               icono: Icons.vaccines_outlined,
-              vacio: 'Todavía no tenés péptidos asignados.',
+              vacio: 'Todavía no tienes péptidos asignados.',
             ),
             _Lista(
               prescripciones: DatosDemo.medicamentos,
               icono: Icons.medication_outlined,
-              vacio: 'Todavía no tenés medicamentos asignados.',
+              vacio: 'Todavía no tienes medicamentos asignados.',
             ),
           ],
         ),

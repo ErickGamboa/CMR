@@ -93,8 +93,8 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Ingresar'));
       await tester.pump();
 
-      expect(find.text('Ingresá tu correo'), findsOneWidget);
-      expect(find.text('Ingresá tu contraseña'), findsOneWidget);
+      expect(find.text('Ingresa tu correo'), findsOneWidget);
+      expect(find.text('Ingresa tu contraseña'), findsOneWidget);
       expect(auth.llamadas, isEmpty);
     });
 
@@ -116,7 +116,7 @@ void main() {
       // Las cuentas las administra el admin desde el sitio web.
       expect(find.textContaining('Olvidaste'), findsNothing);
       expect(find.textContaining('Registrate'), findsNothing);
-      expect(find.textContaining('No tenés cuenta'), findsNothing);
+      expect(find.textContaining('No tienes cuenta'), findsNothing);
       expect(
         find.textContaining('Las credenciales las entrega tu administrador'),
         findsOneWidget,

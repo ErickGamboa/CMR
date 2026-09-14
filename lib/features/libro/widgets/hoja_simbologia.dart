@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../widgets/ocultar_teclado.dart';
 import '../modelo_libro.dart';
 import 'pildora_intercambio.dart';
 
@@ -12,6 +13,7 @@ class HojaSimbologia extends StatelessWidget {
   const HojaSimbologia({super.key});
 
   static Future<void> mostrar(BuildContext context) {
+    OcultarTeclado.soltarFoco();
     return showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,

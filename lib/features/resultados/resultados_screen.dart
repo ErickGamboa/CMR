@@ -27,7 +27,7 @@ class _ResultadosScreenState extends State<ResultadosScreen> {
           child: Padding(
             padding: const EdgeInsets.all(32),
             child: Text(
-              'Todavía no tenés mediciones registradas.',
+              'Todavía no tienes mediciones registradas.',
               style: theme.textTheme.bodyMedium
                   ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               textAlign: TextAlign.center,

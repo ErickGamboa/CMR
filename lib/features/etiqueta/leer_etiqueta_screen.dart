@@ -65,19 +65,20 @@ class _LeerEtiquetaScreenState extends State<LeerEtiquetaScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Leer etiqueta')),
       body: ListView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
           Text('Cómo leer una etiqueta', style: theme.textTheme.titleMedium),
           const SizedBox(height: 12),
           const _Paso(
             numero: 1,
-            texto: 'Buscá el tamaño de la porción y cuántas porciones trae el '
+            texto: 'Busca el tamaño de la porción y cuántas porciones trae el '
                 'paquete. Todo lo demás está calculado sobre una sola porción.',
           ),
           const _Paso(
             numero: 2,
-            texto: 'Anotá la grasa total, los carbohidratos totales, la fibra '
-                'y la proteína. Son los cuatro números que ocupás.',
+            texto: 'Anota la grasa total, los carbohidratos totales, la fibra '
+                'y la proteína. Son los cuatro números que ocupas.',
           ),
           const _Paso(
             numero: 3,
@@ -86,8 +87,8 @@ class _LeerEtiquetaScreenState extends State<LeerEtiquetaScreen> {
           ),
           const _Paso(
             numero: 4,
-            texto: 'Convertí los gramos a equivalencias con la calculadora de '
-                'abajo y comparalos contra tu plan.',
+            texto: 'Convierte los gramos a equivalencias con la calculadora de '
+                'abajo y compáralos contra tu plan.',
           ),
           const SizedBox(height: 18),
           const _NotaPorcion(),
@@ -95,7 +96,7 @@ class _LeerEtiquetaScreenState extends State<LeerEtiquetaScreen> {
           Text('Calculadora', style: theme.textTheme.titleMedium),
           const SizedBox(height: 4),
           Text(
-            'Ingresá los gramos que dice la etiqueta por porción.',
+            'Ingresa los gramos que dice la etiqueta por porción.',
             style: theme.textTheme.bodySmall
                 ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
@@ -223,7 +224,7 @@ class _NotaPorcion extends StatelessWidget {
                 Text(
                   'Los valores de la etiqueta son de UNA porción, no del '
                   'paquete completo. Si el paquete trae 3 porciones y te lo '
-                  'comés entero, multiplicá todo por 3.',
+                  'comes entero, multiplica todo por 3.',
                   style: theme.textTheme.bodySmall,
                 ),
               ],
@@ -262,7 +263,7 @@ class _CampoGramos extends StatelessWidget {
         final texto = (v ?? '').trim();
         if (texto.isEmpty) return null; // vacío se toma como 0
         final n = double.tryParse(texto.replaceAll(',', '.'));
-        if (n == null) return 'Escribí solo números';
+        if (n == null) return 'Escribe solo números';
         if (n < 0) return 'No puede ser negativo';
         return null;
       },

@@ -71,7 +71,7 @@ class _Suplementos extends StatelessWidget {
         const SizedBox(height: 20),
         _Titulo(
           texto: 'Ejemplos y marcas',
-          detalle: 'Tocá un suplemento para ver las marcas recomendadas',
+          detalle: 'Toca un suplemento para ver las marcas recomendadas',
         ),
         const SizedBox(height: 14),
         GridView.count(

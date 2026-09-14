@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../widgets/ocultar_teclado.dart';
 import '../modelo_libro.dart';
 import 'pildora_intercambio.dart';
 
@@ -25,6 +26,7 @@ class HojaAlimento extends StatelessWidget {
     required AlimentoLibro alimento,
     required SeccionLibro seccion,
   }) {
+    OcultarTeclado.soltarFoco();
     return showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,

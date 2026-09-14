@@ -78,14 +78,14 @@ class RepositorioLibro implements FuenteLibro {
       throw FallaLibro(
         e.code == '42P01'
             ? 'El libro todavía no está cargado en el servidor.'
-            : 'No pudimos cargar el libro. Intentá de nuevo en unos minutos.',
+            : 'No pudimos cargar el libro. Intenta de nuevo en unos minutos.',
       );
     } on SocketException {
       throw const FallaLibro(
-        'No pudimos conectar. Revisá tu conexión a internet.',
+        'No pudimos conectar. Revisa tu conexión a internet.',
       );
     } on TimeoutException {
-      throw const FallaLibro('El servidor tardó demasiado. Intentá de nuevo.');
+      throw const FallaLibro('El servidor tardó demasiado. Intenta de nuevo.');
     }
   }
 }

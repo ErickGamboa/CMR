@@ -19,7 +19,7 @@ class LaboratoriosScreen extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(32),
                 child: Text(
-                  'Todavía no tenés laboratorios registrados.',
+                  'Todavía no tienes laboratorios registrados.',
                   style: theme.textTheme.bodyMedium
                       ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   textAlign: TextAlign.center,
@@ -30,7 +30,7 @@ class LaboratoriosScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
               children: [
                 Text(
-                  'Tocá una fecha para ver los resultados',
+                  'Toca una fecha para ver los resultados',
                   style: theme.textTheme.bodySmall
                       ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                 ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../widgets/ocultar_teclado.dart';
 import 'modelo_libro.dart';
 import 'repositorio_libro.dart';
 import 'widgets/fila_alimento.dart';
@@ -70,6 +71,8 @@ class _LibroScreenState extends State<LibroScreen>
 
   void _alCambiarPestana() {
     if (_pestanas.index == _pestanaActual) return;
+    // Cambiar de pestaña es irse a otra cosa: el buscador suelta el teclado.
+    OcultarTeclado.soltarFoco();
     setState(() => _pestanaActual = _pestanas.index);
   }
 
@@ -82,6 +85,7 @@ class _LibroScreenState extends State<LibroScreen>
   }
 
   void _limpiarBusqueda() {
+    OcultarTeclado.soltarFoco();
     _texto.clear();
     setState(() => _consulta = '');
   }
@@ -137,9 +141,12 @@ class _LibroScreenState extends State<LibroScreen>
               if (!enLibres)
                 _FiltrosDeGrupo(
                   seleccionados: _filtros,
-                  onCambio: (grupo) => setState(() {
-                    if (!_filtros.remove(grupo)) _filtros.add(grupo);
-                  }),
+                  onCambio: (grupo) {
+                    OcultarTeclado.soltarFoco();
+                    setState(() {
+                      if (!_filtros.remove(grupo)) _filtros.add(grupo);
+                    });
+                  },
                 ),
               Expanded(
                 child: TabBarView(
@@ -196,7 +203,7 @@ class _Buscador extends StatelessWidget {
         onChanged: onChanged,
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
-          hintText: 'Buscá un alimento o una marca',
+          hintText: 'Busca un alimento o una marca',
           prefixIcon: const Icon(Icons.search),
           suffixIcon: controller.text.isEmpty
               ? null
@@ -291,6 +298,7 @@ class _Lista extends StatelessWidget {
     }
 
     return ListView.separated(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.only(top: 4, bottom: 32),
       itemCount: entradas.length,
       separatorBuilder: (context, i) {
@@ -491,7 +499,7 @@ class _SinResultados extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              'Probá en otra pestaña o cambiá la búsqueda.',
+              'Prueba en otra pestaña o cambia la búsqueda.',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall
                   ?.copyWith(color: theme.colorScheme.onSurfaceVariant),

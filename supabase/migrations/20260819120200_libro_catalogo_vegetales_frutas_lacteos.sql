@@ -71,7 +71,7 @@ insert into libro_alimentos
 
   ('lact-010', 'lacteos', 'Leche', 'Leche doble proteína',                  array['Dos Pinos'],  '1 taza',   0,   1,   1,   0, null, 10),
   ('lact-011', 'lacteos', 'Leche', 'Leche 0% grasa',                        array['Dos Pinos'],  '1 taza',   0,   0,   1,   0, null, 11),
-  ('lact-012', 'lacteos', 'Leche', 'Leche + Proteína, diferentes sabores',  array['Dos Pinos'],  '1 unidad', 0,   1,   0,   0, '{"l": 1}', 12),
+  ('lact-012', 'lacteos', 'Leche', 'Leche + Proteína, diferentes sabores',  array['Dos Pinos'],  '1 unidad', 0,   1,   1,   0, null, 12),
   ('lact-013', 'lacteos', 'Leche', 'Choco Leche',                           array['Dos Pinos'],  '200 ml',   1,   0,   1, 0.5, null, 13),
   ('lact-014', 'lacteos', 'Leche', 'Rompope regular',                       array['Dos Pinos'],  '½ taza',   1,   0, 0.5,   0, null, 14),
 

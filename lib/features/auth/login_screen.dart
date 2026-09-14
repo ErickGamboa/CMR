@@ -38,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   String? _validarCorreo(String? valor) {
     final v = valor?.trim() ?? '';
-    if (v.isEmpty) return 'Ingresá tu correo';
+    if (v.isEmpty) return 'Ingresa tu correo';
     // Suficiente para atajar errores de tipeo; la validación real la hace
     // el servidor de autenticación.
     if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(v)) {
@@ -49,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   String? _validarClave(String? valor) {
     final v = valor ?? '';
-    if (v.isEmpty) return 'Ingresá tu contraseña';
+    if (v.isEmpty) return 'Ingresa tu contraseña';
     if (v.length < 8) return 'Debe tener al menos 8 caracteres';
     return null;
   }
@@ -87,6 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
             child: ConstrainedBox(
               // En tablet y en iPad el formulario no debe estirarse a lo ancho.
@@ -100,13 +101,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       const Center(child: CmrLogo(ancho: 220)),
                       const SizedBox(height: 44),
                       Text(
-                        'Iniciá sesión',
+                        'Inicia sesión',
                         style: theme.textTheme.headlineSmall,
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Accedé a tu control metabólico y regenerativo.',
+                        'Accede a tu control metabólico y regenerativo.',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -183,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       // contraseña, así que el usuario necesita saber a dónde ir.
                       Text(
                         'Las credenciales las entrega tu administrador. '
-                        'Si no podés ingresar, contactalo.',
+                        'Si no puedes ingresar, contáctalo.',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
