@@ -1,15 +1,15 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { EstadoPacienteBadge } from "@/components/estado-paciente";
 import { Volver } from "@/components/volver";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { COLUMNAS_PACIENTE, type Paciente } from "@/lib/pacientes";
 import { clienteServidor } from "@/lib/supabase/servidor";
 
 import { Acceso } from "./acceso";
+import { empezarConsulta } from "./acciones";
+import { AtenderBoton } from "./atender-boton";
 import { BotonesEstado } from "./botones-estado";
 import { FormularioFicha } from "./ficha";
 
@@ -66,12 +66,12 @@ export default async function PaginaPaciente({
 
           {/* Lo que el doctor viene a hacer casi siempre. Esta pantalla es
               para corregir datos; atender es el trabajo. */}
-          <Link
-            href={`/pacientes/${paciente.user_id}/atender`}
-            className={buttonVariants({ className: "w-full sm:w-auto" })}
-          >
-            Atender
-          </Link>
+          <AtenderBoton
+            accion={async () => {
+              "use server";
+              return empezarConsulta(paciente.user_id);
+            }}
+          />
         </div>
       </header>
 

@@ -143,3 +143,24 @@ export async function guardarPlan(
   revalidatePath(`/pacientes/${paciente}/atender/plan`);
   return { error: null, guardado: true };
 }
+
+/**
+ * Borra el plan de alimentación del paciente.
+ *
+ * Se va la fila entera —tabla, notas y fecha de vigencia— y no solo las
+ * casillas: un plan sin ningún intercambio no es un plan vacío, es un plan que
+ * no existe, y así la app muestra que no tiene ninguno en vez de una tabla en
+ * blanco. Los totales y el reparto cuelgan con `on delete cascade`.
+ */
+export async function limpiarPlan(paciente: string) {
+  const supabase = await clienteServidor();
+  const { error } = await supabase
+    .from("planes_alimentacion")
+    .delete()
+    .eq("paciente_id", paciente);
+
+  if (error) return { error: "No pudimos borrar el plan." };
+
+  revalidatePath(`/pacientes/${paciente}/atender/plan`);
+  return { error: null };
+}

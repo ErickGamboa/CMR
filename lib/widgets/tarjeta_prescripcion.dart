@@ -21,6 +21,16 @@ class TarjetaPrescripcion extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
+    final etiquetas = <Widget>[
+      if (prescripcion.dosis.trim().isNotEmpty)
+        _Etiqueta(texto: prescripcion.dosis, destacada: true),
+      if (prescripcion.frecuencia.trim().isNotEmpty)
+        _Etiqueta(texto: prescripcion.frecuencia),
+    ];
+
+    final texto = prescripcion.indicacion?.trim() ?? '';
+    final indicacion = texto.isEmpty ? null : texto;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
@@ -47,19 +57,18 @@ class TarjetaPrescripcion extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 6,
-                    children: [
-                      _Etiqueta(texto: prescripcion.dosis, destacada: true),
-                      _Etiqueta(texto: prescripcion.frecuencia),
-                    ],
-                  ),
-                  if (prescripcion.indicacion != null) ...[
+                  // Hay indicaciones que no tienen dosis ni frecuencia que
+                  // mostrar aparte: el doctor las escribe de corrido y todo
+                  // va en el párrafo. Una etiqueta vacía se vería como un
+                  // recuadro azul sin nada adentro.
+                  if (etiquetas.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Wrap(spacing: 8, runSpacing: 6, children: etiquetas),
+                  ],
+                  if (indicacion != null) ...[
                     const SizedBox(height: 10),
                     Text(
-                      prescripcion.indicacion!,
+                      indicacion,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),

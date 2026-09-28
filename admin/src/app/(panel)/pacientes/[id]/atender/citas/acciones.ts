@@ -62,3 +62,17 @@ export async function borrarCita(paciente: string, id: string) {
   revalidatePath(`/pacientes/${paciente}/atender/citas`);
   return { error: null };
 }
+
+/** Vacía la agenda del paciente, las pasadas y las que vienen. */
+export async function limpiarCitas(paciente: string) {
+  const supabase = await clienteServidor();
+  const { error } = await supabase
+    .from("citas")
+    .delete()
+    .eq("paciente_id", paciente);
+
+  if (error) return { error: "No pudimos limpiarlas." };
+
+  revalidatePath(`/pacientes/${paciente}/atender/citas`);
+  return { error: null };
+}

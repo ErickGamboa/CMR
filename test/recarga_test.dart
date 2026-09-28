@@ -39,6 +39,28 @@ class PacienteQueCambia extends PacienteFalso {
   }
 }
 
+/// Cuenta cuántas veces le pidieron los laboratorios.
+class LaboratoriosQueCuenta extends PacienteFalso {
+  int pedidos = 0;
+
+  @override
+  Future<List<Laboratorio>> laboratorios() async {
+    pedidos++;
+    return laboratoriosDePrueba;
+  }
+}
+
+/// Lo mismo con los videos, para tener dos pantallas distintas de testigo.
+class VideosQueCuentan extends CatalogoFalso {
+  int pedidos = 0;
+
+  @override
+  Future<List<Video>> videos() async {
+    pedidos++;
+    return videosDePrueba;
+  }
+}
+
 void main() {
   group('ControlRecarga', () {
     test('la generación sube en cada recarga', () {
@@ -161,6 +183,47 @@ void main() {
         find.widgetWithIcon(IconButton, Icons.refresh),
       );
       expect(despues.onPressed, isNotNull);
+    });
+  });
+
+  group('el botón actualiza toda la app', () {
+    testWidgets('recargar en una pantalla vuelve a pedir las otras', (
+      tester,
+    ) async {
+      // Dos pantallas montadas a la vez, como cuando el paciente entró a
+      // Laboratorios desde el inicio y el de abajo sigue en la pila.
+      final paciente = LaboratoriosQueCuenta();
+      final catalogo = VideosQueCuentan();
+
+      await _abrir(
+        tester,
+        Column(
+          children: [
+            Expanded(child: LaboratoriosScreen(fuente: paciente)),
+            Expanded(child: VideosScreen(fuente: catalogo)),
+          ],
+        ),
+      );
+
+      expect(paciente.pedidos, 1);
+      expect(catalogo.pedidos, 1);
+
+      // Se toca el de una sola de las dos.
+      await tester.tap(find.byTooltip('Actualizar').first);
+      await tester.pumpAndSettle();
+
+      expect(
+        paciente.pedidos,
+        2,
+        reason: 'la pantalla del botón que se tocó vuelve a pedir',
+      );
+      expect(
+        catalogo.pedidos,
+        2,
+        reason:
+            'la otra también: actualizar es de la app entera, no de la '
+            'pantalla en la que se está parado',
+      );
     });
   });
 

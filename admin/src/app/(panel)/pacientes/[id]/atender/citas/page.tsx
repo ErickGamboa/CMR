@@ -1,11 +1,18 @@
 import { BorrarFila } from "@/components/borrar-fila";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LimpiarTodo } from "@/components/limpiar-todo";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { LUGAR_POR_DEFECTO, TIPOS_CITA } from "@/lib/catalogos";
 import { formatearFechaHora } from "@/lib/fechas";
 import { clienteServidor } from "@/lib/supabase/servidor";
 
 import { Paso } from "../paso";
-import { borrarCita } from "./acciones";
+import { borrarCita, limpiarCitas } from "./acciones";
 import { FormularioCita } from "./formulario";
 
 type Fila = {
@@ -71,6 +78,24 @@ export default async function PasoCitas({
                   </span>
                 )}
               </CardTitle>
+              {/* Vacía la agenda entera, no solo lo pendiente: el botón está
+                  acá porque es la tarjeta que el doctor mira, pero la
+                  confirmación dice cuántas se lleva en total. */}
+              <CardAction>
+                <LimpiarTodo
+                  que="la agenda"
+                  cuantos={citas.length}
+                  advertencia={
+                    pasadas.length > 0
+                      ? `Incluye ${pasadas.length === 1 ? "la anterior" : `las ${pasadas.length} anteriores`}.`
+                      : undefined
+                  }
+                  onLimpiar={async () => {
+                    "use server";
+                    return limpiarCitas(id);
+                  }}
+                />
+              </CardAction>
             </CardHeader>
             <CardContent>
               {pendientes.length === 0 ? (

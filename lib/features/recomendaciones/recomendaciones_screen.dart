@@ -19,23 +19,15 @@ class RecomendacionesScreen extends StatefulWidget {
 }
 
 class _RecomendacionesScreenState extends State<RecomendacionesScreen> {
-  final _recarga = ControlRecarga();
-
-  @override
-  void dispose() {
-    _recarga.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recomendaciones'),
-        actions: [BotonRecargar(control: _recarga)],
+        actions: [BotonRecargar(control: recargaGlobal)],
       ),
       body: CargaDeDatos<List<Recomendacion>>(
-        control: _recarga,
+        control: recargaGlobal,
         cargar: () =>
             (widget.fuente ?? RepositorioPaciente()).recomendaciones(),
         vacio: const SinDatos(

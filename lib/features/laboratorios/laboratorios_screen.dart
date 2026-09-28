@@ -20,23 +20,15 @@ class LaboratoriosScreen extends StatefulWidget {
 }
 
 class _LaboratoriosScreenState extends State<LaboratoriosScreen> {
-  final _recarga = ControlRecarga();
-
-  @override
-  void dispose() {
-    _recarga.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Laboratorios'),
-        actions: [BotonRecargar(control: _recarga)],
+        actions: [BotonRecargar(control: recargaGlobal)],
       ),
       body: CargaDeDatos<List<Laboratorio>>(
-        control: _recarga,
+        control: recargaGlobal,
         cargar: () => (widget.fuente ?? RepositorioPaciente()).laboratorios(),
         vacio: const SinDatos(
           icono: Icons.science_outlined,
@@ -182,13 +174,18 @@ class _FilaAnalisis extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(analisis.nombre, style: theme.textTheme.bodyMedium),
-                const SizedBox(height: 2),
-                Text(
-                  'Ref. ${analisis.referencia} ${analisis.unidad}',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
+                // La línea de referencia solo aparece si hay una. La clínica
+                // no maneja rangos, y un "Ref.  mg/dl" con el hueco vacío se
+                // lee como que la app perdió un dato.
+                if (analisis.referencia.trim().isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    'Ref. ${analisis.referencia} ${analisis.unidad}'.trim(),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),

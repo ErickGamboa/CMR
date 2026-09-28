@@ -57,7 +57,6 @@ class _InicioScreenState extends State<InicioScreen> {
   // Se piden una sola vez por sesión de pantalla: la lista de módulos no
   // cambia mientras el paciente usa la app, la cambia el doctor.
   late Future<Set<String>> _habilitados = _cargarModulos();
-  final _recarga = ControlRecarga();
   int _generacionVista = 0;
 
   Future<Set<String>> _cargarModulos() =>
@@ -66,14 +65,12 @@ class _InicioScreenState extends State<InicioScreen> {
   @override
   void initState() {
     super.initState();
-    _recarga.addListener(_alPedirRecarga);
+    recargaGlobal.addListener(_alPedirRecarga);
   }
 
   @override
   void dispose() {
-    _recarga
-      ..removeListener(_alPedirRecarga)
-      ..dispose();
+    recargaGlobal.removeListener(_alPedirRecarga);
     super.dispose();
   }
 
@@ -81,9 +78,9 @@ class _InicioScreenState extends State<InicioScreen> {
   /// tiene habilitados. Si el doctor le prendió Mapeo mientras la app estaba
   /// abierta, la ficha aparece sin reinstalar nada.
   void _alPedirRecarga() {
-    if (_recarga.generacion == _generacionVista || !mounted) return;
+    if (recargaGlobal.generacion == _generacionVista || !mounted) return;
 
-    _generacionVista = _recarga.generacion;
+    _generacionVista = recargaGlobal.generacion;
     setState(() {
       _portada = _cargarPortada();
       _habilitados = _cargarModulos();
@@ -152,7 +149,7 @@ class _InicioScreenState extends State<InicioScreen> {
       appBar: AppBar(
         title: const CmrLogo(variante: CmrLogoVariante.marca, alto: 24),
         actions: [
-          BotonRecargar(control: _recarga),
+          BotonRecargar(control: recargaGlobal),
           IconButton(
             onPressed: () => _abrirMiCuenta(context),
             icon: const Icon(Icons.person_outline),

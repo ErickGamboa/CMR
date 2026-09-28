@@ -95,3 +95,23 @@ export async function borrarMedicion(paciente: string, id: string) {
   revalidatePath(`/pacientes/${paciente}/atender/mediciones`);
   return { error: null };
 }
+
+/**
+ * Vacía el historial de mediciones del paciente.
+ *
+ * Es el más delicado de los cuatro: con esto se van las gráficas del Home y
+ * la comparación con la medición anterior, que no se reconstruyen de ningún
+ * otro lado. El aviso de la confirmación lo dice.
+ */
+export async function limpiarMediciones(paciente: string) {
+  const supabase = await clienteServidor();
+  const { error } = await supabase
+    .from("mediciones")
+    .delete()
+    .eq("paciente_id", paciente);
+
+  if (error) return { error: "No pudimos limpiarlas." };
+
+  revalidatePath(`/pacientes/${paciente}/atender/mediciones`);
+  return { error: null };
+}

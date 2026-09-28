@@ -1,10 +1,17 @@
 import { BorrarFila } from "@/components/borrar-fila";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LimpiarTodo } from "@/components/limpiar-todo";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { formatearFechaCorta } from "@/lib/fechas";
 import { clienteServidor } from "@/lib/supabase/servidor";
 
 import { Paso } from "../paso";
-import { borrarMedicion } from "./acciones";
+import { borrarMedicion, limpiarMediciones } from "./acciones";
 import { FormularioMedicion } from "./formulario";
 
 type Fila = {
@@ -72,6 +79,17 @@ export default async function PasoMediciones({
                 </span>
               )}
             </CardTitle>
+            <CardAction>
+              <LimpiarTodo
+                que="el historial"
+                cuantos={mediciones.length}
+                advertencia="Con esto se van las gráficas del inicio y la comparación con la medición anterior, que no se reconstruyen de ningún otro lado."
+                onLimpiar={async () => {
+                  "use server";
+                  return limpiarMediciones(id);
+                }}
+              />
+            </CardAction>
           </CardHeader>
           <CardContent>
             {mediciones.length === 0 ? (

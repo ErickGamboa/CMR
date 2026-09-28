@@ -1,11 +1,24 @@
 import { BorrarFila } from "@/components/borrar-fila";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SelectorIndicaciones } from "@/components/indicaciones/selector";
+import { LimpiarTodo } from "@/components/limpiar-todo";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { cargarPlantillas } from "@/lib/catalogo";
 import { formatearFechaCorta } from "@/lib/fechas";
+import type { DatosAgregar } from "@/lib/indicaciones";
 import { clienteServidor } from "@/lib/supabase/servidor";
 
 import { Paso } from "../paso";
-import { borrarRecomendacion } from "./acciones";
-import { FormularioRecomendacion, type Icono } from "./formulario";
+import {
+  agregarRecomendacion,
+  borrarRecomendacion,
+  limpiarRecomendaciones,
+} from "./acciones";
 
 type Fila = {
   id: string;
@@ -23,7 +36,8 @@ export default async function PasoRecomendaciones({
   const { id } = await params;
   const supabase = await clienteServidor();
 
-  const [{ data: filas }, { data: iconos }] = await Promise.all([
+  const [plantillas, { data: filas }, { data: iconos }] = await Promise.all([
+    cargarPlantillas(["recomendacion"]),
     supabase
       .from("recomendaciones")
       .select("id, fecha, titulo, texto, icono")
@@ -37,25 +51,42 @@ export default async function PasoRecomendaciones({
   ]);
 
   const recomendaciones = (filas ?? []) as Fila[];
-  const hoy = new Date();
-  const hoyIso = [
-    hoy.getFullYear(),
-    String(hoy.getMonth() + 1).padStart(2, "0"),
-    String(hoy.getDate()).padStart(2, "0"),
-  ].join("-");
 
   return (
     <Paso clave="recomendaciones" id={id}>
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:items-start">
+      <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Nueva recomendación</CardTitle>
+            <CardTitle className="text-base">Dejarle una</CardTitle>
           </CardHeader>
           <CardContent>
-            <FormularioRecomendacion
-              paciente={id}
-              hoy={hoyIso}
-              iconos={(iconos ?? []) as Icono[]}
+            <SelectorIndicaciones
+              modo="recomendacion"
+              grupos={[
+                {
+                  clave: "recomendacion",
+                  titulo: "Recomendaciones",
+                  plantillas,
+                },
+              ]}
+              camposLibres={[
+                { clave: "titulo", etiqueta: "Título" },
+                {
+                  clave: "icono",
+                  etiqueta: "Ícono",
+                  // La lista sale de la tabla `iconos`, espejo del catálogo
+                  // cerrado de la app: un nombre que no esté ahí sale
+                  // genérico.
+                  opciones: (
+                    (iconos ?? []) as { nombre: string; etiqueta: string }[]
+                  ).map((i) => ({ valor: i.nombre, etiqueta: i.etiqueta })),
+                },
+                { clave: "texto", etiqueta: "Recomendación", largo: true },
+              ]}
+              accion={async (datos: DatosAgregar) => {
+                "use server";
+                return agregarRecomendacion(id, datos);
+              }}
             />
           </CardContent>
         </Card>
@@ -70,6 +101,16 @@ export default async function PasoRecomendaciones({
                 </span>
               )}
             </CardTitle>
+            <CardAction>
+              <LimpiarTodo
+                que="las recomendaciones"
+                cuantos={recomendaciones.length}
+                onLimpiar={async () => {
+                  "use server";
+                  return limpiarRecomendaciones(id);
+                }}
+              />
+            </CardAction>
           </CardHeader>
           <CardContent>
             {recomendaciones.length === 0 ? (

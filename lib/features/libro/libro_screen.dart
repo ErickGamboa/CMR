@@ -53,14 +53,13 @@ class _LibroScreenState extends State<LibroScreen>
     final fuente = _fuente ??=
         widget.fuente ?? RepositorioLibro(Supabase.instance.client);
 
-    _recarga.iniciar();
+    recargaGlobal.iniciar();
     return (deNuevo ? fuente.recargar() : fuente.cargar()).whenComplete(
-      _recarga.terminar,
+      recargaGlobal.terminar,
     );
   }
 
   final TextEditingController _texto = TextEditingController();
-  final _recarga = ControlRecarga();
   int _generacionVista = 0;
 
   /// Ya normalizada, para no repetir el trabajo en cada fila.
@@ -75,13 +74,13 @@ class _LibroScreenState extends State<LibroScreen>
   @override
   void initState() {
     super.initState();
-    _recarga.addListener(_alPedirRecarga);
+    recargaGlobal.addListener(_alPedirRecarga);
   }
 
   void _alPedirRecarga() {
-    if (_recarga.generacion == _generacionVista || !mounted) return;
+    if (recargaGlobal.generacion == _generacionVista || !mounted) return;
 
-    _generacionVista = _recarga.generacion;
+    _generacionVista = recargaGlobal.generacion;
     setState(() {
       _carga = _cargar(deNuevo: true);
     });
@@ -99,9 +98,7 @@ class _LibroScreenState extends State<LibroScreen>
     _pestanas.removeListener(_alCambiarPestana);
     _pestanas.dispose();
     _texto.dispose();
-    _recarga
-      ..removeListener(_alPedirRecarga)
-      ..dispose();
+    recargaGlobal.removeListener(_alPedirRecarga);
     super.dispose();
   }
 
@@ -117,7 +114,7 @@ class _LibroScreenState extends State<LibroScreen>
       appBar: AppBar(
         title: const Text('Libro'),
         actions: [
-          BotonRecargar(control: _recarga),
+          BotonRecargar(control: recargaGlobal),
           IconButton(
             onPressed: () => HojaSimbologia.mostrar(context),
             icon: const Icon(Icons.help_outline),

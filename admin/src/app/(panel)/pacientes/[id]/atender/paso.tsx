@@ -1,8 +1,12 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { buttonVariants } from "@/components/ui/button";
+import { cerrarConsulta, marcarPaso } from "@/lib/consultas";
 import { buscarPaso, type ClavePaso } from "@/lib/pasos";
+
+import { Siguiente, TerminarConsulta } from "./avanzar";
 
 /**
  * El cuerpo de un paso: título, contenido, y avanzar o retroceder.
@@ -68,24 +72,25 @@ export function Paso({
         )}
 
         {siguiente ? (
-          <Link
-            href={`${base}/${siguiente.clave}`}
-            className={buttonVariants({ className: "group gap-1.5" })}
-          >
-            <span className="hidden sm:inline">{siguiente.titulo}</span>
-            <span className="sm:hidden">Siguiente</span>
-            <ChevronRight
-              aria-hidden
-              className="size-4 transition-transform duration-200 group-hover:translate-x-0.5"
-            />
-          </Link>
+          <Siguiente
+            titulo={siguiente.titulo}
+            accion={async () => {
+              "use server";
+              // El orden importa: primero queda el visto, después se navega.
+              // `redirect` corta la función, así que marcar después no se
+              // llegaría a ejecutar nunca.
+              await marcarPaso(id, clave);
+              redirect(`${base}/${siguiente.clave}`);
+            }}
+          />
         ) : (
-          <Link
-            href={`/pacientes/${id}`}
-            className={buttonVariants({ variant: "outline" })}
-          >
-            Terminar consulta
-          </Link>
+          <TerminarConsulta
+            accion={async () => {
+              "use server";
+              await cerrarConsulta(id);
+              redirect(`/pacientes/${id}`);
+            }}
+          />
         )}
       </nav>
     </section>

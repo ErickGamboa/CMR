@@ -20,23 +20,15 @@ class ResultadosScreen extends StatefulWidget {
 }
 
 class _ResultadosScreenState extends State<ResultadosScreen> {
-  final _recarga = ControlRecarga();
-
-  @override
-  void dispose() {
-    _recarga.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Resultados'),
-        actions: [BotonRecargar(control: _recarga)],
+        actions: [BotonRecargar(control: recargaGlobal)],
       ),
       body: CargaDeDatos<List<Medicion>>(
-        control: _recarga,
+        control: recargaGlobal,
         cargar: () => (widget.fuente ?? RepositorioPaciente()).mediciones(),
         vacio: const SinDatos(
           icono: Icons.insights_outlined,

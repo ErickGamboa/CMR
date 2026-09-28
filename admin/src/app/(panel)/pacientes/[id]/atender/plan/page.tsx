@@ -3,6 +3,7 @@ import { escribirCelda } from "@/lib/plan";
 import { clienteServidor } from "@/lib/supabase/servidor";
 
 import { Paso } from "../paso";
+import { limpiarPlan } from "./acciones";
 import { TablaPlan, type PlanCargado } from "./tabla";
 
 /** Postgres devuelve los `numeric` como texto. */
@@ -59,7 +60,18 @@ export default async function PasoPlan({
     <Paso clave="plan" id={id}>
       <Card>
         <CardContent>
-          <TablaPlan paciente={id} plan={cargado} />
+          <TablaPlan
+            paciente={id}
+            plan={cargado}
+            // Solo hay uno activo por paciente, así que limpiar es uno o cero.
+            // Va dentro de la tabla, al lado de Guardar: es donde el doctor
+            // está mirando cuando decide que este plan no sirve.
+            cuantos={plan?.id ? 1 : 0}
+            onLimpiar={async () => {
+              "use server";
+              return limpiarPlan(id);
+            }}
+          />
         </CardContent>
       </Card>
     </Paso>

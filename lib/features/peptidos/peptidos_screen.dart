@@ -21,14 +21,6 @@ class PeptidosScreen extends StatefulWidget {
 class _PeptidosScreenState extends State<PeptidosScreen> {
   // Un solo control para las dos pestañas: el botón está en la barra, que es
   // común, y recargar una sola dejaría la otra vieja sin que se note.
-  final _recarga = ControlRecarga();
-
-  @override
-  void dispose() {
-    _recarga.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final datos = widget.fuente ?? RepositorioPaciente();
@@ -38,7 +30,7 @@ class _PeptidosScreenState extends State<PeptidosScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Péptidos y medicamentos'),
-          actions: [BotonRecargar(control: _recarga)],
+          actions: [BotonRecargar(control: recargaGlobal)],
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Péptidos'),
@@ -49,13 +41,13 @@ class _PeptidosScreenState extends State<PeptidosScreen> {
         body: TabBarView(
           children: [
             _Lista(
-              control: _recarga,
+              control: recargaGlobal,
               cargar: () => datos.prescripciones(TipoPrescripcion.peptido),
               icono: Icons.vaccines_outlined,
               vacio: 'Todavía no tienes péptidos asignados.',
             ),
             _Lista(
-              control: _recarga,
+              control: recargaGlobal,
               cargar: () => datos.prescripciones(TipoPrescripcion.medicamento),
               icono: Icons.medication_outlined,
               vacio: 'Todavía no tienes medicamentos asignados.',

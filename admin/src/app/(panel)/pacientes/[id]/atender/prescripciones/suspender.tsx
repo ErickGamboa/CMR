@@ -34,13 +34,13 @@ export function Suspender({
   }
 
   return (
-    <>
+    <div className="mt-1 -ml-2">
       <Button
         variant="ghost"
         size="sm"
         onClick={cambiar}
         disabled={enCurso}
-        className="text-muted-foreground transition-colors hover:text-foreground"
+        className="h-7 px-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
       >
         {enCurso ? "…" : activo ? "Suspender" : "Reactivar"}
       </Button>
@@ -49,6 +49,6 @@ export function Suspender({
           {error}
         </p>
       )}
-    </>
+    </div>
   );
 }

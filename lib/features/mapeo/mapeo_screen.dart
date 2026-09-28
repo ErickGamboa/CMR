@@ -32,13 +32,10 @@ class _MapeoScreenState extends State<MapeoScreen>
   )..addListener(OcultarTeclado.soltarFoco);
 
   // Un control para las dos pestañas: el botón está en la barra, que es común.
-  final _recarga = ControlRecarga();
-
   @override
   void dispose() {
     _pestanas.removeListener(OcultarTeclado.soltarFoco);
     _pestanas.dispose();
-    _recarga.dispose();
     super.dispose();
   }
 
@@ -47,7 +44,7 @@ class _MapeoScreenState extends State<MapeoScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mapeo'),
-        actions: [BotonRecargar(control: _recarga)],
+        actions: [BotonRecargar(control: recargaGlobal)],
         bottom: TabBar(
           controller: _pestanas,
           tabs: [for (final t in TipoMapeo.values) Tab(text: t.etiqueta)],
@@ -57,7 +54,7 @@ class _MapeoScreenState extends State<MapeoScreen>
         controller: _pestanas,
         children: [
           for (final t in TipoMapeo.values)
-            _Pestana(tipo: t, fuente: widget.fuente, control: _recarga),
+            _Pestana(tipo: t, fuente: widget.fuente, control: recargaGlobal),
         ],
       ),
     );

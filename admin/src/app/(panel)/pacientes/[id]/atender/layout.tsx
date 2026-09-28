@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 import { EstadoPacienteBadge } from "@/components/estado-paciente";
 import { Volver } from "@/components/volver";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { pasosDeLaConsulta } from "@/lib/consultas";
 import { COLUMNAS_PACIENTE, type Paciente } from "@/lib/pacientes";
-import { PASOS, type ClavePaso } from "@/lib/pasos";
 import { clienteServidor } from "@/lib/supabase/servidor";
 
 import { PasosNav } from "./pasos-nav";
@@ -23,29 +23,20 @@ export default async function LayoutAtender({
   const { id } = await params;
   const supabase = await clienteServidor();
 
-  const { data } = await supabase
-    .from("pacientes")
-    .select(COLUMNAS_PACIENTE)
-    .eq("user_id", id)
-    .maybeSingle();
+  const [{ data }, hechos] = await Promise.all([
+    supabase
+      .from("pacientes")
+      .select(COLUMNAS_PACIENTE)
+      .eq("user_id", id)
+      .maybeSingle(),
+    // Lo palomeado es lo de **esta** consulta, no lo que el paciente tenga
+    // cargado de antes: a la segunda visita eso dejaba los siete pasos en
+    // verde antes de empezar.
+    pasosDeLaConsulta(id),
+  ]);
 
   const paciente = data as unknown as Paciente | null;
   if (!paciente) notFound();
-
-  // Los conteos salen en paralelo: son siete consultas chiquitas y esperarlas
-  // en fila multiplicaría por siete lo que tarda la página en aparecer.
-  const pares = await Promise.all(
-    PASOS.map(async (p) => {
-      const { count } = await supabase
-        .from(p.tabla)
-        .select("*", { count: "exact", head: true })
-        .eq("paciente_id", id);
-
-      return [p.clave, count ?? 0] as const;
-    }),
-  );
-
-  const conteos = Object.fromEntries(pares) as Record<ClavePaso, number>;
 
   return (
     <div className="space-y-8">
@@ -59,7 +50,7 @@ export default async function LayoutAtender({
           <EstadoPacienteBadge estado={paciente.estado} />
         </div>
 
-        <PasosNav base={`/pacientes/${id}/atender`} conteos={conteos} />
+        <PasosNav base={`/pacientes/${id}/atender`} hechos={[...hechos]} />
       </header>
 
       {paciente.estado !== "activo" && (

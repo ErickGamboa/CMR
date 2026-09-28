@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { Campo } from "@/components/campo";
+import { LimpiarTodo } from "@/components/limpiar-todo";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -40,22 +41,36 @@ const llave = (g: Grupo, t: Tiempo) => `${g}.${t}`;
 export function TablaPlan({
   paciente,
   plan,
+  cuantos,
+  onLimpiar,
 }: {
   paciente: string;
   plan: PlanCargado;
+  /** 1 si el paciente ya tiene plan, 0 si no. */
+  cuantos: number;
+  onLimpiar: () => Promise<{ error: string | null }>;
 }) {
   const [estado, enviar] = useActionState(guardarPlan, SIN_ENVIAR);
 
-  // Controladas para poder sumar mientras el doctor escribe. Se resincronizan
-  // cuando el servidor manda datos distintos —al guardar—, comparando el
+  // Los tres campos van controlados. Las celdas, para poder sumar mientras el
+  // doctor escribe; la fecha y las notas, porque con `defaultValue` Base UI
+  // avisa —y con razón— cuando el valor de partida cambia después de montado:
+  // al limpiar el plan, la fecha vuelve a hoy y las notas a vacío, y un campo
+  // no controlado se quedaría mostrando lo del plan que ya no existe.
+  //
+  // Se resincronizan cuando el servidor manda datos distintos, comparando el
   // contenido y no la identidad del objeto, que cambia en cada render.
-  const [celdas, setCeldas] = useState(plan.celdas);
-  const firma = JSON.stringify(plan.celdas);
+  const firma = JSON.stringify(plan);
   const [ultimaFirma, setUltimaFirma] = useState(firma);
+  const [celdas, setCeldas] = useState(plan.celdas);
+  const [vigenteDesde, setVigenteDesde] = useState(plan.vigenteDesde);
+  const [notas, setNotas] = useState(plan.notas);
 
   if (firma !== ultimaFirma) {
     setUltimaFirma(firma);
     setCeldas(plan.celdas);
+    setVigenteDesde(plan.vigenteDesde);
+    setNotas(plan.notas);
   }
 
   return (
@@ -175,7 +190,8 @@ export function TablaPlan({
           id="vigente_desde"
           etiqueta="Vigente desde"
           tipo="date"
-          defaultValue={plan.vigenteDesde}
+          value={vigenteDesde}
+          onChange={(e) => setVigenteDesde(e.target.value)}
         />
       </div>
 
@@ -185,7 +201,8 @@ export function TablaPlan({
           id="notas"
           name="notas"
           rows={3}
-          defaultValue={plan.notas}
+          value={notas}
+          onChange={(e) => setNotas(e.target.value)}
           placeholder="Aclaraciones que el paciente ve junto a la tabla."
           className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
         />
@@ -205,7 +222,15 @@ export function TablaPlan({
         </p>
       )}
 
-      <Guardar />
+      <div className="flex flex-wrap items-center gap-3">
+        <Guardar />
+        <LimpiarTodo
+          que="el plan"
+          cuantos={cuantos}
+          advertencia="Se va la tabla entera con las notas y la fecha de vigencia, y el paciente queda sin plan."
+          onLimpiar={onLimpiar}
+        />
+      </div>
     </form>
   );
 }

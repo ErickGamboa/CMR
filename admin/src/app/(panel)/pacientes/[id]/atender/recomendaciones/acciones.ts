@@ -2,47 +2,72 @@
 
 import { revalidatePath } from "next/cache";
 
+import { cargarPlantilla } from "@/lib/catalogo";
+import {
+  armarRecomendacion,
+  faltantes,
+  type DatosAgregar,
+} from "@/lib/indicaciones";
 import { clienteServidor } from "@/lib/supabase/servidor";
 
 // Un archivo "use server" solo puede exportar funciones async. Los tipos sí
 // (se borran al compilar); las constantes van en el componente de cliente.
-export type Resultado = { error: string | null; guardado: boolean };
+export type Resultado = { error: string | null };
 
-export async function guardarRecomendacion(
-  _anterior: Resultado,
-  datos: FormData,
+/**
+ * Deja una recomendación.
+ *
+ * La frase se rearma acá con la plantilla que se lee de la base, no con lo
+ * que mandó el navegador: del cliente llegan el id y los valores escogidos y
+ * nada más. Así lo que ve el paciente no depende de que nadie haya tocado el
+ * formulario por el camino.
+ */
+export async function agregarRecomendacion(
+  paciente: string,
+  datos: DatosAgregar,
 ): Promise<Resultado> {
-  const paciente = String(datos.get("paciente") ?? "");
-  const titulo = String(datos.get("titulo") ?? "").trim();
-  const texto = String(datos.get("texto") ?? "").trim();
-  const icono = String(datos.get("icono") ?? "consejo");
-  const fecha = String(datos.get("fecha") ?? "").trim();
+  if (!paciente) return { error: "Falta el paciente." };
 
-  if (!paciente) return { error: "Falta el paciente.", guardado: false };
-  if (!titulo) return { error: "Escribí el título.", guardado: false };
-  if (!texto) return { error: "Escribí la recomendación.", guardado: false };
-
-  const supabase = await clienteServidor();
-  const { data, error } = await supabase
-    .from("recomendaciones")
-    .insert({
-      paciente_id: paciente,
-      titulo,
-      texto,
-      icono,
-      ...(fecha ? { fecha } : {}),
-    })
-    .select("id");
-
-  if (error || !data || data.length === 0) {
-    return {
-      error: "No pudimos guardarla. Intenta de nuevo.",
-      guardado: false,
-    };
+  const plantilla = await cargarPlantilla(datos.plantillaId);
+  if (!plantilla || plantilla.tipo !== "recomendacion") {
+    return { error: "Esa recomendación ya no está en el catálogo." };
   }
 
+  let fila;
+
+  if (plantilla.libre) {
+    const titulo = (datos.libre?.titulo ?? "").trim();
+    const texto = (datos.libre?.texto ?? "").trim();
+
+    if (!titulo) return { error: "Escribí el título." };
+    if (!texto) return { error: "Escribí la recomendación." };
+
+    fila = {
+      titulo,
+      texto,
+      icono: (datos.libre?.icono ?? "").trim() || "consejo",
+    };
+  } else {
+    const faltan = faltantes(plantilla, datos.valores);
+    if (faltan.length > 0) {
+      return { error: `Falta ${faltan.map((c) => c.etiqueta).join(", ").toLowerCase()}.` };
+    }
+
+    fila = armarRecomendacion(plantilla, datos.valores);
+  }
+
+  const supabase = await clienteServidor();
+  const { error } = await supabase.from("recomendaciones").insert({
+    paciente_id: paciente,
+    ...fila,
+    plantilla_id: plantilla.id,
+    valores: plantilla.libre ? null : datos.valores,
+  });
+
+  if (error) return { error: "No pudimos guardarla. Intentá de nuevo." };
+
   revalidatePath(`/pacientes/${paciente}/atender/recomendaciones`);
-  return { error: null, guardado: true };
+  return { error: null };
 }
 
 export async function borrarRecomendacion(paciente: string, id: string) {
@@ -53,6 +78,25 @@ export async function borrarRecomendacion(paciente: string, id: string) {
     .eq("id", id);
 
   if (error) return { error: "No pudimos borrarla." };
+
+  revalidatePath(`/pacientes/${paciente}/atender/recomendaciones`);
+  return { error: null };
+}
+
+/**
+ * Vacía todas las recomendaciones del paciente.
+ *
+ * Para cuando se replantea el tratamiento y la lista vieja no sirve: borrarlas
+ * de una en una eran diez confirmaciones.
+ */
+export async function limpiarRecomendaciones(paciente: string) {
+  const supabase = await clienteServidor();
+  const { error } = await supabase
+    .from("recomendaciones")
+    .delete()
+    .eq("paciente_id", paciente);
+
+  if (error) return { error: "No pudimos limpiarlas." };
 
   revalidatePath(`/pacientes/${paciente}/atender/recomendaciones`);
   return { error: null };

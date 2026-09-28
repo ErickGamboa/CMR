@@ -15,26 +15,33 @@ import { cn } from "@/lib/utils";
  * partirse y una fila con scroll lateral esconde justo lo que el indicador
  * viene a mostrar: dónde estás.
  *
- * El palomeo no significa "terminado" sino "tiene algo cargado". Una consulta
- * no obliga a llenar los siete pasos: a veces solo se pesa al paciente.
+ * El palomeo sale de apretar "Siguiente" en ese paso, y de nada más: ni de
+ * guardar algo ahí, ni de pasar por encima tocando el número. Es el doctor
+ * diciendo "con este ya terminé", que es distinto de "acá hay datos" — una
+ * visita no obliga a llenar los siete pasos, y a veces solo se pesa al
+ * paciente.
+ *
+ * Se borra al terminar la consulta, porque lo que le sirve al doctor es saber
+ * por dónde va hoy, no que el paciente tenga historial.
  */
 export function PasosNav({
   base,
-  conteos,
+  hechos,
 }: {
   base: string;
-  conteos: Record<ClavePaso, number>;
+  hechos: ClavePaso[];
 }) {
   const segmento = useSelectedLayoutSegment();
   const actual = PASOS.findIndex((p) => p.clave === segmento);
   const indice = actual === -1 ? 0 : actual;
+  const listos = new Set(hechos);
 
   return (
     <nav aria-label="Pasos de la consulta">
       <ol className="hidden items-center gap-1 lg:flex">
         {PASOS.map((p, i) => {
           const esActual = i === indice;
-          const tiene = conteos[p.clave] > 0;
+          const tiene = listos.has(p.clave);
 
           return (
             <li key={p.clave} className="flex min-w-0 flex-1 items-center">

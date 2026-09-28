@@ -3,9 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { cerrarConsulta } from "@/lib/consultas";
 import { doctorActual } from "@/lib/doctor";
 import { asignarClave, eliminarPaciente } from "@/lib/supabase/admin";
 import type { EstadoPaciente } from "@/lib/pacientes";
+import { PRIMER_PASO } from "@/lib/pasos";
 import { clienteServidor } from "@/lib/supabase/servidor";
 
 export type EstadoFicha = { error: string | null; guardado: boolean };
@@ -135,4 +137,21 @@ export async function rechazarPaciente(idPaciente: string) {
 
   revalidatePath("/pacientes");
   redirect("/pacientes");
+}
+
+/**
+ * Empieza a atender.
+ *
+ * Cierra lo que haya quedado abierto antes de entrar, así que el indicador de
+ * pasos arranca sin ningún palomeo cada vez que el doctor aprieta "Atender".
+ * Sin esto, volver a entrar al mismo paciente en el mismo día mostraba los
+ * vistos de la vuelta anterior, y el indicador dejaba de decir por dónde va
+ * **esta** consulta.
+ *
+ * No se crea la consulta acá: la abre el primer "Siguiente" que se apriete. Un
+ * doctor que entra a mirar y se sale no deja una visita registrada.
+ */
+export async function empezarConsulta(paciente: string) {
+  await cerrarConsulta(paciente);
+  redirect(`/pacientes/${paciente}/atender/${PRIMER_PASO}`);
 }

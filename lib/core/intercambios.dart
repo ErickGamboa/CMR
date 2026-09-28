@@ -111,25 +111,27 @@ class Intercambios {
   bool get vacio => _valores.isEmpty;
 
   /// Los grupos que gasta, en el orden de las columnas del libro.
-  Iterable<(GrupoIntercambio, double)> get presentes =>
-      GrupoIntercambio.values
-          .where(_valores.containsKey)
-          .map((g) => (g, _valores[g]!));
+  Iterable<(GrupoIntercambio, double)> get presentes => GrupoIntercambio.values
+      .where(_valores.containsKey)
+      .map((g) => (g, _valores[g]!));
 
   bool gasta(GrupoIntercambio grupo) => _valores.containsKey(grupo);
 
   /// "1 carbohidrato + 1 grasa". Es la forma en que la hoja de detalle explica
   /// el conteo, porque "1 C + 1 G" no lo entiende nadie la primera vez.
   String enPalabras() => presentes
-      .map((e) => '${formatearCantidad(e.$2)} '
-          '${e.$2 == 1 ? e.$1.singular : e.$1.plural}')
+      .map(
+        (e) =>
+            '${formatearCantidad(e.$2)} '
+            '${e.$2 == 1 ? e.$1.singular : e.$1.plural}',
+      )
       .join(' + ');
 
   static double _aDouble(Object? valor) => switch (valor) {
-        num v => v.toDouble(),
-        String v => double.tryParse(v) ?? 0,
-        _ => 0,
-      };
+    num v => v.toDouble(),
+    String v => double.tryParse(v) ?? 0,
+    _ => 0,
+  };
 }
 
 /// Escribe las cantidades como las escribe el libro: los medios con ½ en vez
@@ -143,4 +145,3 @@ String formatearCantidad(double cantidad) {
   if (resto.abs() < 0.01) return '$entero';
   return cantidad.toStringAsFixed(2).replaceFirst(RegExp(r'0+$'), '');
 }
-

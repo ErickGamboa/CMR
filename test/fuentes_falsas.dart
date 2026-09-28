@@ -104,7 +104,7 @@ final laboratoriosDePrueba = <Laboratorio>[
         referencia: '70 – 99',
       ),
       AnalisisLab(
-        nombre: 'Emoglobina glicada',
+        nombre: 'Hemoglobina glicada',
         valor: '5.8',
         unidad: '%',
         referencia: '< 5.7',

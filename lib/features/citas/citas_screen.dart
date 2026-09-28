@@ -26,14 +26,6 @@ class CitasScreen extends StatefulWidget {
 }
 
 class _CitasScreenState extends State<CitasScreen> {
-  final _recarga = ControlRecarga();
-
-  @override
-  void dispose() {
-    _recarga.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -41,7 +33,7 @@ class _CitasScreenState extends State<CitasScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Mis citas'),
-          actions: [BotonRecargar(control: _recarga)],
+          actions: [BotonRecargar(control: recargaGlobal)],
           bottom: TabBar(
             tabs: [
               for (final tipo in TipoCita.values) Tab(text: tipo.etiqueta),
@@ -51,7 +43,7 @@ class _CitasScreenState extends State<CitasScreen> {
         // Se piden todas de una y se reparten en las pestañas: son dos vistas
         // de la misma agenda, no dos consultas.
         body: CargaDeDatos<List<Cita>>(
-          control: _recarga,
+          control: recargaGlobal,
           cargar: () => (widget.fuente ?? RepositorioPaciente()).citas(),
           constructor: (context, citas) => TabBarView(
             children: [

@@ -23,23 +23,15 @@ class VideosScreen extends StatefulWidget {
 }
 
 class _VideosScreenState extends State<VideosScreen> {
-  final _recarga = ControlRecarga();
-
-  @override
-  void dispose() {
-    _recarga.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Videos'),
-        actions: [BotonRecargar(control: _recarga)],
+        actions: [BotonRecargar(control: recargaGlobal)],
       ),
       body: CargaDeDatos<List<Video>>(
-        control: _recarga,
+        control: recargaGlobal,
         cargar: () => (widget.fuente ?? RepositorioCatalogo()).videos(),
         vacio: const SinDatos(
           icono: Icons.play_circle_outline,
@@ -79,13 +71,6 @@ class _Lista extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
-        Text(
-          'Se abren fuera de la app',
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: scheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 14),
         for (final v in videos)
           Card(
             margin: const EdgeInsets.only(bottom: 12),

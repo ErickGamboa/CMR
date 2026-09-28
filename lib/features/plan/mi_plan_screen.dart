@@ -35,14 +35,6 @@ class MiPlanScreen extends StatefulWidget {
 
 class _MiPlanScreenState extends State<MiPlanScreen> {
   // Un control para las dos pestañas: el botón está en la barra, que es común.
-  final _recarga = ControlRecarga();
-
-  @override
-  void dispose() {
-    _recarga.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -50,7 +42,7 @@ class _MiPlanScreenState extends State<MiPlanScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Mi plan'),
-          actions: [BotonRecargar(control: _recarga)],
+          actions: [BotonRecargar(control: recargaGlobal)],
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Alimentos'),
@@ -60,11 +52,11 @@ class _MiPlanScreenState extends State<MiPlanScreen> {
         ),
         body: TabBarView(
           children: [
-            PlanAlimentacionVista(fuente: widget.fuentePlan, control: _recarga),
+            PlanAlimentacionVista(fuente: widget.fuentePlan, control: recargaGlobal),
             _Suplementos(
               paciente: widget.fuentePaciente,
               catalogo: widget.fuenteCatalogo,
-              control: _recarga,
+              control: recargaGlobal,
             ),
           ],
         ),

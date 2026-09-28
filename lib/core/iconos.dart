@@ -18,6 +18,7 @@ const _catalogo = <String, IconData>{
   'corazon': Icons.favorite_outline,
   'ayuno': Icons.schedule_outlined,
   'sol': Icons.wb_sunny_outlined,
+  'evitar': Icons.block_outlined,
 
   // Categorías de suplementos
   'suplemento': Icons.medication_liquid_outlined,

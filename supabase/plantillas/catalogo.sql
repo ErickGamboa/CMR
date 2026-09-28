@@ -49,6 +49,20 @@ insert into suplemento_marcas (categoria_id, nombre, presentacion, orden) values
 -- La app no los reproduce adentro: abre la URL en YouTube, en el navegador o
 -- en lo que corresponda. Despublicar en vez de borrar conserva el enlace por
 -- si se vuelve a usar.
+--
+-- Los que graba la clínica viven en el bucket público `videos` de Supabase
+-- Storage. Antes de subirlos hay que convertirlos, porque lo que sale del
+-- iPhone no sirve para esto: viene en HEVC dentro de un .mov y con el índice
+-- al final del archivo, así que el teléfono del paciente lo baja completo
+-- antes de mostrar el primer cuadro, y en varios Android no se ve del todo.
+--
+--   ffmpeg -i entrada.mov -c:v libx264 -preset slow -crf 23 \
+--          -profile:v high -pix_fmt yuv420p -c:a aac -b:a 128k \
+--          -movflags +faststart salida.mp4
+--
+-- `+faststart` es lo que pone el índice adelante. Para uno largo conviene dos
+-- pasadas con `-b:v 2900k` en vez de `-crf`, que deja el tamaño predecible:
+-- el plan gratis rechaza cualquier archivo de más de 50 MB.
 
 insert into videos (titulo, descripcion, url, orden, publicado) values
   ('Video de prueba', 'Se reemplaza cuando lleguen los oficiales.',

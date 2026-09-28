@@ -56,10 +56,30 @@ class ControlRecarga extends ChangeNotifier {
 
   @override
   void dispose() {
+    // El global no se libera: vive lo que vive la app. Si una pantalla lo
+    // soltara al salir, el botón quedaría muerto en todas las demás y no se
+    // notaría hasta que alguien lo tocara.
+    assert(
+      !identical(this, recargaGlobal),
+      'El control global de recarga no se libera.',
+    );
+
     _vivo = false;
     super.dispose();
   }
 }
+
+/// El control que comparte toda la app.
+///
+/// Recargar es una sola cosa. El paciente aprieta "actualizar" porque quiere
+/// ver lo que el doctor le acaba de cargar, no porque quiera refrescar la
+/// pantalla en la que está parado; si vuelve al inicio y sigue viendo el peso
+/// viejo, el botón no hizo lo que decía.
+///
+/// Así que el control es uno solo y todas las pantallas montadas lo escuchan:
+/// tocarlo en Laboratorios también vuelve a pedir el resumen del Home y lo que
+/// haya detrás en la pila.
+final recargaGlobal = ControlRecarga();
 
 /// El botón de recargar que va en la barra superior.
 ///

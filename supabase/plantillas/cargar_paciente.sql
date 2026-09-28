@@ -74,7 +74,7 @@ select examen.id, a.nombre, a.valor, a.unidad, a.ref, a.fuera, a.orden
   from examen,
        (values
          ('Glucosa en ayunas',  '92',  'mg/dL', '70 – 99', false, 1),
-         ('Emoglobina glicada', '5.8', '%',     '< 5.7',   true,  2),
+         ('Hemoglobina glicada', '5.8', '%',     '< 5.7',   true,  2),
          ('Colesterol total',   '178', 'mg/dL', '< 200',   false, 3)
        ) as a(nombre, valor, unidad, ref, fuera, orden);
 

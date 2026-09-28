@@ -62,9 +62,8 @@ export const PASOS: Paso[] = [
   {
     clave: "laboratorios",
     titulo: "Laboratorios",
-    detalle: "Exámenes con sus valores y referencias.",
+    detalle: "Los resultados que trae el reporte.",
     tabla: "laboratorios",
-    pendiente: true,
   },
   {
     clave: "mapeo",

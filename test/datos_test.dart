@@ -274,12 +274,9 @@ void main() {
   });
 
   group('datos cargados', () {
-    testWidgets('Videos lista lo publicado y avisa que abre afuera', (
-      tester,
-    ) async {
+    testWidgets('Videos lista lo publicado', (tester) async {
       await _abrir(tester, VideosScreen(fuente: CatalogoFalso()));
 
-      expect(find.text('Se abren fuera de la app'), findsOneWidget);
       for (final v in videosDePrueba) {
         expect(find.text(v.titulo), findsOneWidget, reason: v.titulo);
       }
