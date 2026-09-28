@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { ingresar, type EstadoIngreso } from "./acciones";
+import { ingresar, type EstadoIngreso } from "@/app/acciones";
 
 const inicial: EstadoIngreso = { error: null };
 

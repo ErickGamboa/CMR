@@ -5,6 +5,7 @@ import 'package:cmr_app/core/auth/servicio_auth.dart';
 import 'package:cmr_app/core/cuenta/estado_cuenta.dart';
 import 'package:cmr_app/features/auth/crear_cuenta_screen.dart';
 import 'package:cmr_app/features/auth/login_screen.dart';
+import 'package:cmr_app/features/auth/recuperar_clave_screen.dart';
 import 'package:cmr_app/features/cuenta/mi_cuenta_screen.dart';
 import 'package:cmr_app/features/inicio/home_shell.dart';
 import 'package:cmr_app/main.dart';
@@ -225,6 +226,99 @@ void main() {
       expect(find.byType(LoginScreen), findsOneWidget);
       expect(auth.autenticado, isFalse);
       expect(find.textContaining('Tu solicitud se envió'), findsOneWidget);
+    });
+  });
+
+  // La pantalla existe pero el login todavía no la enlaza: mandar el código
+  // necesita correo saliente y el proyecto no lo tiene. Los tests la abren
+  // directo para que no se pudra mientras espera.
+  group('recuperar la contraseña', () {
+    Future<void> pedirCodigo(WidgetTester tester, {String? correo}) async {
+      await _abrir(
+        tester,
+        RecuperarClaveScreen(auth: auth, correo: correo),
+      );
+    }
+
+    testWidgets('arranca con el correo que traiga del login', (tester) async {
+      await pedirCodigo(tester, correo: 'maria@ejemplo.com');
+
+      // No se lo vuelve a preguntar: lo acaba de escribir una pantalla atrás.
+      expect(find.text('maria@ejemplo.com'), findsOneWidget);
+    });
+
+    testWidgets('pide el código y recién ahí muestra el resto', (tester) async {
+      await pedirCodigo(tester, correo: 'maria@ejemplo.com');
+
+      // Antes de mandarlo no tiene sentido pedir un código que no existe.
+      expect(find.widgetWithText(TextFormField, 'Código del correo'),
+          findsNothing);
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Enviar código'));
+      await tester.pumpAndSettle();
+
+      expect(auth.codigosPedidos, ['maria@ejemplo.com']);
+      expect(find.widgetWithText(TextFormField, 'Código del correo'),
+          findsOneWidget);
+      expect(find.widgetWithText(TextFormField, 'Contraseña nueva'),
+          findsOneWidget);
+    });
+
+    testWidgets('no dice si ese correo tiene cuenta o no', (tester) async {
+      await pedirCodigo(tester, correo: 'quiensabe@ejemplo.com');
+      await tester.tap(find.widgetWithText(FilledButton, 'Enviar código'));
+      await tester.pumpAndSettle();
+
+      // Un mensaje distinto según exista o no sería una forma de averiguar
+      // quién es paciente de la clínica.
+      expect(find.textContaining('Si ese correo tiene una cuenta'),
+          findsOneWidget);
+    });
+
+    testWidgets('cambia la contraseña sin dejar sesión abierta', (
+      tester,
+    ) async {
+      await pedirCodigo(tester, correo: 'maria@ejemplo.com');
+      await tester.tap(find.widgetWithText(FilledButton, 'Enviar código'));
+      await tester.pumpAndSettle();
+
+      await _escribir(tester, 'Código del correo', '123456');
+      await _escribir(tester, 'Contraseña nueva', 'nuevaclave1');
+      await tester.tap(find.widgetWithText(FilledButton, 'Cambiar contraseña'));
+      await tester.pumpAndSettle();
+
+      expect(auth.cambiosDeClave, [
+        (
+          correo: 'maria@ejemplo.com',
+          codigo: '123456',
+          clave: 'nuevaclave1',
+        ),
+      ]);
+      // Entra con lo que acaba de escribir, que es la forma de comprobar que
+      // quedó bien.
+      expect(auth.autenticado, isFalse);
+    });
+
+    testWidgets('un código corto no se manda al servidor', (tester) async {
+      await pedirCodigo(tester, correo: 'maria@ejemplo.com');
+      await tester.tap(find.widgetWithText(FilledButton, 'Enviar código'));
+      await tester.pumpAndSettle();
+
+      await _escribir(tester, 'Código del correo', '123');
+      await _escribir(tester, 'Contraseña nueva', 'nuevaclave1');
+      await tester.tap(find.widgetWithText(FilledButton, 'Cambiar contraseña'));
+      await tester.pumpAndSettle();
+
+      expect(auth.cambiosDeClave, isEmpty);
+      expect(find.text('Son 6 dígitos'), findsOneWidget);
+    });
+
+    testWidgets('el login todavía no la ofrece', (tester) async {
+      await _abrir(tester, LoginScreen(auth: auth));
+
+      // Un botón que promete un correo que nunca va a llegar es peor que no
+      // tener el botón. Cuando haya correo saliente, esto se invierte.
+      expect(find.textContaining('Olvidaste'), findsNothing);
     });
   });
 

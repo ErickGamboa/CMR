@@ -40,16 +40,23 @@ export async function proxy(peticion: NextRequest) {
   } = await supabase.auth.getUser();
 
   const ruta = peticion.nextUrl.pathname;
-  const enLogin = ruta.startsWith("/ingresar");
 
-  if (!user && !enLogin) {
+  // La portada es el login. Privacidad y soporte tienen que abrirse sin
+  // cuenta: son las URL que la App Store y Google Play revisan, y con sesión
+  // de por medio el revisor vería un formulario en vez de la política.
+  const enLogin = ruta === "/";
+  const abierta = enLogin || ruta === "/privacidad" || ruta === "/soporte";
+
+  if (!user && !abierta) {
     const destino = peticion.nextUrl.clone();
-    destino.pathname = "/ingresar";
+    destino.pathname = "/";
     // Para devolverlo a donde iba después de entrar.
     destino.searchParams.set("volver", ruta);
     return NextResponse.redirect(destino);
   }
 
+  // Solo desde el login: a las páginas públicas puede entrar quien ya tiene
+  // sesión sin que lo saquen de ahí.
   if (user && enLogin) {
     const destino = peticion.nextUrl.clone();
     destino.pathname = "/pacientes";

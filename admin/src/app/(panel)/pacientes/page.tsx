@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { buttonVariants } from "@/components/ui/button";
+import { idsDeDoctores } from "@/lib/doctor";
 import { COLUMNAS_PACIENTE, type Paciente } from "@/lib/pacientes";
 import { clienteServidor } from "@/lib/supabase/servidor";
 
@@ -18,11 +19,14 @@ export default async function PaginaPacientes() {
   //
   // Sin filtro por doctor: la política de RLS ya decide qué se puede ver, y
   // repetir la regla acá sería tener que mantenerla en dos lugares.
-  const { data, error } = await supabase
-    .from("pacientes")
-    .select(COLUMNAS_PACIENTE)
-    .order("apellidos", { ascending: true })
-    .order("nombre", { ascending: true });
+  const [{ data, error }, doctores] = await Promise.all([
+    supabase
+      .from("pacientes")
+      .select(COLUMNAS_PACIENTE)
+      .order("apellidos", { ascending: true })
+      .order("nombre", { ascending: true }),
+    idsDeDoctores(),
+  ]);
 
   if (error) {
     return (
@@ -34,7 +38,11 @@ export default async function PaginaPacientes() {
     );
   }
 
-  const pacientes = (data ?? []) as unknown as Paciente[];
+  // Las cuentas del equipo no son pacientes de nadie: fuera de las tres
+  // pestañas y fuera del conteo.
+  const pacientes = ((data ?? []) as unknown as Paciente[]).filter(
+    (p) => !doctores.has(p.user_id),
+  );
 
   if (pacientes.length === 0) {
     return (

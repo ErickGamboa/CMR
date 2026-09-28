@@ -66,6 +66,29 @@ class FakeAuth implements ServicioAuth {
     registros.add((correo: correo, nombre: nombre, cedula: cedula));
   }
 
+  /// A qué correos se les pidió código, y qué contraseñas se cambiaron.
+  final List<String> codigosPedidos = [];
+  final List<({String correo, String codigo, String clave})> cambiosDeClave =
+      [];
+
+  @override
+  Future<void> pedirCodigoDeRecuperacion(String correo) async {
+    if (falla != null) throw falla!;
+    codigosPedidos.add(correo);
+  }
+
+  @override
+  Future<void> cambiarClaveConCodigo({
+    required String correo,
+    required String codigo,
+    required String clave,
+  }) async {
+    if (falla != null) throw falla!;
+
+    // Igual que el real: cambiar la contraseña NO deja sesión abierta.
+    cambiosDeClave.add((correo: correo, codigo: codigo, clave: clave));
+  }
+
   @override
   Future<void> eliminarCuenta() async {
     if (falla != null) throw falla!;

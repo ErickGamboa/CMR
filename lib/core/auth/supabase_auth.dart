@@ -105,6 +105,53 @@ class SupabaseAuth implements ServicioAuth {
   }
 
   @override
+  Future<void> pedirCodigoDeRecuperacion(String correo) async {
+    try {
+      await _client.auth.resetPasswordForEmail(correo);
+    } on AuthException catch (e) {
+      throw FallaAuth(_traducirRecuperacion(e));
+    } on SocketException {
+      throw const FallaAuth(
+        'No pudimos conectar. Revisa tu conexión a internet.',
+      );
+    } on TimeoutException {
+      throw const FallaAuth('El servidor tardó demasiado. Intenta de nuevo.');
+    }
+  }
+
+  @override
+  Future<void> cambiarClaveConCodigo({
+    required String correo,
+    required String codigo,
+    required String clave,
+  }) async {
+    try {
+      // El código abre una sesión de recuperación, que es lo único que
+      // autoriza a cambiar la contraseña sin saber la anterior.
+      await _client.auth.verifyOTP(
+        type: OtpType.recovery,
+        email: correo,
+        token: codigo,
+      );
+
+      await _client.auth.updateUser(UserAttributes(password: clave));
+
+      // Y se cierra: la persona vuelve al login y entra con la contraseña
+      // nueva. Dejarla adentro se sentiría bien hasta la próxima vez, cuando
+      // resulte que escribió otra cosa de la que creía.
+      await _client.auth.signOut();
+    } on AuthException catch (e) {
+      throw FallaAuth(_traducirRecuperacion(e));
+    } on SocketException {
+      throw const FallaAuth(
+        'No pudimos conectar. Revisa tu conexión a internet.',
+      );
+    } on TimeoutException {
+      throw const FallaAuth('El servidor tardó demasiado. Intenta de nuevo.');
+    }
+  }
+
+  @override
   Future<void> eliminarCuenta() async {
     try {
       // La función de la base borra `auth.uid()` y nada más; no recibe a quién
@@ -185,5 +232,34 @@ class SupabaseAuth implements ServicioAuth {
       return 'Demasiados intentos. Espera unos minutos e intenta de nuevo.';
     }
     return 'No pudimos crear la cuenta. Intenta de nuevo en unos minutos.';
+  }
+
+  /// Traduce el error de recuperar la contraseña.
+  ///
+  /// Nada de lo que devuelve dice si el correo tiene cuenta: pedir el código
+  /// responde igual exista o no, y el único error que menciona el correo es el
+  /// del código vencido, que solo ve quien ya lo recibió.
+  String _traducirRecuperacion(AuthException e) {
+    final mensaje = e.message.toLowerCase();
+
+    if (e.code == 'otp_expired' ||
+        mensaje.contains('expired') ||
+        mensaje.contains('invalid') && mensaje.contains('token')) {
+      return 'Ese código no sirve o ya venció. Pedí uno nuevo.';
+    }
+    if (e.code == 'weak_password' || mensaje.contains('password')) {
+      return 'La contraseña es muy corta. Usa al menos 8 caracteres.';
+    }
+    // Sin proveedor de correo saliente configurado, Supabase agota su cuota
+    // de cortesía enseguida. No es que la persona haya insistido.
+    if (e.code == 'over_email_send_rate_limit' ||
+        mensaje.contains('email rate limit')) {
+      return 'No pudimos mandar el código ahora mismo. Intenta en unos '
+          'minutos o consulta en recepción.';
+    }
+    if (e.statusCode == '429') {
+      return 'Demasiados intentos. Espera unos minutos e intenta de nuevo.';
+    }
+    return 'No pudimos completar el cambio. Intenta de nuevo en unos minutos.';
   }
 }

@@ -1,11 +1,12 @@
 import Link from "next/link";
 
-import { salir } from "@/app/ingresar/acciones";
+import { salir } from "@/app/acciones";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -85,17 +86,27 @@ function Cabecera({ doctor }: { doctor: Doctor }) {
             </DropdownMenuTrigger>
 
             <DropdownMenuContent align="end" className="w-60">
-              <DropdownMenuLabel className="font-normal">
-                <p className="text-sm font-medium">{doctor.nombre}</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {doctor.correo}
-                </p>
-              </DropdownMenuLabel>
+              {/* El rótulo va envuelto en un grupo porque en Base UI es un
+                  `GroupLabel`: suelto revienta al abrir el menú con
+                  "MenuGroupContext is missing", y se lleva puesto el botón de
+                  cerrar sesión, que es lo único que hay acá. */}
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="font-normal">
+                  <p className="text-sm font-medium">{doctor.nombre}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {doctor.correo}
+                  </p>
+                </DropdownMenuLabel>
+              </DropdownMenuGroup>
               <DropdownMenuSeparator />
               {/* Un formulario y no un enlace: cerrar sesión cambia estado en
                   el servidor, y eso no va por GET. */}
               <form action={salir}>
+                {/* `nativeButton` porque lo que se renderiza ES un <button>:
+                    sin avisarle, Base UI le pone los atributos con los que
+                    simula uno sobre un elemento que ya lo es, y se queja. */}
                 <DropdownMenuItem
+                  nativeButton
                   render={
                     <button type="submit" className="w-full cursor-pointer" />
                   }
@@ -128,9 +139,9 @@ function iniciales(nombre: string) {
 /**
  * La sesión es válida, pero no es de un doctor.
  *
- * Dice exactamente qué falta —una fila en `doctores`— porque el caso más
- * probable no es un intruso: es el propio doctor entrando con una cuenta a la
- * que todavía no le dieron de alta.
+ * Es la segunda puerta: entrar al sitio no distingue tipos de cuenta, así que
+ * acá cae tanto un paciente que probó con la cuenta de la app como un doctor
+ * al que todavía no le dieron de alta. El mensaje sirve a los dos.
  */
 function SinPermiso() {
   return (
@@ -141,15 +152,16 @@ function SinPermiso() {
         </div>
         <div className="space-y-2">
           <h1 className="text-xl font-semibold tracking-tight">
-            Esta cuenta no administra la clínica
+            Este panel es para el equipo de la clínica
           </h1>
+          {/* Acá puede caer un paciente que probó entrar con su cuenta de la
+              app, así que el mensaje le dice adónde ir en vez de hablarle de
+              filas y tablas. */}
           <p className="text-sm leading-relaxed text-muted-foreground">
-            Entraste bien, pero tu cuenta no está registrada como doctor. Se da
-            de alta agregando una fila en la tabla{" "}
-            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
-              doctores
-            </code>
-            .
+            Tu correo y tu contraseña son correctos, pero esta cuenta no
+            administra la clínica. Si sos paciente, tu plan, tus citas y tus
+            resultados están en la app CMR. Si deberías tener acceso al panel,
+            pedí que te den de alta como doctor.
           </p>
         </div>
         <form action={salir}>

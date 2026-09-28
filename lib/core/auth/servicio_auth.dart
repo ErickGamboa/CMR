@@ -44,6 +44,23 @@ abstract interface class ServicioAuth {
     String? cedula,
   });
 
+  /// Manda al correo un código de seis dígitos para poner otra contraseña.
+  ///
+  /// No dice si ese correo tiene cuenta o no, ni cuando la tiene ni cuando no:
+  /// una pantalla que respondiera distinto en cada caso sería una forma de
+  /// averiguar quién es paciente de la clínica.
+  Future<void> pedirCodigoDeRecuperacion(String correo);
+
+  /// Canjea el código y deja puesta la contraseña nueva.
+  ///
+  /// No abre sesión: la persona vuelve al login y entra con lo que acaba de
+  /// escribir, que es la forma de comprobar que quedó bien.
+  Future<void> cambiarClaveConCodigo({
+    required String correo,
+    required String codigo,
+    required String clave,
+  });
+
   /// Borra la cuenta y **todo** lo que cuelga de ella, sin vuelta atrás.
   ///
   /// App Store y Google Play lo exigen: si la app deja crear una cuenta, tiene

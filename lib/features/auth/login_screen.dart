@@ -7,9 +7,14 @@ import 'crear_cuenta_screen.dart';
 
 /// Pantalla de ingreso.
 ///
-/// Desde acá se puede pedir una cuenta, pero no recuperar la contraseña: eso
-/// necesita correo saliente, que el proyecto todavía no tiene. Mientras tanto
-/// lo resuelve el doctor asignando una desde el sitio.
+/// Desde acá se pide una cuenta, pero todavía no se recupera la contraseña:
+/// mandar el código necesita un proveedor de correo saliente que el proyecto
+/// no tiene configurado, y un botón que promete un correo que nunca llega es
+/// peor que no tener el botón. La pantalla está hecha y probada
+/// ([RecuperarClaveScreen]); solo falta volver a enlazarla acá.
+///
+/// Entrar no distingue tipos de cuenta: el panel del doctor es otro sitio, y
+/// una cuenta de paciente no llega a nada ahí.
 ///
 /// Al abrir sesión, [AuthGate] cambia de pantalla solo: esta no navega.
 class LoginScreen extends StatefulWidget {
@@ -214,15 +219,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       OutlinedButton(
                         onPressed: _enviando ? null : _abrirRegistro,
                         child: const Text('Crear una cuenta'),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        'Si ya eres paciente y no puedes entrar, consulta en '
-                        'recepción.',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),

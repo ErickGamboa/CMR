@@ -128,9 +128,9 @@ void main() {
 
       expect(find.text('Crear una cuenta'), findsOneWidget);
 
-      // Recuperar la contraseña no está en la app: el correo de recuperación
-      // todavía no tiene por dónde salir, y el doctor puede asignar una nueva
-      // desde el sitio.
+      // La pantalla de recuperación existe, pero mandar el código necesita
+      // correo saliente que el proyecto todavía no tiene. Mientras tanto el
+      // doctor asigna una contraseña nueva desde el sitio.
       expect(find.textContaining('Olvidaste'), findsNothing);
       expect(find.textContaining('Olvidé'), findsNothing);
     });

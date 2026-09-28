@@ -9,8 +9,10 @@ export type EstadoIngreso = { error: string | null };
 /**
  * Inicia sesión con correo y contraseña.
  *
- * Las cuentas las crea el doctor desde el panel de Supabase: acá no hay
- * registro ni recuperación de contraseña, igual que en la app del paciente.
+ * Es la portada del sitio: no hay registro ni recuperación acá, porque las
+ * cuentas del panel las da de alta la clínica. Entrar no distingue tipos de
+ * cuenta —cualquiera con correo y contraseña válidos pasa esta puerta—; la
+ * que separa doctores de pacientes es la de .
  */
 export async function ingresar(
   _anterior: EstadoIngreso,
@@ -48,5 +50,5 @@ export async function ingresar(
 export async function salir() {
   const supabase = await clienteServidor();
   await supabase.auth.signOut();
-  redirect("/ingresar");
+  redirect("/");
 }

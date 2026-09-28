@@ -4,6 +4,7 @@ import { EstadoPacienteBadge } from "@/components/estado-paciente";
 import { Volver } from "@/components/volver";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { idsDeDoctores } from "@/lib/doctor";
 import { COLUMNAS_PACIENTE, type Paciente } from "@/lib/pacientes";
 import { clienteServidor } from "@/lib/supabase/servidor";
 
@@ -15,11 +16,21 @@ import { FormularioFicha } from "./ficha";
 
 async function buscar(id: string) {
   const supabase = await clienteServidor();
-  const { data } = await supabase
-    .from("pacientes")
-    .select(COLUMNAS_PACIENTE)
-    .eq("user_id", id)
-    .maybeSingle();
+
+  const [{ data }, doctores] = await Promise.all([
+    supabase
+      .from("pacientes")
+      .select(COLUMNAS_PACIENTE)
+      .eq("user_id", id)
+      .maybeSingle(),
+    idsDeDoctores(),
+  ]);
+
+  // La ficha de un doctor no existe como paciente. Se comprueba acá además de
+  // sacarlo de la lista: la lista es una forma de llegar, pero la dirección se
+  // puede escribir a mano, y esta pantalla trae los botones de aprobar, dar de
+  // baja y borrar la cuenta.
+  if (doctores.has(id)) return null;
 
   return data as unknown as Paciente | null;
 }
