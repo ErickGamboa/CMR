@@ -31,12 +31,12 @@ export default async function LayoutPanel({ children }: LayoutProps<"/">) {
     <div className="flex min-h-dvh flex-col bg-muted/30">
       <Cabecera doctor={doctor} />
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-8 sm:py-10">
         {children}
       </main>
 
       <footer className="border-t bg-background">
-        <div className="mx-auto max-w-5xl px-4 py-5 text-xs text-muted-foreground sm:px-6">
+        <div className="mx-auto max-w-7xl px-4 py-5 text-xs text-muted-foreground sm:px-6">
           Clínica COSME - CMR
         </div>
       </footer>
@@ -51,7 +51,7 @@ export default async function LayoutPanel({ children }: LayoutProps<"/">) {
 function Cabecera({ doctor }: { doctor: Doctor }) {
   return (
     <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-5xl items-center gap-4 px-4 sm:gap-6 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:gap-6 sm:px-6">
         <Link
           href="/pacientes"
           aria-label="Inicio"

@@ -100,10 +100,10 @@ export function ListaPacientes({ pacientes }: { pacientes: Paciente[] }) {
           </TabsList>
         </Tabs>
 
-        <div className="relative lg:w-72">
+        <div className="relative lg:w-96">
           <Search
             aria-hidden
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute left-3 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground"
           />
           <Input
             type="search"
@@ -111,7 +111,7 @@ export function ListaPacientes({ pacientes }: { pacientes: Paciente[] }) {
             onChange={(e) => setConsulta(e.target.value)}
             placeholder="Buscar por nombre, cédula o correo"
             aria-label="Buscar paciente"
-            className="pl-9 pr-9"
+            className="pl-10 pr-10"
           />
           {consulta !== "" && (
             <button

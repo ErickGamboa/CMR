@@ -130,10 +130,10 @@ export default async function PasoLaboratorios({
                         .map((a, i) => (
                           <span
                             key={i}
-                            className="rounded-md border px-2 py-0.5 text-xs text-muted-foreground"
+                            className="rounded-md border px-2.5 py-1 text-xs text-muted-foreground"
                           >
                             {a.nombre}{" "}
-                            <span className="font-semibold tabular-nums text-foreground">
+                            <span className="text-sm font-semibold tabular-nums text-foreground">
                               {a.valor}
                             </span>{" "}
                             {a.unidad}

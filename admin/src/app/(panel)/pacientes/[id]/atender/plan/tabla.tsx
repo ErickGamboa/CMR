@@ -80,7 +80,7 @@ export function TablaPlan({
       {/* En pantalla angosta la tabla no cabe: se desliza a lo ancho en vez de
           apretar las columnas hasta que no se pueda escribir en ellas. */}
       <div className="-mx-1 overflow-x-auto px-1 pb-1">
-        <table className="w-full min-w-[46rem] border-separate border-spacing-0">
+        <table className="w-full min-w-[52rem] border-separate border-spacing-0">
           <thead>
             <tr>
               <th
@@ -136,7 +136,7 @@ export function TablaPlan({
                   </th>
 
                   {TIEMPOS.map((t) => (
-                    <td key={t.valor} className="border-b px-2 py-2">
+                    <td key={t.valor} className="border-b px-2 py-2.5">
                       <input
                         type="text"
                         name={campoCelda(g.valor, t.valor)}
@@ -151,7 +151,7 @@ export function TablaPlan({
                         inputMode="decimal"
                         autoComplete="off"
                         placeholder="–"
-                        className="h-9 w-full rounded-md border border-transparent bg-transparent text-center tabular-nums outline-none transition-colors placeholder:text-muted-foreground/40 hover:border-input focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                        className="h-10 w-full rounded-md border border-transparent bg-transparent text-center tabular-nums outline-none transition-colors placeholder:text-muted-foreground/40 hover:border-input focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
                       />
                     </td>
                   ))}
@@ -163,7 +163,7 @@ export function TablaPlan({
                   >
                     <span
                       aria-label={`Total de ${g.titulo} en el día`}
-                      className={`text-sm font-semibold tabular-nums transition-colors ${
+                      className={`text-base font-semibold tabular-nums transition-colors ${
                         total ? "" : "text-muted-foreground/40"
                       }`}
                     >
@@ -204,7 +204,7 @@ export function TablaPlan({
           value={notas}
           onChange={(e) => setNotas(e.target.value)}
           placeholder="Aclaraciones que el paciente ve junto a la tabla."
-          className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
+          className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
         />
       </div>
 

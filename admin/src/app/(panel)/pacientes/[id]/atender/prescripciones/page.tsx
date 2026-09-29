@@ -142,12 +142,12 @@ export default async function PasoPrescripciones({
                               {(p.dosis || p.frecuencia) && (
                                 <div className="flex flex-wrap items-center gap-1.5">
                                   {p.dosis && (
-                                    <span className="rounded-md bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
+                                    <span className="rounded-md bg-primary px-2.5 py-1 text-sm font-semibold tabular-nums text-primary-foreground">
                                       {p.dosis}
                                     </span>
                                   )}
                                   {p.frecuencia && (
-                                    <span className="rounded-md border px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                                    <span className="rounded-md border px-2.5 py-1 text-sm font-medium text-muted-foreground">
                                       {p.frecuencia}
                                     </span>
                                   )}

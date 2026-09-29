@@ -352,7 +352,7 @@ function Editor({
                   onChange={(e) =>
                     setLibre((v) => ({ ...v, [c.clave]: e.target.value }))
                   }
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 >
                   {c.opciones.map((o) => (
                     <option key={o.valor} value={o.valor}>
@@ -368,7 +368,7 @@ function Editor({
                   onChange={(e) =>
                     setLibre((v) => ({ ...v, [c.clave]: e.target.value }))
                   }
-                  className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
+                  className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 />
               ) : (
                 <Input
@@ -473,7 +473,7 @@ function Control({
                 onCambiar(o);
               }}
               aria-pressed={!libre && valor === o}
-              className={`min-w-11 rounded-md border px-3 py-1.5 text-sm tabular-nums transition-all duration-150 ${
+              className={`min-w-12 rounded-md border px-3.5 py-2 text-sm tabular-nums transition-all duration-150 ${
                 !libre && valor === o
                   ? "border-primary bg-primary font-semibold text-primary-foreground"
                   : "hover:border-primary/50 hover:bg-accent"
@@ -594,7 +594,7 @@ function TarjetaComoEnLaApp({
       {(plantilla.plantillaDosis || plantilla.plantillaFrecuencia) && (
         <div className="flex flex-wrap items-center gap-2">
           {plantilla.plantillaDosis && (
-            <span className="rounded-md bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground">
+            <span className="rounded-md bg-primary px-3 py-1.5 text-sm font-semibold tabular-nums text-primary-foreground">
               <Frase
                 plantilla={plantilla.plantillaDosis}
                 valores={valores}
@@ -603,7 +603,7 @@ function TarjetaComoEnLaApp({
             </span>
           )}
           {plantilla.plantillaFrecuencia && (
-            <span className="rounded-md border px-2.5 py-1 text-xs font-medium text-muted-foreground">
+            <span className="rounded-md border px-3 py-1.5 text-sm font-medium text-muted-foreground">
               <Frase
                 plantilla={plantilla.plantillaFrecuencia}
                 valores={valores}

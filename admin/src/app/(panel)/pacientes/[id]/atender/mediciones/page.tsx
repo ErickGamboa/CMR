@@ -107,7 +107,7 @@ export default async function PasoMediciones({
                       <p className="text-sm font-medium">
                         {formatearFechaCorta(m.fecha)}
                       </p>
-                      <dl className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                      <dl className="flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-muted-foreground">
                         <Dato etiqueta="Peso" valor={`${num(m.peso)} kg`} />
                         <Dato
                           etiqueta="Grasa"
@@ -151,7 +151,7 @@ function Dato({ etiqueta, valor }: { etiqueta: string; valor: string }) {
   return (
     <div className="flex gap-1">
       <dt>{etiqueta}</dt>
-      <dd className="font-medium tabular-nums text-foreground">{valor}</dd>
+      <dd className="text-sm font-semibold tabular-nums text-foreground">{valor}</dd>
     </div>
   );
 }
