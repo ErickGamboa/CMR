@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/fechas.dart' show formatearFechaCorta;
 import '../libro/libro_screen.dart';
@@ -34,6 +33,7 @@ class PlanAlimentacionVista extends StatefulWidget {
 class _PlanAlimentacionVistaState extends State<PlanAlimentacionVista> {
   FuentePlan? _fuente;
   late Future<PlanAlimentacion?> _carga = _cargar();
+  (PlanAlimentacion?,)? _ultimo;
   int _generacionVista = 0;
 
   @override
@@ -64,8 +64,7 @@ class _PlanAlimentacionVistaState extends State<PlanAlimentacionVista> {
   /// La fuente se resuelve dentro de este `async` para que, si Supabase no
   /// está inicializado, el error caiga en el [FutureBuilder].
   Future<PlanAlimentacion?> _cargar({bool deNuevo = false}) async {
-    final fuente = _fuente ??=
-        widget.fuente ?? RepositorioPlan(Supabase.instance.client);
+    final fuente = _fuente ??= widget.fuente ?? RepositorioPlan();
 
     final control = widget.control;
     if (control == null) {
@@ -91,21 +90,27 @@ class _PlanAlimentacionVistaState extends State<PlanAlimentacionVista> {
     return FutureBuilder<PlanAlimentacion?>(
       future: _carga,
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return _Falla(
-            mensaje: snapshot.error is FallaPlan
-                ? (snapshot.error! as FallaPlan).mensaje
-                : 'No pudimos cargar tu plan.',
-            onReintentar: () => setState(() {
-              _carga = _cargar(deNuevo: true);
-            }),
-          );
-        }
-        if (snapshot.connectionState != ConnectionState.done) {
+        final listo = snapshot.connectionState == ConnectionState.done;
+        if (listo && !snapshot.hasError) _ultimo = (snapshot.data,);
+
+        // Al refrescar se sigue viendo el que estaba, sin parpadear. El plan
+        // va en un registro porque `null` es una respuesta válida: no tiene.
+        final mostrado = _ultimo;
+        if (mostrado == null) {
+          if (snapshot.hasError && listo) {
+            return _Falla(
+              mensaje: snapshot.error is FallaPlan
+                  ? (snapshot.error! as FallaPlan).mensaje
+                  : 'No pudimos cargar tu plan.',
+              onReintentar: () => setState(() {
+                _carga = _cargar(deNuevo: true);
+              }),
+            );
+          }
           return const Center(child: CircularProgressIndicator());
         }
 
-        final plan = snapshot.data;
+        final (plan,) = mostrado;
         if (plan == null || plan.vacio) return const _SinPlan();
 
         return ListView(

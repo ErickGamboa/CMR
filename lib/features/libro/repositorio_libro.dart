@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/datos/repositorio.dart';
+import '../../core/local/sincronizador.dart';
 import 'modelo_libro.dart';
 
 /// De dónde salen los datos del libro.
@@ -16,46 +18,59 @@ abstract interface class FuenteLibro {
   Future<Libro> recargar();
 }
 
-/// Lee el libro de intercambios de Supabase.
+/// Baja el libro de intercambios de Supabase.
 ///
 /// El libro es el mismo para todos los pacientes y cambia una o dos veces al
 /// año, así que se baja completo de una sola vez (son menos de 300 filas) y se
-/// guarda en memoria. Con eso el buscador y los filtros trabajan sin red: el
-/// paciente escribe y la lista responde de inmediato, que es lo que uno espera
-/// de algo que reemplaza a un PDF.
+/// guarda en el teléfono. Con eso el buscador y los filtros trabajan sin red:
+/// el paciente escribe y la lista responde de inmediato, que es lo que uno
+/// espera de algo que reemplaza a un PDF.
+Future<Object?> bajarLibro(SupabaseClient db) async {
+  // `ascending: true` va explícito: el cliente de Supabase ordena descendente
+  // por defecto, y acá el orden es el del libro impreso.
+  final (secciones, alimentos) = await (
+    db
+        .from('libro_secciones')
+        .select('id, nombre, tipo, grupo, nota')
+        .order('orden', ascending: true),
+    db
+        .from('libro_alimentos')
+        .select(
+          'id, seccion_id, subseccion, nombre, marcas, porcion, '
+          'c, f, p, v, l, g, alternativa, grasa_variable, libre, nota',
+        )
+        .order('orden', ascending: true),
+  ).wait;
+
+  return {'secciones': secciones, 'alimentos': alimentos};
+}
+
+/// Lee el libro de la copia local.
 class RepositorioLibro implements FuenteLibro {
-  RepositorioLibro(this._client);
+  RepositorioLibro([this._datos]);
 
-  final SupabaseClient _client;
+  final Sincronizador? _datos;
 
-  Future<Libro>? _enVuelo;
-
-  /// Devuelve el libro. La primera llamada lo baja; las siguientes reciben lo
-  /// que ya está en memoria.
   @override
-  Future<Libro> cargar() => _enVuelo ??= _bajar();
+  Future<Libro> cargar() => _leer();
 
-  /// Vuelve a bajarlo. Se usa cuando la primera carga falló y el paciente
-  /// toca "Intentar de nuevo".
+  /// Es lo mismo que [cargar]: la copia local siempre tiene lo último que se
+  /// bajó.
   @override
-  Future<Libro> recargar() => _enVuelo = _bajar();
+  Future<Libro> recargar() => _leer();
 
-  Future<Libro> _bajar() async {
+  Future<Libro> _leer() async {
     try {
-      // `ascending: true` va explícito: el cliente de Supabase ordena
-      // descendente por defecto, y acá el orden es el del libro impreso.
-      final secciones = await _client
-          .from('libro_secciones')
-          .select('id, nombre, tipo, grupo, nota')
-          .order('orden', ascending: true);
+      final datos = _datos ?? Sincronizador.actual;
+      if (datos == null) {
+        throw const FallaLibro('No pudimos abrir los datos guardados.');
+      }
 
-      final alimentos = await _client
-          .from('libro_alimentos')
-          .select(
-            'id, seccion_id, subseccion, nombre, marcas, porcion, '
-            'c, f, p, v, l, g, alternativa, grasa_variable, libre, nota',
-          )
-          .order('orden', ascending: true);
+      final guardado = await datos.leer(Claves.libro) as Map<String, dynamic>;
+      final secciones = (guardado['secciones'] as List<dynamic>)
+          .cast<Map<String, dynamic>>();
+      final alimentos = (guardado['alimentos'] as List<dynamic>)
+          .cast<Map<String, dynamic>>();
 
       // Agrupar por sección de una pasada, respetando el orden que ya trae la
       // consulta.
@@ -72,6 +87,8 @@ class RepositorioLibro implements FuenteLibro {
             porSeccion[fila['id'] as String] ?? const [],
           ),
       ]);
+    } on FallaDatos catch (e) {
+      throw FallaLibro(e.mensaje);
     } on PostgrestException catch (e) {
       // El caso típico acá es que las migraciones del libro no se aplicaron
       // todavía: mejor decirlo que mostrar un error de Postgres.

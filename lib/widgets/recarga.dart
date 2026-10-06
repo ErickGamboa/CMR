@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -18,7 +20,24 @@ class ControlRecarga extends ChangeNotifier {
 
   bool get cargando => _enCurso > 0;
 
+  /// Qué hacer cuando el paciente pide datos nuevos. La app lo conecta al
+  /// sincronizador, que baja de Supabase y después llama a [refrescar]; sin
+  /// eso (en los tests) se refresca directo.
+  Future<void> Function()? sincronizar;
+
+  /// Lo que hace el botón: pedir lo último a la nube.
   void recargar() {
+    if (!_vivo) return;
+    if (sincronizar case final s?) {
+      unawaited(s());
+      return;
+    }
+    refrescar();
+  }
+
+  /// Avisa que la copia local cambió: lo que esté en pantalla se vuelve a
+  /// leer.
+  void refrescar() {
     if (!_vivo) return;
     _generacion++;
     notifyListeners();
@@ -77,8 +96,8 @@ class ControlRecarga extends ChangeNotifier {
 /// viejo, el botón no hizo lo que decía.
 ///
 /// Así que el control es uno solo y todas las pantallas montadas lo escuchan:
-/// tocarlo en Laboratorios también vuelve a pedir el resumen del Home y lo que
-/// haya detrás en la pila.
+/// tocarlo en Laboratorios baja todo de nuevo, y al terminar se vuelve a leer
+/// el resumen del Home y lo que haya detrás en la pila.
 final recargaGlobal = ControlRecarga();
 
 /// El botón de recargar que va en la barra superior.

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -37,6 +39,26 @@ class PacienteQueCambia extends PacienteFalso {
     pedidos++;
     return siguiente;
   }
+}
+
+/// Responde una recomendación la primera vez, y después lo que diga
+/// [pendiente], que puede quedarse colgado como una red lenta.
+class PacienteQueTarda extends PacienteFalso {
+  PacienteQueTarda() : super(recomendaciones: const []);
+
+  Completer<List<Recomendacion>>? pendiente;
+
+  @override
+  Future<List<Recomendacion>> recomendaciones() async =>
+      pendiente?.future ??
+      [
+        Recomendacion(
+          fecha: DateTime(2026, 9, 14),
+          titulo: 'Toma más agua',
+          texto: 'Dos litros y medio al día.',
+          icono: Icons.water_drop_outlined,
+        ),
+      ];
 }
 
 /// Cuenta cuántas veces le pidieron los laboratorios.
@@ -150,6 +172,42 @@ void main() {
 
       expect(fuente.pedidos, 2);
       expect(find.text('Toma más agua'), findsOneWidget);
+    });
+
+    testWidgets('mientras refresca sigue mostrando lo que tenía', (
+      tester,
+    ) async {
+      final fuente = PacienteQueTarda();
+      await _abrir(tester, RecomendacionesScreen(fuente: fuente));
+      expect(find.text('Toma más agua'), findsOneWidget);
+
+      // La segunda respuesta se queda colgada: sin parpadeo ni indicador.
+      fuente.pendiente = Completer();
+      await tester.tap(find.byTooltip('Actualizar'));
+      await tester.pump();
+
+      expect(find.text('Toma más agua'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+
+      fuente.pendiente!.complete(const []);
+      await tester.pumpAndSettle();
+      expect(find.text('Toma más agua'), findsNothing);
+    });
+
+    testWidgets('si refrescar falla, se queda con lo que tenía', (
+      tester,
+    ) async {
+      final fuente = PacienteQueTarda();
+      await _abrir(tester, RecomendacionesScreen(fuente: fuente));
+
+      fuente.pendiente = Completer();
+      await tester.tap(find.byTooltip('Actualizar'));
+      await tester.pump();
+      fuente.pendiente!.completeError(const FallaDatos('No pudimos conectar.'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Toma más agua'), findsOneWidget);
+      expect(find.text('No pudimos conectar.'), findsNothing);
     });
 
     testWidgets('no dispara dos consultas encima', (tester) async {

@@ -27,6 +27,10 @@ class _FuenteFalsa implements FuenteMapeo {
   int guardadas = 0;
   FallaMapeo? falla;
 
+  /// Si es `false`, guarda como si no hubiera señal: queda en el teléfono y
+  /// no llega a la nube.
+  bool hayConexion = true;
+
   @override
   Future<List<RegistroMapeo>> historial(TipoMapeo tipo) async {
     if (falla case final f?) throw f;
@@ -35,7 +39,7 @@ class _FuenteFalsa implements FuenteMapeo {
   }
 
   @override
-  Future<void> guardar(TipoMapeo tipo, RegistroMapeo registro) async {
+  Future<bool> guardar(TipoMapeo tipo, RegistroMapeo registro) async {
     if (falla case final f?) throw f;
     guardadas++;
     if (registro.vacio) {
@@ -43,6 +47,7 @@ class _FuenteFalsa implements FuenteMapeo {
     } else {
       _guardado[tipo]![registro.fechaIso] = registro;
     }
+    return hayConexion;
   }
 
   RegistroMapeo? deDia(TipoMapeo tipo, DateTime dia) =>

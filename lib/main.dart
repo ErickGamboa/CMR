@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/auth/servicio_auth.dart';
 import 'core/cuenta/estado_cuenta.dart';
 import 'core/auth/supabase_auth.dart';
 import 'core/entorno.dart';
+import 'core/local/conjuntos.dart';
 import 'features/auth/auth_gate.dart';
 import 'theme/app_theme.dart';
 import 'widgets/ocultar_teclado.dart';
@@ -26,7 +28,15 @@ class _ArranqueState extends State<Arranque> {
   // Sin espera artificial: el splash nativo y [PantallaCarga] dibujan lo mismo
   // en el mismo lugar, así que no hay parpadeo que disimular y la app abre lo
   // más rápido que pueda.
-  late final Future<ServicioAuth> _inicio = SupabaseAuth.inicializar();
+  late final Future<ServicioAuth> _inicio = _arrancar();
+
+  /// Supabase primero: la copia local necesita el cliente para saber de qué
+  /// paciente es cada cosa. Abrir SQLite son milisegundos.
+  Future<ServicioAuth> _arrancar() async {
+    final auth = await SupabaseAuth.inicializar();
+    await arrancarDatosLocales(Supabase.instance.client);
+    return auth;
+  }
 
   @override
   Widget build(BuildContext context) {

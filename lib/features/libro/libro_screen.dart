@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../widgets/ocultar_teclado.dart';
 import '../../widgets/recarga.dart';
@@ -45,13 +44,13 @@ class _LibroScreenState extends State<LibroScreen>
 
   FuenteLibro? _fuente;
   late Future<Libro> _carga = _cargar();
+  Libro? _ultimo;
 
   /// La fuente se resuelve dentro de este `async` a propósito: si Supabase no
   /// está inicializado, el error cae en el [FutureBuilder] y la pantalla
   /// muestra "Intentar de nuevo" en vez de reventar el árbol de widgets.
   Future<Libro> _cargar({bool deNuevo = false}) async {
-    final fuente = _fuente ??=
-        widget.fuente ?? RepositorioLibro(Supabase.instance.client);
+    final fuente = _fuente ??= widget.fuente ?? RepositorioLibro();
 
     recargaGlobal.iniciar();
     return (deNuevo ? fuente.recargar() : fuente.cargar()).whenComplete(
@@ -133,7 +132,16 @@ class _LibroScreenState extends State<LibroScreen>
       body: FutureBuilder<Libro>(
         future: _carga,
         builder: (context, snapshot) {
-          if (snapshot.hasError) {
+          if (snapshot.connectionState == ConnectionState.done &&
+              snapshot.hasData) {
+            _ultimo = snapshot.data;
+          }
+          // Al refrescar se sigue viendo el que estaba, sin parpadear.
+          final libro = snapshot.connectionState == ConnectionState.done
+              ? snapshot.data ?? _ultimo
+              : _ultimo;
+
+          if (libro == null && snapshot.hasError) {
             return _Falla(
               mensaje: snapshot.error is FallaLibro
                   ? (snapshot.error! as FallaLibro).mensaje
@@ -143,11 +151,10 @@ class _LibroScreenState extends State<LibroScreen>
               }),
             );
           }
-          if (!snapshot.hasData) {
+          if (libro == null) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final libro = snapshot.data!;
           final enLibres = _pestanaActual == _indiceLibres;
 
           return Column(

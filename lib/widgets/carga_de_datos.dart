@@ -110,11 +110,29 @@ class _CargaDeDatosState<T> extends State<CargaDeDatos<T>> {
     return datos is Iterable && datos.isEmpty;
   }
 
+  /// Lo último que se mostró. Al refrescar se sigue viendo esto hasta que
+  /// llegue lo nuevo: los datos vienen de la copia local y tardan
+  /// milisegundos, y un indicador de carga en el medio sería un parpadeo.
+  (T,)? _mostrado;
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<T>(
       future: _futuro,
       builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done &&
+            snapshot.hasData) {
+          _mostrado = (snapshot.data as T,);
+        }
+
+        // Lo que ya estaba en pantalla gana sobre esperar y sobre fallar:
+        // ver lo de antes es mejor que un error por algo que sí se tenía.
+        if (_mostrado case (final datos,)?
+            when snapshot.connectionState == ConnectionState.waiting ||
+                snapshot.hasError) {
+          return _contenido(context, datos);
+        }
+
         // El estado va antes que el error: al reintentar, FutureBuilder
         // arrastra el error viejo hasta que el futuro nuevo responde.
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -135,12 +153,14 @@ class _CargaDeDatosState<T> extends State<CargaDeDatos<T>> {
               const Center(child: CircularProgressIndicator());
         }
 
-        final datos = snapshot.data as T;
-        if (widget.vacio != null && _vacio(datos)) return widget.vacio!;
-
-        return widget.constructor(context, datos);
+        return _contenido(context, snapshot.data as T);
       },
     );
+  }
+
+  Widget _contenido(BuildContext context, T datos) {
+    if (widget.vacio != null && _vacio(datos)) return widget.vacio!;
+    return widget.constructor(context, datos);
   }
 }
 

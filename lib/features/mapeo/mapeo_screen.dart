@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/fechas.dart';
 import '../../widgets/ocultar_teclado.dart';
@@ -94,6 +93,10 @@ class _PestanaState extends State<_Pestana> with AutomaticKeepAliveClientMixin {
   bool _sucio = false;
   bool _guardando = false;
 
+  /// Ya hubo un historial que mostrar. Al refrescar se sigue viendo ese, sin
+  /// parpadear, hasta que llegue el nuevo.
+  bool _cargado = false;
+
   int _generacionVista = 0;
 
   @override
@@ -121,8 +124,7 @@ class _PestanaState extends State<_Pestana> with AutomaticKeepAliveClientMixin {
   /// está inicializado, el error cae en el [FutureBuilder] y la pantalla
   /// ofrece reintentar en vez de reventar el árbol de widgets.
   Future<List<RegistroMapeo>> _cargar() async {
-    final fuente = _fuente ??=
-        widget.fuente ?? RepositorioMapeo(Supabase.instance.client);
+    final fuente = _fuente ??= widget.fuente ?? RepositorioMapeo();
     widget.control.iniciar();
     final historial = await fuente
         .historial(widget.tipo)
@@ -131,7 +133,10 @@ class _PestanaState extends State<_Pestana> with AutomaticKeepAliveClientMixin {
     _porDia
       ..clear()
       ..addEntries(historial.map((r) => MapEntry(r.fechaIso, r)));
-    _mostrar(_dia);
+    // La sincronización también refresca esto, sola y en cualquier momento:
+    // si el paciente está a media anotación, lo suyo no se toca.
+    if (!_sucio) _mostrar(_dia);
+    _cargado = true;
 
     return historial;
   }
@@ -212,7 +217,7 @@ class _PestanaState extends State<_Pestana> with AutomaticKeepAliveClientMixin {
 
     setState(() => _guardando = true);
     try {
-      await _fuente!.guardar(widget.tipo, registro);
+      final subido = await _fuente!.guardar(widget.tipo, registro);
 
       if (registro.vacio) {
         _porDia.remove(registro.fechaIso);
@@ -225,7 +230,16 @@ class _PestanaState extends State<_Pestana> with AutomaticKeepAliveClientMixin {
         _sucio = false;
         _guardando = false;
       });
-      _avisar(registro.vacio ? 'Registro borrado' : 'Guardado');
+      // Sin señal igual queda guardado, pero el doctor todavía no lo ve: eso
+      // sí hay que decirlo.
+      _avisar(switch ((registro.vacio, subido)) {
+        (true, true) => 'Registro borrado',
+        (false, true) => 'Guardado',
+        (true, false) =>
+          'Borrado en tu teléfono. Se actualizará cuando tengas conexión.',
+        (false, false) =>
+          'Guardado en tu teléfono. Se enviará cuando tengas conexión.',
+      });
       return true;
     } on FallaMapeo catch (e) {
       if (!mounted) return false;
@@ -257,21 +271,25 @@ class _PestanaState extends State<_Pestana> with AutomaticKeepAliveClientMixin {
         // El estado se mira antes que el error: al reintentar, FutureBuilder
         // arrastra el error viejo hasta que el futuro nuevo responde, y sin
         // esto la pantalla se quedaría pegada en la falla.
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return _Falla(
-            mensaje: snapshot.error is FallaMapeo
-                ? (snapshot.error! as FallaMapeo).mensaje
-                : 'No pudimos cargar tu mapeo.',
-            onReintentar: () => setState(() {
-              _carga = _cargar();
-            }),
-          );
-        }
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+        // Si ya hubo historial, lo que estaba gana sobre esperar y sobre
+        // fallar: [_porDia] lo sigue teniendo.
+        if (!_cargado) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return _Falla(
+              mensaje: snapshot.error is FallaMapeo
+                  ? (snapshot.error! as FallaMapeo).mensaje
+                  : 'No pudimos cargar tu mapeo.',
+              onReintentar: () => setState(() {
+                _carga = _cargar();
+              }),
+            );
+          }
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
         }
 
         final historial = _porDia.values.toList()

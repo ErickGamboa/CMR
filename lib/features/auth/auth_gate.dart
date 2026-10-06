@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/auth/servicio_auth.dart';
@@ -60,11 +62,36 @@ class _PortonDeCuenta extends StatefulWidget {
 }
 
 class _PortonDeCuentaState extends State<_PortonDeCuenta> {
+  late final FuenteCuenta _fuente = widget.cuenta ?? RepositorioCuenta();
   late Future<EstadoCuenta> _carga = _cargar();
 
+  /// Si la última vez estaba aprobada, entra de una con eso y pregunta por
+  /// detrás. Esperar la respuesta del servidor dejaría al paciente mirando
+  /// un indicador cada vez que abre la app con mala señal, y sin señal no lo
+  /// dejaría entrar nunca a ver lo que tiene guardado.
+  ///
+  /// Si el servidor dice otra cosa, la pantalla cambia apenas llega la
+  /// respuesta: dar de baja una cuenta sigue cerrándole la app en cuanto
+  /// tiene conexión.
   Future<EstadoCuenta> _cargar() async {
-    final fuente = widget.cuenta ?? RepositorioCuenta();
-    return fuente.estado();
+    if (await _fuente.recordado() == EstadoCuenta.activa) {
+      unawaited(_verificarPorDetras());
+      return EstadoCuenta.activa;
+    }
+    return _fuente.estado();
+  }
+
+  Future<void> _verificarPorDetras() async {
+    try {
+      final estado = await _fuente.estado();
+      if (!mounted || estado == EstadoCuenta.activa) return;
+
+      setState(() {
+        _carga = Future.value(estado);
+      });
+    } on Object {
+      // Sin conexión: se queda con lo último que se supo.
+    }
   }
 
   void _reintentar() {

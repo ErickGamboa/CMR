@@ -7,6 +7,7 @@ import '../../core/modulos_habilitados.dart';
 import '../../widgets/carga_de_datos.dart';
 import '../../widgets/cmr_logo.dart';
 import '../../widgets/recarga.dart';
+import '../../widgets/ultima_actualizacion.dart';
 import '../cuenta/mi_cuenta_screen.dart';
 import '../etiqueta/leer_etiqueta_screen.dart';
 import '../laboratorios/laboratorios_screen.dart';
@@ -74,15 +75,15 @@ class _InicioScreenState extends State<InicioScreen> {
     super.dispose();
   }
 
-  /// Recargar el Home vuelve a pedir las dos cosas: la portada y qué módulos
-  /// tiene habilitados. Si el doctor le prendió Mapeo mientras la app estaba
-  /// abierta, la ficha aparece sin reinstalar nada.
+  /// Recargar el Home vuelve a leer qué módulos tiene habilitados. Si el
+  /// doctor le prendió Mapeo mientras la app estaba abierta, la ficha aparece
+  /// sin reinstalar nada. La portada la vuelven a pedir sus dos bloques, que
+  /// escuchan el mismo control.
   void _alPedirRecarga() {
     if (recargaGlobal.generacion == _generacionVista || !mounted) return;
 
     _generacionVista = recargaGlobal.generacion;
     setState(() {
-      _portada = _cargarPortada();
       _habilitados = _cargarModulos();
     });
   }
@@ -90,8 +91,20 @@ class _InicioScreenState extends State<InicioScreen> {
   FuentePaciente get _datos => widget.paciente ?? RepositorioPaciente();
 
   /// La usan los dos bloques del Home, que están separados por la fila de
-  /// accesos.
-  late Future<_Portada> _portada = _cargarPortada();
+  /// accesos. Se pide una vez por generación: los dos bloques la piden al
+  /// recargar y tienen que recibir la misma, no dos consultas.
+  Future<_Portada>? _portada;
+  int? _generacionPortada;
+
+  Future<_Portada> _portadaActual() {
+    // La generación se lee del control y no de [_generacionVista]: los
+    // bloques pueden enterarse de la recarga antes que esta pantalla.
+    final generacion = recargaGlobal.generacion;
+    if (_portada case final p? when _generacionPortada == generacion) return p;
+
+    _generacionPortada = generacion;
+    return _portada = _cargarPortada();
+  }
 
   /// Las dos consultas salen juntas: son independientes y esperar una tras
   /// otra dejaría el Home a medio dibujar el doble de tiempo.
@@ -162,9 +175,10 @@ class _InicioScreenState extends State<InicioScreen> {
         // para que pueda desbordar hasta el borde al hacer scroll.
         padding: const EdgeInsets.only(top: 8, bottom: 16),
         children: [
+          const UltimaActualizacion(),
           CargaDeDatos<_Portada>(
-            key: ValueKey('cita-$_generacionVista'),
-            cargar: () => _portada,
+            control: recargaGlobal,
+            cargar: _portadaActual,
             alCargar: const SizedBox.shrink(),
             alFallar: const SizedBox.shrink(),
             constructor: (context, datos) => switch (datos.proxima) {
@@ -198,8 +212,8 @@ class _InicioScreenState extends State<InicioScreen> {
           ),
           const SizedBox(height: 20),
           CargaDeDatos<_Portada>(
-            key: ValueKey('resumen-$_generacionVista'),
-            cargar: () => _portada,
+            control: recargaGlobal,
+            cargar: _portadaActual,
             alCargar: const SizedBox.shrink(),
             alFallar: const SizedBox.shrink(),
             constructor: (context, datos) => datos.mediciones.isEmpty

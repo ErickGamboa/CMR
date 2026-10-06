@@ -49,9 +49,34 @@ String formatearDiaConSemana(DateTime f) =>
 /// Ej.: "viernes 18 de setiembre · 10:30 a.m.".
 String formatearFechaLarga(DateTime f) {
   final dia = _dias[f.weekday - 1];
+  return '$dia ${f.day} de ${_meses[f.month - 1]} · ${_hora(f)}';
+}
+
+/// Ej.: "10:30 a.m.".
+String _hora(DateTime f) {
   final hora = f.hour % 12 == 0 ? 12 : f.hour % 12;
   final minuto = f.minute.toString().padLeft(2, '0');
   final periodo = f.hour < 12 ? 'a.m.' : 'p.m.';
+  return '$hora:$minuto $periodo';
+}
 
-  return '$dia ${f.day} de ${_meses[f.month - 1]} · $hora:$minuto $periodo';
+/// Cuánto hace, en palabras. Ej.: "hace 5 min", "ayer a las 3:40 p.m.",
+/// "el 2 oct a las 9:15 a.m.".
+String formatearHace(DateTime f, {DateTime? ahora}) {
+  final ref = ahora ?? DateTime.now();
+  final pasado = ref.difference(f);
+
+  if (pasado.inMinutes < 1) return 'hace un momento';
+  if (pasado.inMinutes < 60) return 'hace ${pasado.inMinutes} min';
+
+  final hoy = DateTime(ref.year, ref.month, ref.day);
+  final dia = DateTime(f.year, f.month, f.day);
+  final dias = hoy.difference(dia).inDays;
+
+  if (dias == 0) return 'hoy a las ${_hora(f)}';
+  if (dias == 1) return 'ayer a las ${_hora(f)}';
+
+  final fecha = '${f.day} ${_meses[f.month - 1].substring(0, 3)}';
+  final anio = f.year == ref.year ? '' : ' ${f.year}';
+  return 'el $fecha$anio a las ${_hora(f)}';
 }

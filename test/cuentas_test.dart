@@ -102,6 +102,40 @@ void main() {
       expect(find.text('No pudimos conectar.'), findsOneWidget);
     });
 
+    testWidgets('sin conexión entra si la última vez estaba aprobada', (
+      tester,
+    ) async {
+      // Es lo que deja ver los datos guardados sin internet.
+      final cuenta = CuentaFalsa()
+        ..ultimoConocido = EstadoCuenta.activa
+        ..falla = const FallaCuenta('No pudimos conectar.');
+
+      await entrar(tester, cuenta);
+
+      expect(find.byType(HomeShell), findsOneWidget);
+      expect(cuenta.consultas, 1, reason: 'igual lo verifica por detrás');
+    });
+
+    testWidgets('si por detrás resulta dada de baja, la saca', (tester) async {
+      final cuenta = CuentaFalsa(EstadoCuenta.inactiva)
+        ..ultimoConocido = EstadoCuenta.activa;
+
+      await entrar(tester, cuenta);
+
+      expect(find.byType(HomeShell), findsNothing);
+      expect(find.text('Tu cuenta está dada de baja'), findsOneWidget);
+    });
+
+    testWidgets('lo recordado no sirve si no estaba aprobada', (tester) async {
+      final cuenta = CuentaFalsa()
+        ..ultimoConocido = EstadoCuenta.pendiente
+        ..falla = const FallaCuenta('No pudimos conectar.');
+
+      await entrar(tester, cuenta);
+
+      expect(find.byType(HomeShell), findsNothing);
+    });
+
     testWidgets('al aprobarla, "Volver a revisar" deja entrar', (tester) async {
       final cuenta = CuentaFalsa(EstadoCuenta.pendiente);
       await entrar(tester, cuenta);
@@ -234,10 +268,7 @@ void main() {
   // directo para que no se pudra mientras espera.
   group('recuperar la contraseña', () {
     Future<void> pedirCodigo(WidgetTester tester, {String? correo}) async {
-      await _abrir(
-        tester,
-        RecuperarClaveScreen(auth: auth, correo: correo),
-      );
+      await _abrir(tester, RecuperarClaveScreen(auth: auth, correo: correo));
     }
 
     testWidgets('arranca con el correo que traiga del login', (tester) async {
@@ -251,17 +282,23 @@ void main() {
       await pedirCodigo(tester, correo: 'maria@ejemplo.com');
 
       // Antes de mandarlo no tiene sentido pedir un código que no existe.
-      expect(find.widgetWithText(TextFormField, 'Código del correo'),
-          findsNothing);
+      expect(
+        find.widgetWithText(TextFormField, 'Código del correo'),
+        findsNothing,
+      );
 
       await tester.tap(find.widgetWithText(FilledButton, 'Enviar código'));
       await tester.pumpAndSettle();
 
       expect(auth.codigosPedidos, ['maria@ejemplo.com']);
-      expect(find.widgetWithText(TextFormField, 'Código del correo'),
-          findsOneWidget);
-      expect(find.widgetWithText(TextFormField, 'Contraseña nueva'),
-          findsOneWidget);
+      expect(
+        find.widgetWithText(TextFormField, 'Código del correo'),
+        findsOneWidget,
+      );
+      expect(
+        find.widgetWithText(TextFormField, 'Contraseña nueva'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('no dice si ese correo tiene cuenta o no', (tester) async {
@@ -271,8 +308,10 @@ void main() {
 
       // Un mensaje distinto según exista o no sería una forma de averiguar
       // quién es paciente de la clínica.
-      expect(find.textContaining('Si ese correo tiene una cuenta'),
-          findsOneWidget);
+      expect(
+        find.textContaining('Si ese correo tiene una cuenta'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('cambia la contraseña sin dejar sesión abierta', (
@@ -288,11 +327,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(auth.cambiosDeClave, [
-        (
-          correo: 'maria@ejemplo.com',
-          codigo: '123456',
-          clave: 'nuevaclave1',
-        ),
+        (correo: 'maria@ejemplo.com', codigo: '123456', clave: 'nuevaclave1'),
       ]);
       // Entra con lo que acaba de escribir, que es la forma de comprobar que
       // quedó bien.

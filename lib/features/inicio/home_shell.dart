@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/auth/servicio_auth.dart';
 import '../../core/datos/repositorio.dart';
+import '../../core/local/sincronizador.dart';
 import '../citas/citas_screen.dart';
 import '../libro/libro_screen.dart';
 import '../peptidos/peptidos_screen.dart';
@@ -34,6 +37,26 @@ class HomeShell extends StatefulWidget {
 
 class _HomeShellState extends State<HomeShell> {
   int _indice = 0;
+
+  /// Al volver a la app desde segundo plano también se baja lo nuevo: es
+  /// común dejarla abierta y retomarla horas después, y eso no es "abrirla".
+  late final AppLifecycleListener _ciclo;
+
+  @override
+  void initState() {
+    super.initState();
+    _ciclo = AppLifecycleListener(
+      onResume: () => unawaited(Sincronizador.actual?.alVolver()),
+    );
+    // Las pantallas ya muestran lo guardado mientras esto baja lo nuevo.
+    unawaited(Sincronizador.actual?.entrar());
+  }
+
+  @override
+  void dispose() {
+    _ciclo.dispose();
+    super.dispose();
+  }
 
   void _ir(ModuloPrimario modulo) => setState(() => _indice = modulo.index);
 

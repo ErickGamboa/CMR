@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/datos/repositorio.dart';
+import '../../core/local/sincronizador.dart';
 import 'modelo_plan.dart';
 
 /// De dónde sale el plan de alimentación.
@@ -17,45 +19,64 @@ abstract interface class FuentePlan {
   Future<PlanAlimentacion?> recargar();
 }
 
-/// Lee el plan activo del paciente de Supabase.
+/// Baja el plan activo del paciente de Supabase, o `null` si no tiene.
 ///
 /// Las políticas de RLS ya limitan las tres tablas al paciente de la sesión,
 /// así que acá no hace falta filtrar por paciente: pedir "el plan activo"
 /// devuelve el propio y nada más.
+Future<Object?> bajarPlan(SupabaseClient db) async {
+  final plan = await db
+      .from('planes_alimentacion')
+      .select('id, vigente_desde, notas')
+      .eq('activo', true)
+      .maybeSingle();
+
+  if (plan == null) return null;
+
+  final id = plan['id'] as String;
+
+  // Las dos salen juntas: son independientes y esperar una tras otra
+  // alargaría la sincronización entera por nada.
+  final (totales, distribucion) = await (
+    db.from('plan_totales').select('grupo, total, es_minimo').eq('plan_id', id),
+    db
+        .from('plan_distribucion')
+        .select('grupo, tiempo, cantidad, es_minimo')
+        .eq('plan_id', id),
+  ).wait;
+
+  return {'plan': plan, 'totales': totales, 'distribucion': distribucion};
+}
+
+/// Lee el plan de la copia local.
 class RepositorioPlan implements FuentePlan {
-  RepositorioPlan(this._client);
+  RepositorioPlan([this._datos]);
 
-  final SupabaseClient _client;
-
-  Future<PlanAlimentacion?>? _enVuelo;
+  final Sincronizador? _datos;
 
   @override
-  Future<PlanAlimentacion?> cargar() => _enVuelo ??= _bajar();
+  Future<PlanAlimentacion?> cargar() => _leer();
 
+  /// Es lo mismo que [cargar]: la copia local siempre tiene lo último que se
+  /// bajó, no hay nada en memoria que invalidar.
   @override
-  Future<PlanAlimentacion?> recargar() => _enVuelo = _bajar();
+  Future<PlanAlimentacion?> recargar() => _leer();
 
-  Future<PlanAlimentacion?> _bajar() async {
+  Future<PlanAlimentacion?> _leer() async {
     try {
-      final plan = await _client
-          .from('planes_alimentacion')
-          .select('id, vigente_desde, notas')
-          .eq('activo', true)
-          .maybeSingle();
+      final datos = _datos ?? Sincronizador.actual;
+      if (datos == null) {
+        throw const FallaPlan('No pudimos abrir los datos guardados.');
+      }
 
-      if (plan == null) return null;
+      final guardado = await datos.leer(Claves.plan) as Map<String, dynamic>?;
+      if (guardado == null) return null;
 
-      final id = plan['id'] as String;
-
-      final totales = await _client
-          .from('plan_totales')
-          .select('grupo, total, es_minimo')
-          .eq('plan_id', id);
-
-      final distribucion = await _client
-          .from('plan_distribucion')
-          .select('grupo, tiempo, cantidad, es_minimo')
-          .eq('plan_id', id);
+      final plan = guardado['plan'] as Map<String, dynamic>;
+      final totales = (guardado['totales'] as List<dynamic>)
+          .cast<Map<String, dynamic>>();
+      final distribucion = (guardado['distribucion'] as List<dynamic>)
+          .cast<Map<String, dynamic>>();
 
       final porGrupo = <GrupoIntercambio, Asignacion>{};
       for (final fila in totales) {
@@ -73,6 +94,8 @@ class RepositorioPlan implements FuentePlan {
         totales: porGrupo,
         distribucion: _agrupar(distribucion),
       );
+    } on FallaDatos catch (e) {
+      throw FallaPlan(e.mensaje);
     } on PostgrestException catch (e) {
       throw FallaPlan(
         e.code == '42P01'

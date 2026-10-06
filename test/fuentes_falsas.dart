@@ -342,10 +342,17 @@ class CuentaFalsa implements FuenteCuenta {
 
   int consultas = 0;
 
+  /// Lo que la app recuerda de la vez anterior. Sin definir, nada: entra
+  /// preguntándole al servidor, como la primera vez.
+  EstadoCuenta? ultimoConocido;
+
   @override
   Future<EstadoCuenta> estado() async {
     consultas++;
     if (falla case final f?) throw f;
     return estadoActual;
   }
+
+  @override
+  Future<EstadoCuenta?> recordado() async => ultimoConocido;
 }

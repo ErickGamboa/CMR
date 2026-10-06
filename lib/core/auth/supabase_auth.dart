@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../entorno.dart';
+import '../local/sincronizador.dart';
 import 'servicio_auth.dart';
 
 /// Implementación real contra Supabase Auth.
@@ -171,8 +172,13 @@ class SupabaseAuth implements ServicioAuth {
     }
   }
 
+  /// Antes de cerrar, intenta subir el mapeo anotado sin conexión: al salir,
+  /// la copia local se borra entera (ver `Sincronizador`).
   @override
-  Future<void> salir() => _client.auth.signOut();
+  Future<void> salir() async {
+    await Sincronizador.actual?.antesDeSalir();
+    await _client.auth.signOut();
+  }
 
   /// Traduce el error de Supabase a un mensaje accionable.
   ///
