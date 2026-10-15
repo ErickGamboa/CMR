@@ -50,5 +50,5 @@ export async function ingresar(
 export async function salir() {
   const supabase = await clienteServidor();
   await supabase.auth.signOut();
-  redirect("/");
+  redirect("/admin");
 }

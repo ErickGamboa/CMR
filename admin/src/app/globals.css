@@ -192,3 +192,41 @@
     @apply font-sans;
   }
 }
+/* --------------------------------------------------------------------------
+   Portada pública
+   -------------------------------------------------------------------------- */
+
+/* La cinta de terapias. Corre la mitad de su ancho porque lleva la lista dos
+   veces: al volver a cero, la segunda copia está donde estaba la primera. */
+@keyframes cinta {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.cinta {
+  animation: cinta 40s linear infinite;
+}
+
+/* Los bloques aparecen al entrar en pantalla. Solo donde el navegador sabe
+   atar una animación al scroll; en el resto se ven quietos desde el inicio,
+   que es mejor que esconderlos esperando un JavaScript que no hace falta. */
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    translate: 0 1.5rem;
+  }
+}
+@supports (animation-timeline: view()) {
+  .aparecer {
+    animation: aparecer linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cinta,
+  .aparecer {
+    animation: none;
+  }
+}

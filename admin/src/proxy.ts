@@ -41,15 +41,17 @@ export async function proxy(peticion: NextRequest) {
 
   const ruta = peticion.nextUrl.pathname;
 
-  // La portada es el login. Privacidad y soporte tienen que abrirse sin
-  // cuenta: son las URL que la App Store y Google Play revisan, y con sesión
-  // de por medio el revisor vería un formulario en vez de la política.
-  const enLogin = ruta === "/";
-  const abierta = enLogin || ruta === "/privacidad" || ruta === "/soporte";
+  // La portada es pública: es la página de la clínica. El login vive en
+  // /admin. Privacidad y soporte tienen que abrirse sin cuenta: son las URL
+  // que la App Store y Google Play revisan, y con sesión de por medio el
+  // revisor vería un formulario en vez de la política.
+  const enLogin = ruta === "/admin";
+  const abierta =
+    enLogin || ruta === "/" || ruta === "/privacidad" || ruta === "/soporte";
 
   if (!user && !abierta) {
     const destino = peticion.nextUrl.clone();
-    destino.pathname = "/";
+    destino.pathname = "/admin";
     // Para devolverlo a donde iba después de entrar.
     destino.searchParams.set("volver", ruta);
     return NextResponse.redirect(destino);
@@ -71,6 +73,6 @@ export const config = {
   // Todo menos los archivos estáticos y el favicon: no tiene sentido pedirle
   // la sesión a Supabase para servir una imagen.
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4)$).*)",
   ],
 };

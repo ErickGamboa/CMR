@@ -35,13 +35,12 @@ export default function LayoutPublico({ children }: LayoutProps<"/"> ) {
             >
               Soporte
             </Link>
-            {/* La vuelta: desde acá se llega al login sin tener que adivinar
-                que el logo es un enlace. */}
+            {/* Sin enlace al login: el panel se entra escribiendo /admin. */}
             <Link
               href="/"
               className="underline-offset-4 transition-colors hover:text-foreground hover:underline"
             >
-              Entrar
+              Inicio
             </Link>
           </nav>
         </div>
