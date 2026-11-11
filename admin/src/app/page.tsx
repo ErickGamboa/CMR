@@ -16,6 +16,7 @@ import { Poppins } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
 
+import { AvisoLegal } from "@/components/aviso-legal";
 import { Reels, type Reel } from "@/components/inicio/reels";
 import { Logo } from "@/components/logo";
 import {
@@ -24,6 +25,7 @@ import {
   INSTAGRAM_DOCTOR,
   WHATSAPP,
 } from "@/lib/contacto";
+import { RAZON_SOCIAL } from "@/lib/empresa";
 
 import doctorBrazos from "../../public/inicio/doctor-brazos.jpg";
 import doctorGris from "../../public/inicio/doctor-gris.jpg";
@@ -141,6 +143,11 @@ export default function Inicio() {
         <Vision />
         <App />
         <Contacto />
+        <section aria-label="Quién opera CMR" className="pb-16 sm:pb-20">
+          <div className="mx-auto max-w-3xl px-4 sm:px-6">
+            <AvisoLegal variante="parrafo" className="justify-center text-center sm:text-lg" />
+          </div>
+        </section>
       </main>
       <Pie />
     </div>
@@ -797,8 +804,9 @@ function Pie() {
           </a>
         </nav>
       </div>
+      <AvisoLegal />
       <div className="border-t border-[#e1e6ee] py-5 text-center text-xs text-[#5b5f73]">
-        © {new Date().getFullYear()} Clínica COSME – CMR. Todos los derechos
+        © {new Date().getFullYear()} {RAZON_SOCIAL}. Todos los derechos
         reservados.
       </div>
     </footer>

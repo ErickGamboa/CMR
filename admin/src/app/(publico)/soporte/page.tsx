@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { AvisoLegal } from "@/components/aviso-legal";
 import { Correo, Parrafo, Prosa, Seccion, Titulo } from "@/components/prosa";
 import { CORREO_SOPORTE } from "@/lib/contacto";
 
@@ -19,6 +20,10 @@ export default function Soporte() {
         ¿Necesitás ayuda con la app? Escribinos a{" "}
         <Correo correo={CORREO_SOPORTE} /> y te respondemos lo antes posible.
       </Parrafo>
+
+      <Seccion titulo="Quiénes somos">
+        <AvisoLegal variante="parrafo" />
+      </Seccion>
 
       <Seccion titulo="¿Cómo creo mi cuenta?">
         <Parrafo>

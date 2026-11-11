@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { AvisoLegal } from "@/components/aviso-legal";
 import { Logo } from "@/components/logo";
 
 /**
@@ -50,10 +51,8 @@ export default function LayoutPublico({ children }: LayoutProps<"/"> ) {
         {children}
       </main>
 
-      <footer className="border-t">
-        <div className="mx-auto max-w-3xl px-4 py-6 text-xs text-muted-foreground sm:px-6">
-          Clínica COSME - CMR · Control Metabólico y Regenerativo
-        </div>
+      <footer>
+        <AvisoLegal />
       </footer>
     </div>
   );

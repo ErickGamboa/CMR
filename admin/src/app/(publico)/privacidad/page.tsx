@@ -9,7 +9,9 @@ import {
   Seccion,
   Titulo,
 } from "@/components/prosa";
+import { AvisoLegal } from "@/components/aviso-legal";
 import { CORREO_SOPORTE } from "@/lib/contacto";
+import { RAZON_SOCIAL } from "@/lib/empresa";
 
 export const metadata: Metadata = {
   title: "Política de privacidad · CMR Control Metabólico",
@@ -32,8 +34,10 @@ export default function Privacidad() {
       </Parrafo>
 
       <Seccion titulo="1. Quién ofrece esta app">
+        <AvisoLegal variante="parrafo" />
         <Parrafo>
-          CMR la opera el equipo clínico que te atiende. La app funciona junto
+          {RAZON_SOCIAL} es la responsable de la app y de la información que
+          se trata en ella. La app funciona junto
           con un panel administrativo que usa tu doctor(a) para dar seguimiento
           a tu caso; ambos comparten la misma base de datos, protegida para que
           cada paciente solo pueda ver su propia información.

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormularioIngreso } from "@/components/formulario-ingreso";
 import { Logo } from "@/components/logo";
 import { Card, CardContent } from "@/components/ui/card";
+import { AVISO_LEGAL } from "@/lib/empresa";
 
 export const metadata: Metadata = {
   title: "CMR · Panel de la clínica",
@@ -65,6 +66,10 @@ export default async function Ingreso({
           Este panel es para el equipo de la clínica.
           <br />
           Si sos paciente, tu seguimiento está en la app CMR.
+        </p>
+
+        <p className="text-center text-sm font-medium leading-relaxed text-foreground">
+          {AVISO_LEGAL}
         </p>
       </div>
 
